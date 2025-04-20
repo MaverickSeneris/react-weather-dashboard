@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router";
-import Home from "./pages/Home";
+import CurrentCity from "./pages/CurrentCity";
 import CityList from "./pages/CityList";
 
 
@@ -7,7 +7,7 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route index element={<Home />} />
+        <Route index element={<CurrentCity />} />
         <Route path="city-list" element={ <CityList/>} />
       </Routes>
     </BrowserRouter>
