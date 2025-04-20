@@ -1,8 +1,11 @@
 import React from 'react'
+import SearchBar from '../components/SearchBar'
 
 function CityList() {
   return (
-    <div>CityList</div>
+    <div>
+      <SearchBar/>
+    </div>
   )
 }
 
