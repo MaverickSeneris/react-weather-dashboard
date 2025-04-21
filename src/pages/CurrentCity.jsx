@@ -17,23 +17,21 @@ function CurrentCity() {
   const [currentWeatherInfo, setCurrentWeatherInfo] = useState({});
   const [hourlyWeatherInfo, setHourlyWeatherInfo] = useState({});
   const [dailyWeatherInfo, setDailyWeatherInfo] = useState({});
+  const [unit, setUnit] = useState("metric")
 
   useEffect(() => {
-    const oneCallApiUrl = import.meta.env.VITE_OPENWEATHER_ONECALL_API_URL;
-    const oneCallApiKey = import.meta.env.VITE_OPENWEATHER_API_KEY;
-    const openCageApiKey = import.meta.env.VITE_OPENCAGE_API_KEY;
-    const openCageGeoCodingApiUrl = import.meta.env.VITE_OPENCAGE_GEOCODING_API;
+    const weatherApiUrl = import.meta.env.VITE_OPENWEATHER_ONECALL_API_URL;
+    const weatherApiKey = import.meta.env.VITE_OPENWEATHER_API_KEY;
+    const geoLocationApiKey = import.meta.env.VITE_OPENCAGE_API_KEY;
 
-    console.log("url and keys:", oneCallApiKey, oneCallApiUrl);
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
-        // console.log("Browser coordinates:", latitude, longitude);
-
+      
         // First Step: Fetch current location using these coordinates:
         axios
           .get(
-            `https://api.opencagedata.com/geocode/v1/json?q=${latitude}+${longitude}&key=${openCageApiKey}`
+            `https://api.opencagedata.com/geocode/v1/json?q=${latitude}+${longitude}&key=${geoLocationApiKey}`
           )
           .then((response) => {
             const components = response.data.results[0].components;
@@ -53,16 +51,16 @@ function CurrentCity() {
         // Next step: fetch weather using these coordinates:
         axios
           .get(
-            `${oneCallApiUrl}lat=${latitude}&lon=${longitude}&appid=${oneCallApiKey}&units=metric`
+            `${weatherApiUrl}lat=${latitude}&lon=${longitude}&appid=${weatherApiKey}&units=${unit}`
           )
           .then((response) => {
             // console.log(response.data); // response object
             const weatherData = response.data;
-            
+
             setCurrentWeatherInfo({
               temperature: weatherData.current.temp || "",
             });
-    
+
             setDailyWeatherInfo({
               chanceOfRain: weatherData.daily?.[0]?.pop ?? 0,
             });
