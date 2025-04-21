@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
 import sunny from "../assets/weather-icons/02_clear.svg";
+import cloudy from "../assets/weather-icons/04_cloudy.svg";
 import Card from "../components/Card";
 import hourly from "../seed-data/hourlyseed";
 
+
 import axios from "axios";
+import iconMap from "../utils/weatherIconMapper";
 
 function CurrentCity() {
   const [cityInfo, setCityInfo] = useState({
@@ -18,6 +21,8 @@ function CurrentCity() {
   const [hourlyWeatherInfo, setHourlyWeatherInfo] = useState({});
   const [dailyWeatherInfo, setDailyWeatherInfo] = useState({});
   const [unit, setUnit] = useState("metric")
+
+  const iconSrc = iconMap[currentWeatherInfo.weatherIcon];
 
   useEffect(() => {
     const weatherApiUrl = import.meta.env.VITE_OPENWEATHER_ONECALL_API_URL;
@@ -59,7 +64,9 @@ function CurrentCity() {
 
             setCurrentWeatherInfo({
               temperature: weatherData.current.temp || "",
+              weatherIcon: weatherData.current.weather[0].icon
             });
+            console.log(weatherData.current.weather[0].icon);
 
             setDailyWeatherInfo({
               chanceOfRain: weatherData.daily?.[0]?.pop ?? 0,
@@ -82,7 +89,7 @@ function CurrentCity() {
       <p className="text-s">
         Chance of rain: {Math.round(dailyWeatherInfo.chanceOfRain * 100)}%
       </p>
-      <img src={sunny} alt="clear" className="my-6 w-50 pl-4" />
+      <img src={iconSrc} className="my-6 w-50 pl-4" />
       <p className="text-5xl font-bold mb-8">
         {Math.floor(currentWeatherInfo.temperature)}&deg;
       </p>
