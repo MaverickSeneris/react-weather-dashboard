@@ -2,13 +2,12 @@ import React, { useState, useEffect } from "react";
 import sunny from "../assets/weather-icons/02_clear.svg"; // sunny icon for display
 import Card from "../components/Card";
 import hourly from "../seed-data/hourlyseed"; // Sample hourly data for rendering (you may replace this with actual API data)
-
 import axios from "axios";
 import iconMap from "../utils/weatherIconMapper"; // Maps weather codes to local SVG icons
 import formatTime from "../utils/timeFormatter"; // Utility function to format time
 
 function CurrentCity() {
-  const [cityInfo, setCityInfo] = useState({
+  const [currentLocation, setCurrentLocation] = useState({
     town: "",
     state: "",
     country: "",
@@ -33,7 +32,7 @@ function CurrentCity() {
     chanceOfRain: 0,
   });
 
-  const [unit, setUnit] = useState("metric"); // Set default unit to 'metric' for �C
+  const [unit, setUnit] = useState("metric"); // Set default unit to 'metric'
 
   useEffect(() => {
     const weatherApiUrl = import.meta.env.VITE_OPENWEATHER_ONECALL_API_URL;
@@ -54,7 +53,7 @@ function CurrentCity() {
             const components = response.data.results[0].components;
 
             // Set city info based on the response from the geolocation API
-            setCityInfo({
+            setCurrentLocation({
               town: components.town || "",
               state: components.state || "",
               country: components.country || "",
@@ -111,13 +110,13 @@ function CurrentCity() {
     );
   }, [unit]); // Re-run effect if 'unit' state changes
 
-  // Map weather icon code to local icon (SVG)
+  // Map current weather icon code to local icon (SVG)
   const currentWeatherIcon = iconMap[currentWeatherInfo.weatherIcon];
 
   return (
     <div className="flex flex-col items-center w-100 h-100 px-8 mt-16">
       {/* Display current city name */}
-      <span className="font-extrabold text-4xl my-2">{cityInfo.village}</span>
+      <span className="font-extrabold text-4xl my-2">{currentLocation.village}</span>
       <p className="text-s">
         Chance of rain: {Math.round(dailyWeatherInfo.chanceOfRain * 100)}%
       </p>
