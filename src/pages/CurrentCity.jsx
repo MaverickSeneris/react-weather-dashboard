@@ -5,6 +5,7 @@ import hourly from "../seed-data/hourlyseed";
 
 import axios from "axios";
 import iconMap from "../utils/weatherIconMapper";
+import formatTime from "../utils/timeFormatter";
 
 function CurrentCity() {
   const [cityInfo, setCityInfo] = useState({
@@ -14,11 +15,12 @@ function CurrentCity() {
     village: "",
     region: "",
   });
-  // const [cityWeatherData, setCityWeatherData] = useState({});
   const [currentWeatherInfo, setCurrentWeatherInfo] = useState({});
   const [hourlyWeatherInfo, setHourlyWeatherInfo] = useState({});
   const [dailyWeatherInfo, setDailyWeatherInfo] = useState({});
   const [unit, setUnit] = useState("metric");
+
+  console.log(hourlyWeatherInfo);
 
   const iconSrc = iconMap[currentWeatherInfo.weatherIcon];
 
@@ -60,17 +62,35 @@ function CurrentCity() {
             // console.log(response.data); // response object
             const weatherData = response.data;
 
+            // -- Current Weather --
+            // Set current weather details: temperature, icon, description, and feels-like temp
             setCurrentWeatherInfo({
               temperature: weatherData.current.temp || "",
-              weatherIcon: weatherData.current.weather[0].icon,
-              description: weatherData.current.weather[0].description,
-              feelsLike: weatherData.current.feels_like,
+              weatherIcon: weatherData.current.weather[0].icon || "",
+              description: weatherData.current.weather[0].description || "",
+              feelsLike: weatherData.current.feels_like || "",
             });
-            console.log(weatherData.current.weather[0].icon);
-
+            // Set the chance of rain for today from the daily forecast (pop = probability of precipitation, 0–1 scale)
             setDailyWeatherInfo({
               chanceOfRain: weatherData.daily?.[0]?.pop ?? 0,
             });
+            // -- END --
+
+            // -- Hourly Weather (Today's Forecast) --
+            // Map the hourly data into a simplified array of objects
+            const hourlyData = weatherData.hourly.map((data) => ({
+              time: formatTime(data.dt) || "", // Formatted time like "3:45 PM"
+              temperature: data.temp || "", // Temperature in °C (or based on units)
+              icon: data.weather?.[0]?.icon || "", // Weather condition icon code
+            }));
+
+            // Extract separate arrays for time, temperature, and icon
+            setHourlyWeatherInfo({
+              time: hourlyData.map((item) => item.time),
+              temperature: hourlyData.map((item) => item.temperature),
+              icon: hourlyData.map((item) => item.icon),
+            });
+            // -- END --
           })
           .catch((error) => {
             console.error(error);
@@ -84,19 +104,21 @@ function CurrentCity() {
 
   return (
     <div className="flex flex-col items-center w-100 h-100 px-8 mt-16">
-      {/* Current Forecast */}
+      {/* Current Weather */}
       <span className="font-extrabold text-4xl my-2">{cityInfo.village}</span>
       <p className="text-s">
         Chance of rain: {Math.round(dailyWeatherInfo.chanceOfRain * 100)}%
       </p>
       <p className="text-xs">{currentWeatherInfo.description}</p>
-      <p className="text-xs">Feels like: {Math.floor(currentWeatherInfo.feelsLike)}&deg;</p>
+      <p className="text-xs">
+        Feels like: {Math.floor(currentWeatherInfo.feelsLike)}&deg;
+      </p>
       <img src={iconSrc} className="my-6 w-50 pl-4" />
       <p className="text-5xl font-bold mb-8">
         {Math.floor(currentWeatherInfo.temperature)}&deg;
       </p>
 
-      {/* Hourly Forecast */}
+      {/* Hourly Weather */}
       <Card>
         <p className="text-sm font-semibold text-gray-300">Today's Forcast</p>
         <div className="flex gap-4 my-2 justify-around items-center w-[100%]">
