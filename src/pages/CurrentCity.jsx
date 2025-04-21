@@ -4,7 +4,6 @@ import cloudy from "../assets/weather-icons/04_cloudy.svg";
 import Card from "../components/Card";
 import hourly from "../seed-data/hourlyseed";
 
-
 import axios from "axios";
 import iconMap from "../utils/weatherIconMapper";
 
@@ -20,7 +19,7 @@ function CurrentCity() {
   const [currentWeatherInfo, setCurrentWeatherInfo] = useState({});
   const [hourlyWeatherInfo, setHourlyWeatherInfo] = useState({});
   const [dailyWeatherInfo, setDailyWeatherInfo] = useState({});
-  const [unit, setUnit] = useState("metric")
+  const [unit, setUnit] = useState("metric");
 
   const iconSrc = iconMap[currentWeatherInfo.weatherIcon];
 
@@ -32,7 +31,7 @@ function CurrentCity() {
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
-      
+
         // First Step: Fetch current location using these coordinates:
         axios
           .get(
@@ -64,7 +63,9 @@ function CurrentCity() {
 
             setCurrentWeatherInfo({
               temperature: weatherData.current.temp || "",
-              weatherIcon: weatherData.current.weather[0].icon
+              weatherIcon: weatherData.current.weather[0].icon,
+              description: weatherData.current.weather[0].description,
+              feelsLike: weatherData.current.feels_like,
             });
             console.log(weatherData.current.weather[0].icon);
 
@@ -89,6 +90,8 @@ function CurrentCity() {
       <p className="text-s">
         Chance of rain: {Math.round(dailyWeatherInfo.chanceOfRain * 100)}%
       </p>
+      <p className="text-xs">{currentWeatherInfo.description}</p>
+      <p className="text-xs">Feels like: {Math.floor(currentWeatherInfo.feelsLike)}&deg;</p>
       <img src={iconSrc} className="my-6 w-50 pl-4" />
       <p className="text-5xl font-bold mb-8">
         {Math.floor(currentWeatherInfo.temperature)}&deg;
