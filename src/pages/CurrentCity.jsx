@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import sunny from "../assets/weather-icons/02_clear.svg";
-import cloudy from "../assets/weather-icons/04_cloudy.svg";
 import Card from "../components/Card";
 import hourly from "../seed-data/hourlyseed";
 
