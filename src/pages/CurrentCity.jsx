@@ -18,9 +18,9 @@ function CurrentCity() {
     temperature: "",
     weatherIcon: "",
     description: "",
-    feelsLike: "",
-    uvIndex: "",
-    windSpeed: "",
+    feelsLike: 0,
+    uvIndex: 0,
+    windSpeed: 0,
     chanceOfRain: 0,
   });
 
@@ -78,11 +78,12 @@ function CurrentCity() {
               temperature: weatherData.current.temp || "",
               weatherIcon: weatherData.current.weather[0].icon || "",
               description: weatherData.current.weather[0].description || "",
-              feelsLike: weatherData.current.feels_like || "",
-              uvIndex: weatherData.current.uvi || "",
-              windSpeed: weatherData.wind_speed || "",
+              feelsLike: weatherData.current.feels_like || 0,
+              uvIndex: weatherData.current.uvi || 0,
+              windSpeed: weatherData.current.wind_speed || 0,
               chanceOfRain: weatherData.daily?.[0]?.pop ?? 0,
             });
+
 
             // // Set chance of rain for the day (0\u20131 scale, represents probability of precipitation)
             // setDailyWeatherInfo({
@@ -218,12 +219,13 @@ function CurrentCity() {
           ))}
         </div>
       </Card>
+      {/* Current Weather Details */}
       <Card>
-        <p className="text-xs font-bold text-gray-300 pb-2">AIR CONDITION</p>
+        <p className="text-xs font-bold text-gray-300 pb-2">CURRENT CONDITION</p>
         <div className="grid grid-cols-2">
           <div className="pb-4">
             <div>
-              <img src={""} />
+              {/* <img src={""} /> */}
               <p className="font-semibold text-gray-400">Real Feel</p>
             </div>
             <span className="pl-2 font-bold text-gray-300">
@@ -233,29 +235,29 @@ function CurrentCity() {
 
           <div className="pb-4">
             <div>
-              <img src={""} />
+              {/* <img src={""} /> */}
               <p className="font-semibold text-gray-400">Wind</p>
             </div>
             <span className="pl-2 font-bold text-gray-300">
-              {Math.floor(currentWeatherInfo.feelsLike)}&deg;
+              {currentWeatherInfo.windSpeed} km/h
             </span>
           </div>
           <div className="pb-4">
             <div>
-              <img src={""} />
+              {/* <img src={""} /> */}
               <p className="font-semibold text-gray-400">Chance of Rain</p>
             </div>
             <span className="pl-2 font-bold text-gray-300">
-              {Math.floor(currentWeatherInfo.feelsLike)}&deg;
+              {Math.floor(currentWeatherInfo.chanceOfRain * 100)}%
             </span>
           </div>
           <div className="pb-4">
             <div>
-              <img src={""} />
+              {/* <img src={""} /> */}
               <p className="font-semibold text-gray-400">UV index</p>
             </div>
             <span className="pl-2 font-bold text-gray-300">
-              {Math.floor(currentWeatherInfo.feelsLike)}&deg;
+              {currentWeatherInfo.uvIndex}
             </span>
           </div>
         </div>
