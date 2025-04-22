@@ -19,16 +19,15 @@ function CurrentCity() {
     weatherIcon: "",
     description: "",
     feelsLike: "",
+    uvIndex: "",
+    windSpeed: "",
+    chanceOfRain: 0,
   });
 
   const [hourlyWeatherInfo, setHourlyWeatherInfo] = useState({
     time: [],
     temperature: [],
     icon: [],
-  });
-
-  const [dailyChanceOfRain, setDailyChance] = useState({
-    chanceOfRain: 0,
   });
 
   const [dailyWeatherInfo, setDailyWeatherInfo] = useState([]);
@@ -80,38 +79,41 @@ function CurrentCity() {
               weatherIcon: weatherData.current.weather[0].icon || "",
               description: weatherData.current.weather[0].description || "",
               feelsLike: weatherData.current.feels_like || "",
-            });
-
-            // Set chance of rain for the day (0\u20131 scale, represents probability of precipitation)
-            setDailyWeatherInfo({
+              uvIndex: weatherData.current.uvi || "",
+              windSpeed: weatherData.wind_speed || "",
               chanceOfRain: weatherData.daily?.[0]?.pop ?? 0,
             });
 
+            // // Set chance of rain for the day (0\u20131 scale, represents probability of precipitation)
+            // setDailyWeatherInfo({
+            //   chanceOfRain: weatherData.daily?.[0]?.pop ?? 0,
+            // });
+
             // Get weather data every 3 hours only (e.g., 12AM, 3AM, 6AM...) for cleaner hourly forecast
-           const hourlyData = weatherData.hourly
-             .filter((_, index) => index >= 2 && (index - 2) % 3 === 0) // starts at 3rd and gets every 3rd
-             .slice(0, 3) // get first 3 from that selection
-             .map((data) => ({
-               time: formatTime(data.dt),
-               temperature: data.temp,
-               icon: data.weather?.[0]?.icon,
-             }));
+            const hourlyData = weatherData.hourly
+              .filter((_, index) => index >= 2 && (index - 2) % 3 === 0) // starts at 3rd and gets every 3rd
+              .slice(0, 3) // get first 3 from that selection
+              .map((data) => ({
+                time: formatTime(data.dt),
+                temperature: data.temp,
+                icon: data.weather?.[0]?.icon,
+              }));
 
-           setHourlyWeatherInfo({
-             time: hourlyData.map((item) => item.time),
-             temperature: hourlyData.map((item) => item.temperature),
-             icon: hourlyData.map((item) => item.icon),
-           });
+            setHourlyWeatherInfo({
+              time: hourlyData.map((item) => item.time),
+              temperature: hourlyData.map((item) => item.temperature),
+              icon: hourlyData.map((item) => item.icon),
+            });
 
-           const dailyData = weatherData.daily
-             .slice(0, 7)
-             .map((data, index) => ({
-               day: getDayLabel(data.dt, index),
-               icon: data.weather[0]?.icon || "",
-               description: data.weather[0]?.description || "",
-               tempHigh: Math.round(data.temp.max),
-               tempLow: Math.round(data.temp.min),
-             }));
+            const dailyData = weatherData.daily
+              .slice(0, 7)
+              .map((data, index) => ({
+                day: getDayLabel(data.dt, index),
+                icon: data.weather[0]?.icon || "",
+                description: data.weather[0]?.description || "",
+                tempHigh: Math.round(data.temp.max),
+                tempLow: Math.round(data.temp.min),
+              }));
 
             setDailyWeatherInfo(dailyData);
           })
@@ -135,7 +137,7 @@ function CurrentCity() {
         {currentLocation.village}
       </span>
       <p className="text-lg font-semibold text-gray-400 word-space">
-        Chance of rain: {Math.round(dailyChanceOfRain.chanceOfRain * 100)}%
+        Chance of rain: {Math.round(currentWeatherInfo.chanceOfRain * 100)}%
       </p>
       {/* <p className="text-xs">{currentWeatherInfo.description}</p> */}
       {/* <p className="text-xs">
@@ -214,6 +216,48 @@ function CurrentCity() {
               </div>
             </div>
           ))}
+        </div>
+      </Card>
+      <Card>
+        <p className="text-xs font-bold text-gray-300 pb-2">AIR CONDITION</p>
+        <div className="grid grid-cols-2">
+          <div className="pb-4">
+            <div>
+              <img src={""} />
+              <p className="font-semibold text-gray-400">Real Feel</p>
+            </div>
+            <span className="pl-2 font-bold text-gray-300">
+              {Math.floor(currentWeatherInfo.feelsLike)}&deg;
+            </span>
+          </div>
+
+          <div className="pb-4">
+            <div>
+              <img src={""} />
+              <p className="font-semibold text-gray-400">Wind</p>
+            </div>
+            <span className="pl-2 font-bold text-gray-300">
+              {Math.floor(currentWeatherInfo.feelsLike)}&deg;
+            </span>
+          </div>
+          <div className="pb-4">
+            <div>
+              <img src={""} />
+              <p className="font-semibold text-gray-400">Chance of Rain</p>
+            </div>
+            <span className="pl-2 font-bold text-gray-300">
+              {Math.floor(currentWeatherInfo.feelsLike)}&deg;
+            </span>
+          </div>
+          <div className="pb-4">
+            <div>
+              <img src={""} />
+              <p className="font-semibold text-gray-400">UV index</p>
+            </div>
+            <span className="pl-2 font-bold text-gray-300">
+              {Math.floor(currentWeatherInfo.feelsLike)}&deg;
+            </span>
+          </div>
         </div>
       </Card>
     </div>
