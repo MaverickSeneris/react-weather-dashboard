@@ -86,14 +86,16 @@ function CurrentCity() {
               chanceOfRain: weatherData.daily?.[0]?.pop ?? 0,
             });
 
-            // Process hourly weather forecast data (mapped into simpler objects for rendering)
-            const hourlyData = weatherData.hourly.map((data) => ({
-              time: formatTime(data.dt) || "", // Format timestamp into readable time
-              temperature: data.temp || "", // Temperature in �C (or according to selected unit)
-              icon: data.weather?.[0]?.icon || "", // Weather condition icon code
-            }));
+            // Get weather data every 3 hours only (e.g., 12AM, 3AM, 6AM...) for cleaner hourly forecast
+            const hourlyData = weatherData.hourly
+              .filter((_, index) => index % 3 === 0) // keeps every 3rd hour
+              .slice(0, 3) // takes the first 3 of those
+              .map((data) => ({
+                time: formatTime(data.dt),
+                temperature: data.temp,
+                icon: data.weather?.[0]?.icon,
+              }));
 
-            // Extract separate arrays for time, temperature, and icon to update the state
             setHourlyWeatherInfo({
               time: hourlyData.map((item) => item.time),
               temperature: hourlyData.map((item) => item.temperature),
@@ -113,10 +115,14 @@ function CurrentCity() {
   // Map current weather icon code to local icon (SVG)
   const currentWeatherIcon = iconMap[currentWeatherInfo.weatherIcon];
 
+  console.log(currentWeatherInfo.weatherIcon);
+
   return (
     <div className="flex flex-col items-center w-100 h-100 px-8 mt-16">
       {/* Display current city name */}
-      <span className="font-extrabold text-4xl my-2">{currentLocation.village}</span>
+      <span className="font-extrabold text-4xl my-2">
+        {currentLocation.village}
+      </span>
       <p className="text-s">
         Chance of rain: {Math.round(dailyWeatherInfo.chanceOfRain * 100)}%
       </p>
@@ -134,9 +140,9 @@ function CurrentCity() {
       {/* Hourly Weather Forecast */}
       <Card>
         <p className="text-sm font-semibold text-gray-300">Today's Forecast</p>
-        <div className="flex gap-4 my-2 justify-around items-center w-[100%]">
+        <div className="flex flex-col gap-4 my-2 items-center w-[100%]">
           {/* Loop through hourly weather data and display each hour's weather */}
-          {hourly.map((data, index) => {
+          {/* {hourly.map((data, index) => {
             return (
               <div
                 key={index}
@@ -155,7 +161,35 @@ function CurrentCity() {
                 </span>
               </div>
             );
-          })}
+          })} */}
+          <div className="w-[100%] flex justify-around">
+            {hourlyWeatherInfo.time.map((time, index) => {
+              return (
+                <span key={index} className="w-max">
+                  {time}
+                </span>
+              );
+            })}
+          </div>
+          <div className="w-[100%] flex justify-around">
+            {hourlyWeatherInfo.icon.map((icon, index) => {
+              return (
+                <img
+                  className="w-18"
+                  key={index}
+                  src={iconMap[icon]}
+                  alt="weather icon"
+                />
+              );
+            })}
+          </div>
+          <div className="w-[100%] flex justify-around">
+            {hourlyWeatherInfo.temperature.map((temp, index) => { 
+              return (
+                <span key={index}>{Math.floor(temp)}&deg;</span>
+              )
+            })}
+          </div>
         </div>
       </Card>
     </div>
