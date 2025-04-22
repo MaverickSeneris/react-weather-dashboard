@@ -4,6 +4,10 @@ import axios from "axios";
 import iconMap from "../utils/weatherIconMapper"; // Maps weather codes to local SVG icons
 import formatTime from "../utils/timeFormatter"; // Utility function to format time
 import getDayLabel from "../utils/dayLabel";
+import chanceOfRainIcon from "../assets/weather-icons/chance-of-rain.svg"
+import temperatureIcon from "../assets/weather-icons/temperature.svg";
+import windIcon from "../assets/weather-icons/wind.svg";
+import uviIcon from "../assets/weather-icons/uv-index.svg";
 
 function CurrentCity() {
   const [currentLocation, setCurrentLocation] = useState({
@@ -84,12 +88,6 @@ function CurrentCity() {
               chanceOfRain: weatherData.daily?.[0]?.pop ?? 0,
             });
 
-
-            // // Set chance of rain for the day (0\u20131 scale, represents probability of precipitation)
-            // setDailyWeatherInfo({
-            //   chanceOfRain: weatherData.daily?.[0]?.pop ?? 0,
-            // });
-
             // Get weather data every 3 hours only (e.g., 12AM, 3AM, 6AM...) for cleaner hourly forecast
             const hourlyData = weatherData.hourly
               .filter((_, index) => index >= 2 && (index - 2) % 3 === 0) // starts at 3rd and gets every 3rd
@@ -132,7 +130,7 @@ function CurrentCity() {
   const currentWeatherIcon = iconMap[currentWeatherInfo.weatherIcon];
 
   return (
-    <div className="flex flex-col items-center w-100 h-100 px-4 mt-16">
+    <div className="flex flex-col items-center w-100 px-4 mt-10 pb-28">
       {/* Display current city name */}
       <span className="font-extrabold text-4xl my-2">
         {currentLocation.village}
@@ -140,11 +138,7 @@ function CurrentCity() {
       <p className="text-lg font-semibold text-gray-400 word-space">
         Chance of rain: {Math.round(currentWeatherInfo.chanceOfRain * 100)}%
       </p>
-      {/* <p className="text-xs">{currentWeatherInfo.description}</p> */}
-      {/* <p className="text-xs">
-        Feels like: {Math.floor(currentWeatherInfo.feelsLike)}&deg;
-      </p> */}
-
+      
       {/* Current weather icon */}
       <img src={currentWeatherIcon} className="my-6 w-50 pl-4" />
       <p className="text-5xl font-bold mb-8">
@@ -221,42 +215,43 @@ function CurrentCity() {
       </Card>
       {/* Current Weather Details */}
       <Card>
-        <p className="text-xs font-bold text-gray-300 pb-2">CURRENT CONDITION</p>
-        <div className="grid grid-cols-2">
+        <p className="text-xs font-bold text-gray-300 pb-2">
+          CURRENT CONDITION
+        </p>
+        <div className="grid grid-cols-2 mt-2">
           <div className="pb-4">
-            <div>
-              {/* <img src={""} /> */}
+            <div className="flex items-center gap-1">
+              <img src={temperatureIcon} className="w-6 invert-70" />
               <p className="font-semibold text-gray-400">Real Feel</p>
             </div>
-            <span className="pl-2 font-bold text-gray-300">
+            <span className="pl-7 font-bold text-gray-300">
               {Math.floor(currentWeatherInfo.feelsLike)}&deg;
             </span>
           </div>
-
-          <div className="pb-4">
-            <div>
-              {/* <img src={""} /> */}
+          <div className="pb-4 ml-4">
+            <div className="flex items-center gap-1">
+              <img src={windIcon} className="w-6 invert-70" />
               <p className="font-semibold text-gray-400">Wind</p>
             </div>
-            <span className="pl-2 font-bold text-gray-300">
+            <span className="pl-7 font-bold text-gray-300">
               {currentWeatherInfo.windSpeed} km/h
             </span>
           </div>
-          <div className="pb-4">
-            <div>
-              {/* <img src={""} /> */}
+          <div>
+            <div className="flex items-center gap-1">
+              <img src={chanceOfRainIcon} className="w-6 invert-70" />
               <p className="font-semibold text-gray-400">Chance of Rain</p>
             </div>
-            <span className="pl-2 font-bold text-gray-300">
+            <span className="pl-7 font-bold text-gray-300">
               {Math.floor(currentWeatherInfo.chanceOfRain * 100)}%
             </span>
           </div>
-          <div className="pb-4">
-            <div>
-              {/* <img src={""} /> */}
+          <div className="ml-4">
+            <div className="flex items-center gap-1">
+              <img src={uviIcon} className="w-6 invert-70" />
               <p className="font-semibold text-gray-400">UV index</p>
             </div>
-            <span className="pl-2 font-bold text-gray-300">
+            <span className="pl-7 font-bold text-gray-300">
               {currentWeatherInfo.uvIndex}
             </span>
           </div>
