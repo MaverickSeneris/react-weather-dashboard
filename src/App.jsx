@@ -3,6 +3,8 @@ import CurrentCity from "./pages/CurrentCity";
 import CityList from "./pages/CityList";
 import Dashboard from "./pages/Dashboard";
 import Settings from "./pages/Settings";
+import WeatherMap from "./pages/WeatherMap";
+
 
 
 function App() {
@@ -12,6 +14,7 @@ function App() {
         <Route element={<Dashboard />}>
           <Route index element={<CurrentCity />} />
           <Route path="city-list" element={<CityList />} />
+          <Route path="weather-map" element={<WeatherMap />} />
           <Route path="settings" element={<Settings />} />
         </Route>
       </Routes>
