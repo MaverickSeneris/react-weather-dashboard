@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from "react";
-import sunny from "../assets/weather-icons/02_clear.svg"; // sunny icon for display
 import Card from "../components/Card";
-import hourly from "../seed-data/hourlyseed"; // Sample hourly data for rendering (you may replace this with actual API data)
 import axios from "axios";
 import iconMap from "../utils/weatherIconMapper"; // Maps weather codes to local SVG icons
 import formatTime from "../utils/timeFormatter"; // Utility function to format time
+import getDayLabel from "../utils/dayLabel";
 
 function CurrentCity() {
   const [currentLocation, setCurrentLocation] = useState({
@@ -28,9 +27,11 @@ function CurrentCity() {
     icon: [],
   });
 
-  const [dailyWeatherInfo, setDailyWeatherInfo] = useState({
+  const [dailyChanceOfRain, setDailyChance] = useState({
     chanceOfRain: 0,
   });
+
+  const [dailyWeatherInfo, setDailyWeatherInfo] = useState([]);
 
   const [unit, setUnit] = useState("metric"); // Set default unit to 'metric'
 
@@ -87,20 +88,32 @@ function CurrentCity() {
             });
 
             // Get weather data every 3 hours only (e.g., 12AM, 3AM, 6AM...) for cleaner hourly forecast
-            const hourlyData = weatherData.hourly
-              .filter((_, index) => index % 3 === 0) // keeps every 3rd hour
-              .slice(0, 3) // takes the first 3 of those
-              .map((data) => ({
-                time: formatTime(data.dt),
-                temperature: data.temp,
-                icon: data.weather?.[0]?.icon,
-              }));
+           const hourlyData = weatherData.hourly
+             .filter((_, index) => index >= 2 && (index - 2) % 3 === 0) // starts at 3rd and gets every 3rd
+             .slice(0, 3) // get first 3 from that selection
+             .map((data) => ({
+               time: formatTime(data.dt),
+               temperature: data.temp,
+               icon: data.weather?.[0]?.icon,
+             }));
 
-            setHourlyWeatherInfo({
-              time: hourlyData.map((item) => item.time),
-              temperature: hourlyData.map((item) => item.temperature),
-              icon: hourlyData.map((item) => item.icon),
-            });
+           setHourlyWeatherInfo({
+             time: hourlyData.map((item) => item.time),
+             temperature: hourlyData.map((item) => item.temperature),
+             icon: hourlyData.map((item) => item.icon),
+           });
+
+           const dailyData = weatherData.daily
+             .slice(0, 7)
+             .map((data, index) => ({
+               day: getDayLabel(data.dt, index),
+               icon: data.weather[0]?.icon || "",
+               description: data.weather[0]?.description || "",
+               tempHigh: Math.round(data.temp.max),
+               tempLow: Math.round(data.temp.min),
+             }));
+
+            setDailyWeatherInfo(dailyData);
           })
           .catch((error) => {
             console.error(error);
@@ -115,21 +128,19 @@ function CurrentCity() {
   // Map current weather icon code to local icon (SVG)
   const currentWeatherIcon = iconMap[currentWeatherInfo.weatherIcon];
 
-  console.log(currentWeatherInfo.weatherIcon);
-
   return (
-    <div className="flex flex-col items-center w-100 h-100 px-8 mt-16">
+    <div className="flex flex-col items-center w-100 h-100 px-4 mt-16">
       {/* Display current city name */}
       <span className="font-extrabold text-4xl my-2">
         {currentLocation.village}
       </span>
-      <p className="text-s">
-        Chance of rain: {Math.round(dailyWeatherInfo.chanceOfRain * 100)}%
+      <p className="text-lg font-semibold text-gray-400 word-space">
+        Chance of rain: {Math.round(dailyChanceOfRain.chanceOfRain * 100)}%
       </p>
-      <p className="text-xs">{currentWeatherInfo.description}</p>
-      <p className="text-xs">
+      {/* <p className="text-xs">{currentWeatherInfo.description}</p> */}
+      {/* <p className="text-xs">
         Feels like: {Math.floor(currentWeatherInfo.feelsLike)}&deg;
-      </p>
+      </p> */}
 
       {/* Current weather icon */}
       <img src={currentWeatherIcon} className="my-6 w-50 pl-4" />
@@ -139,14 +150,15 @@ function CurrentCity() {
 
       {/* Hourly Weather Forecast */}
       <Card>
-        <p className="text-sm font-semibold text-gray-300 pb-2">
-          Today's Forecast
-        </p>
-        <div className={`flex flex-col my-2 items-center w-[100%] `}>
+        <p className="text-xs font-bold text-gray-300 pb-2">TODAY'S FORECAST</p>
+        <div className={`flex flex-col my-2 items-center w-[100%]`}>
           <div className="w-[100%] flex justify-between">
             {hourlyWeatherInfo.time.map((time, index) => {
               return (
-                <span key={index} className="w-max font-bold pb-2">
+                <span
+                  key={index}
+                  className="w-max font-bold pb-2 text-gray-400"
+                >
                   {time}
                 </span>
               );
@@ -173,6 +185,35 @@ function CurrentCity() {
               );
             })}
           </div>
+        </div>
+      </Card>
+      <Card>
+        <div className="space-y-3">
+          <p className="text-xs font-bold text-gray-300 pb-2">7-DAY FORECAST</p>
+          {dailyWeatherInfo.map((day, index) => (
+            <div
+              key={index}
+              className="flex items-center justify-around text-sm"
+            >
+              <span className="w-12 font-semibold text-lg text-gray-400">
+                {day.day}
+              </span>
+              <div className="flex items-center">
+                <img
+                  src={iconMap[day.icon]}
+                  alt={day.description}
+                  className="w-10"
+                />
+                <span className="pl-2 capitalize font-bold text-[0.8rem] text-gray-300 w-32">
+                  {day.description}
+                </span>
+              </div>
+              <div>
+                <span className="font-bold text-lg">{day.tempHigh}</span>
+                <span className="text-gray-400 text-lg">/{day.tempLow}</span>
+              </div>
+            </div>
+          ))}
         </div>
       </Card>
     </div>
