@@ -139,43 +139,24 @@ function CurrentCity() {
 
       {/* Hourly Weather Forecast */}
       <Card>
-        <p className="text-sm font-semibold text-gray-300">Today's Forecast</p>
-        <div className="flex flex-col gap-4 my-2 items-center w-[100%]">
-          {/* Loop through hourly weather data and display each hour's weather */}
-          {/* {hourly.map((data, index) => {
-            return (
-              <div
-                key={index}
-                className={`flex flex-col justify-between items-center px-3 py-2 ${
-                  index === 1 ? "border-x border-gray-500" : ""
-                }`}
-              >
-                <span className="font-semibold pb-2 text-gray-300">
-                  {data.time}
-                </span>
-                {data.weather === "sunny" && (
-                  <img src={sunny} className="w-18 pl-1.5" />
-                )}
-                <span className="font-bold text-gray-300">
-                  {data.temperature}&deg;
-                </span>
-              </div>
-            );
-          })} */}
-          <div className="w-[100%] flex justify-around">
+        <p className="text-sm font-semibold text-gray-300 pb-2">
+          Today's Forecast
+        </p>
+        <div className={`flex flex-col my-2 items-center w-[100%] `}>
+          <div className="w-[100%] flex justify-between">
             {hourlyWeatherInfo.time.map((time, index) => {
               return (
-                <span key={index} className="w-max">
+                <span key={index} className="w-max font-bold pb-2">
                   {time}
                 </span>
               );
             })}
           </div>
-          <div className="w-[100%] flex justify-around">
+          <div className="w-[100%] flex justify-between">
             {hourlyWeatherInfo.icon.map((icon, index) => {
               return (
                 <img
-                  className="w-18"
+                  className="w-16"
                   key={index}
                   src={iconMap[icon]}
                   alt="weather icon"
@@ -183,11 +164,13 @@ function CurrentCity() {
               );
             })}
           </div>
-          <div className="w-[100%] flex justify-around">
-            {hourlyWeatherInfo.temperature.map((temp, index) => { 
+          <div className="w-[88%] flex justify-between">
+            {hourlyWeatherInfo.temperature.map((temp, index) => {
               return (
-                <span key={index}>{Math.floor(temp)}&deg;</span>
-              )
+                <span key={index} className="font-extrabold text-xl">
+                  {Math.floor(temp)}&deg;
+                </span>
+              );
             })}
           </div>
         </div>
