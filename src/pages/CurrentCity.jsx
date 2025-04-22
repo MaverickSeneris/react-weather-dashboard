@@ -130,7 +130,7 @@ function CurrentCity() {
   const currentWeatherIcon = iconMap[currentWeatherInfo.weatherIcon];
 
   return (
-    <div className="flex flex-col items-center w-100 px-4 mt-10 pb-28">
+    <div className="flex flex-col items-center w-100 px-4 mt-10 pb-2">
       {/* Display current city name */}
       <span className="font-extrabold text-4xl my-2">
         {currentLocation.village}
@@ -138,7 +138,7 @@ function CurrentCity() {
       <p className="text-lg font-semibold text-gray-400 word-space">
         Chance of rain: {Math.round(currentWeatherInfo.chanceOfRain * 100)}%
       </p>
-      
+
       {/* Current weather icon */}
       <img src={currentWeatherIcon} className="my-6 w-50 pl-4" />
       <p className="text-5xl font-bold mb-8">
