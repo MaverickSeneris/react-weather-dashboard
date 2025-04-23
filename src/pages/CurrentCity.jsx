@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import iconMap from "../utils/weatherIconMapper"; // Maps weather codes to local SVG icons
 import formatTime from "../utils/timeFormatter"; // Utility function to format time
-import getDayLabel from "../utils/dayLabel";
+import getDayLabel from "../utils/dayLabel"; // Utility function to format day
 import CurrentCityContainer from "../components/CurrentCityContainer";
 import HourlyContainer from "../components/HourlyContainer";
 import DailyContainer from "../components/DailyContainer";
