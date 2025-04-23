@@ -125,7 +125,7 @@ function CurrentCity() {
   };
 
   return (
-    <div className="flex flex-col items-center w-100 px-4 mt-10 pb-2">
+    <div className="flex flex-col items-center w-screen px-4 mt-10 pb-2">
       <CurrentCityContainer
         cityName={currentLocation.village}
         popValue={Math.round(currentWeatherInfo.chanceOfRain * 100)}
