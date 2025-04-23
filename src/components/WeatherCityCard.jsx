@@ -18,7 +18,7 @@ function WeatherCityCard({ children }) {
       <Card>
         <CardTitle title={"TODAY'S FORECAST"} />
         <HourlyContainer
-          hourlyWeatherInfo={{ time: [], icon: [], temperature: []}}
+          hourlyWeatherInfo={{ time: [], icon: [], temperature: [] }}
         />
       </Card>
       <Card>
