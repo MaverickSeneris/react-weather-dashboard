@@ -5,6 +5,9 @@ import Dashboard from "./pages/Dashboard";
 import Settings from "./pages/Settings";
 import WeatherMap from "./pages/WeatherMap";
 import WeatherCityCard from "./components/WeatherCityCard";
+import CityWeatherDetail from "./pages/CityWeatherDetail";
+
+
 
 
 
@@ -18,6 +21,8 @@ function App() {
           <Route path="weather-map" element={<WeatherMap />} />
           <Route path="settings" element={<Settings />} />
           <Route path="test" element={<WeatherCityCard />} />
+
+          <Route path="city/:name" element={<CityWeatherDetail />} />
         </Route>
       </Routes>
     </BrowserRouter>

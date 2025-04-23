@@ -1,3 +1,4 @@
+Link
 import React from "react";
 import Card from "./ui/Card";
 import CardTitle from "./ui/CardTitle";
@@ -5,11 +6,22 @@ import chanceOfRainIcon from "../assets/weather-icons/chance-of-rain.svg";
 import temperatureIcon from "../assets/weather-icons/temperature.svg";
 import windIcon from "../assets/weather-icons/wind.svg";
 import uviIcon from "../assets/weather-icons/uv-index.svg";
+import { Link } from "react-router";
 
-function CurrentWeatherContainer({ currentWeatherInfo }) {
+function CurrentWeatherContainer({ currentWeatherInfo, cityName }) {
   return (
     <Card>
-      <CardTitle title={"CURRENT CONDITION"} />
+      <div className="flex items-center justify-between">
+        <CardTitle title={"CURRENT CONDITION"} />
+        <Link
+          to={`/city/${cityName || "unknown"}`}
+          state={{currentWeatherInfo, cityName}}
+          className="bg-blue-500 !text-white text-xs font-medium px-2 py-1 rounded-full hover:bg-blue-600 transition"
+        >
+          See more
+        </Link>
+      </div>
+
       <div className="grid grid-cols-2 mt-2">
         <div className="pb-4">
           <div className="flex items-center gap-1">

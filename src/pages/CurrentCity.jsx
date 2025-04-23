@@ -90,6 +90,11 @@ function CurrentCity() {
         uvIndex: data.current.uvi || 0,
         windSpeed: data.current.wind_speed || 0,
         chanceOfRain: data.daily?.[0]?.pop ?? 0,
+        pressure: data.current.pressure || "",
+        visibility: data.current.visibility || "",
+        humidity: data.current.humidity || "",
+        sunset: data.current.sunset || "",
+        sunrise: data.current.sunrise || "",
       });
 
       const hourlyData = data.hourly
@@ -134,7 +139,7 @@ function CurrentCity() {
       />
       <HourlyContainer hourlyWeatherInfo={hourlyWeatherInfo} />
       <DailyContainer dailyWeatherInfo={dailyWeatherInfo} />
-      <CurrentWeatherContainer currentWeatherInfo={currentWeatherInfo} />
+      <CurrentWeatherContainer currentWeatherInfo={currentWeatherInfo} cityName={currentLocation.village} />
     </div>
   );
 }
