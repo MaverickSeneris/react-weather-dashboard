@@ -8,6 +8,10 @@ import chanceOfRainIcon from "../assets/weather-icons/chance-of-rain.svg"
 import temperatureIcon from "../assets/weather-icons/temperature.svg";
 import windIcon from "../assets/weather-icons/wind.svg";
 import uviIcon from "../assets/weather-icons/uv-index.svg";
+import CurrentCityContainer from "../components/CurrentCityContainer";
+import CardTitle from "../components/CardTitle";
+import HourlyContainer from "../components/HourlyContainer";
+
 
 function CurrentCity() {
   const [currentLocation, setCurrentLocation] = useState({
@@ -131,62 +135,21 @@ function CurrentCity() {
 
   return (
     <div className="flex flex-col items-center w-100 px-4 mt-10 pb-2">
-      {/* Display current city name */}
-      <span className="font-extrabold text-4xl my-2">
-        {currentLocation.village}
-      </span>
-      <p className="text-lg font-semibold text-gray-400 word-space">
-        Chance of rain: {Math.round(currentWeatherInfo.chanceOfRain * 100)}%
-      </p>
-
-      {/* Current weather icon */}
-      <img src={currentWeatherIcon} className="my-6 w-50 pl-4" />
-      <p className="text-5xl font-bold mb-8">
-        {Math.floor(currentWeatherInfo.temperature)}&deg;
-      </p>
+      <CurrentCityContainer
+        cityName={currentLocation.village}
+        popValue={Math.round(currentWeatherInfo.chanceOfRain * 100)}
+        weatherIcon={currentWeatherIcon}
+        tempValue={Math.floor(currentWeatherInfo.temperature)}
+      />
 
       {/* Hourly Weather Forecast */}
       <Card>
-        <p className="text-xs font-bold text-gray-300 pb-2">TODAY'S FORECAST</p>
-        <div className={`flex flex-col my-2 items-center w-[100%]`}>
-          <div className="w-[100%] flex justify-between">
-            {hourlyWeatherInfo.time.map((time, index) => {
-              return (
-                <span
-                  key={index}
-                  className="w-max font-bold pb-2 text-gray-400"
-                >
-                  {time}
-                </span>
-              );
-            })}
-          </div>
-          <div className="w-[100%] flex justify-between">
-            {hourlyWeatherInfo.icon.map((icon, index) => {
-              return (
-                <img
-                  className="w-16"
-                  key={index}
-                  src={iconMap[icon]}
-                  alt="weather icon"
-                />
-              );
-            })}
-          </div>
-          <div className="w-[88%] flex justify-between">
-            {hourlyWeatherInfo.temperature.map((temp, index) => {
-              return (
-                <span key={index} className="font-extrabold text-xl">
-                  {Math.floor(temp)}&deg;
-                </span>
-              );
-            })}
-          </div>
-        </div>
+       <CardTitle title={"TODAY'S FORECAST"}/>
+          <HourlyContainer hourlyWeatherInfo={hourlyWeatherInfo}/>
       </Card>
       <Card>
         <div className="space-y-3">
-          <p className="text-xs font-bold text-gray-300 pb-2">7-DAY FORECAST</p>
+          <CardTitle title={"7-DAY FORECAST"} />
           {dailyWeatherInfo.map((day, index) => (
             <div
               key={index}
@@ -215,9 +178,7 @@ function CurrentCity() {
       </Card>
       {/* Current Weather Details */}
       <Card>
-        <p className="text-xs font-bold text-gray-300 pb-2">
-          CURRENT CONDITION
-        </p>
+        <CardTitle title={"CURRENT CONDITION"} />
         <div className="grid grid-cols-2 mt-2">
           <div className="pb-4">
             <div className="flex items-center gap-1">
