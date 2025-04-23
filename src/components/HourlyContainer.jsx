@@ -1,7 +1,7 @@
 import React from "react";
 import iconMap from "../utils/weatherIconMapper";
-import Card from "./Card";
-import CardTitle from "./CardTitle";
+import Card from "./ui/Card";
+import CardTitle from "./ui/CardTitle";
 
 function HourlyContainer({ hourlyWeatherInfo }) {
   return (

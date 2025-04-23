@@ -1,6 +1,6 @@
 import React from "react";
-import Card from "./Card";
-import CardTitle from "./CardTitle";
+import Card from "./ui/Card";
+import CardTitle from "./ui/CardTitle";
 import iconMap from "../utils/weatherIconMapper";
 
 function DailyContainer({ dailyWeatherInfo }) {
