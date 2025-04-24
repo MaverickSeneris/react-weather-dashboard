@@ -46,7 +46,7 @@ function CityWeatherDetail() {
 
       {cityInfo.map((info, index) => {
         return (
-          <div className="grid grid-cols-2 mt-2 w-[100%] gap-x-4">
+          <div key={index} className="grid grid-cols-2 mt-2 w-[100%] gap-x-4">
             <Card>
               <CardTitle title={"UV INDEX"} />
               {info.uvIndex}
