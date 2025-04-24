@@ -11,7 +11,7 @@ function HourlyContainer({ hourlyWeatherInfo }) {
         <div className="w-[100%] flex justify-between">
           {hourlyWeatherInfo.time.map((time, index) => {
             return (
-              <span key={index} className="w-max font-bold pb-2 text-gray-400">
+              <span key={index} className="w-max font-bold pb-2 text-gray-400 text-center">
                 {time}
               </span>
             );

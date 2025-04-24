@@ -1,4 +1,3 @@
-Link
 import React from "react";
 import Card from "./ui/Card";
 import CardTitle from "./ui/CardTitle";
@@ -15,14 +14,14 @@ function CurrentWeatherContainer({ currentWeatherInfo, cityName }) {
         <CardTitle title={"CURRENT CONDITION"} />
         <Link
           to={`/city/${cityName || "unknown"}`}
-          state={{currentWeatherInfo, cityName}}
-          className="bg-blue-500 !text-white text-xs font-medium px-2 py-1 rounded-full hover:bg-blue-600 transition"
+          state={{ currentWeatherInfo, cityName }}
+          className=" flex justify-center items-center mb-2 bg-blue-500 px-2 py-1 rounded-full hover:bg-blue-600 transition"
         >
-          See more
+          <p className="font-bold text-xs !text-white">See more</p>
         </Link>
       </div>
 
-      <div className="grid grid-cols-2 mt-2">
+      <div className="grid grid-cols-2 mt-4">
         <div className="pb-4">
           <div className="flex items-center gap-1">
             <img src={temperatureIcon} className="w-6 invert-70" />

@@ -12,6 +12,14 @@ function CityWeatherDetail() {
   const { currentWeatherInfo, cityName } = state || {};
   const navigate = useNavigate();
 
+  const now = new Date();
+  const sunrise = currentWeatherInfo.sunrise;
+  const sunset = currentWeatherInfo.sunset;
+  const isDayTime = now >= sunrise && now < sunset;
+
+  const displayLabel = isDayTime ? "SUNRISE" : "SUNSET";
+  const displayTime = isDayTime ? sunrise : sunset;
+
   const cityInfo = [
     {
       temperature: currentWeatherInfo.temperature,
@@ -21,23 +29,19 @@ function CityWeatherDetail() {
       pressure: currentWeatherInfo.pressure,
       humidity: currentWeatherInfo.humidity,
       visibility: currentWeatherInfo.visibility,
-      pressure: currentWeatherInfo.pressure,
-      sunrise: currentWeatherInfo.sunrise,
-      sunset: currentWeatherInfo.sunset,
+      sunrise: sunrise,
+      sunset: sunset,
       chanceOfRain: currentWeatherInfo.chanceOfRain,
     },
   ];
 
-  const ValueContainer = ({ value, unit }) => {
-    return (
-      <span className="font-bold text-xl text-gray-300">
-        {value}
-        {unit}
-      </span>
-    );
-  };
+  const ValueContainer = ({ value, unit }) => (
+    <span className="font-bold text-[1.4rem] text-gray-300">
+      {value}
+      {unit}
+    </span>
+  );
 
-  console.log(currentWeatherInfo, "-----", cityInfo);
   return (
     <div className="flex flex-col items-center w-screen px-4 mt-5 pb-2">
       <button
@@ -46,6 +50,7 @@ function CityWeatherDetail() {
       >
         <BiChevronLeft className="w-8 h-8 mr-1" />
       </button>
+
       <CurrentCityContainer
         cityName={cityName}
         popValue={Math.round(currentWeatherInfo.chanceOfRain * 100)}
@@ -53,44 +58,42 @@ function CityWeatherDetail() {
         tempValue={Math.floor(currentWeatherInfo.temperature)}
       />
 
-      {cityInfo.map((info, index) => {
-        return (
-          <div key={index} className="grid grid-cols-2 mt-2 w-[100%] gap-x-4">
-            <Card>
-              <CardTitle title={"UV INDEX"} />
-              <ValueContainer value={Math.ceil(info.uvIndex)}/>
-            </Card>
-            <Card>
-              <CardTitle title={"WIND"} />
-              <ValueContainer value={info.wind} unit={" km/h"} />
-            </Card>
-            <Card>
-              <CardTitle title={"HUMIDITY"} />
-              <ValueContainer value={info.humidity} unit={"%"} />
-            </Card>
-            <Card>
-              <CardTitle title={"VISIBILITY"} />
-              <ValueContainer value={info.visibility / 1000} unit={" km"} />
-            </Card>
-            <Card>
-              <CardTitle title={"FEELS LIKE"} />
-              <ValueContainer value={Math.floor(info.feelsLike)} unit={"°"} />
-            </Card>
-            <Card>
-              <CardTitle title={"CHANCE OF RAIN"} />
-              <ValueContainer value={info.chanceOfRain} unit={"%"} />
-            </Card>
-            <Card>
-              <CardTitle title={"PRESSURE"} />
-              <ValueContainer value={info.pressure} unit={" hPa"} />
-            </Card>
-            <Card>
-              <CardTitle title={"SUNSET"} />
-              <ValueContainer value={formatTime(info.sunset)}/>
-            </Card>
-          </div>
-        );
-      })}
+      {cityInfo.map((info, index) => (
+        <div key={index} className="grid grid-cols-2 mt-2 w-[100%] gap-x-4">
+          <Card>
+            <CardTitle title={"UV INDEX"} />
+            <ValueContainer value={Math.ceil(info.uvIndex)} />
+          </Card>
+          <Card>
+            <CardTitle title={"WIND"} />
+            <ValueContainer value={info.wind} unit={" km/h"} />
+          </Card>
+          <Card>
+            <CardTitle title={"HUMIDITY"} />
+            <ValueContainer value={info.humidity} unit={"%"} />
+          </Card>
+          <Card>
+            <CardTitle title={"VISIBILITY"} />
+            <ValueContainer value={info.visibility / 1000} unit={" km"} />
+          </Card>
+          <Card>
+            <CardTitle title={"FEELS LIKE"} />
+            <ValueContainer value={Math.floor(info.feelsLike)} unit={"°"} />
+          </Card>
+          <Card>
+            <CardTitle title={"CHANCE OF RAIN"} />
+            <ValueContainer value={info.chanceOfRain} unit={"%"} />
+          </Card>
+          <Card>
+            <CardTitle title={"PRESSURE"} />
+            <ValueContainer value={info.pressure} unit={" hPa"} />
+          </Card>
+          <Card>
+            <CardTitle title={displayLabel} />
+            <ValueContainer value={formatTime(displayTime)} />
+          </Card>
+        </div>
+      ))}
     </div>
   );
 }

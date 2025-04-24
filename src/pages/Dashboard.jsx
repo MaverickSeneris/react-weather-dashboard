@@ -5,7 +5,6 @@ import { IoMapSharp } from "react-icons/io5";
 import { ImEqualizer } from "react-icons/im";
 
 function Dashboard() {
-
   const location = useLocation();
   const path = location.pathname;
 
