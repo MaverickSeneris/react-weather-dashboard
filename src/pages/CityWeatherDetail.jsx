@@ -28,6 +28,15 @@ function CityWeatherDetail() {
     },
   ];
 
+  const ValueContainer = ({ value, unit }) => {
+    return (
+      <span className="font-bold text-xl text-gray-300">
+        {value}
+        {unit}
+      </span>
+    );
+  };
+
   console.log(currentWeatherInfo, "-----", cityInfo);
   return (
     <div className="flex flex-col items-center w-screen px-4 mt-5 pb-2">
@@ -49,35 +58,35 @@ function CityWeatherDetail() {
           <div key={index} className="grid grid-cols-2 mt-2 w-[100%] gap-x-4">
             <Card>
               <CardTitle title={"UV INDEX"} />
-              {info.uvIndex}
+              <ValueContainer value={Math.ceil(info.uvIndex)}/>
             </Card>
             <Card>
               <CardTitle title={"WIND"} />
-              {info.wind}km/h
+              <ValueContainer value={info.wind} unit={" km/h"} />
             </Card>
             <Card>
               <CardTitle title={"HUMIDITY"} />
-              {info.humidity}%
+              <ValueContainer value={info.humidity} unit={"%"} />
             </Card>
             <Card>
               <CardTitle title={"VISIBILITY"} />
-              {info.visibility / 1000}km
+              <ValueContainer value={info.visibility / 1000} unit={" km"} />
             </Card>
             <Card>
               <CardTitle title={"FEELS LIKE"} />
-              {Math.floor(info.feelsLike)}&deg;
+              <ValueContainer value={Math.floor(info.feelsLike)} unit={"°"} />
             </Card>
             <Card>
               <CardTitle title={"CHANCE OF RAIN"} />
-              {info.chanceOfRain}%
+              <ValueContainer value={info.chanceOfRain} unit={"%"} />
             </Card>
             <Card>
               <CardTitle title={"PRESSURE"} />
-              {info.pressure}hPa
+              <ValueContainer value={info.pressure} unit={" hPa"} />
             </Card>
             <Card>
               <CardTitle title={"SUNSET"} />
-              {formatTime(info.sunset)}
+              <ValueContainer value={formatTime(info.sunset)}/>
             </Card>
           </div>
         );
