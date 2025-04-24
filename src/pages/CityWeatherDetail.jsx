@@ -4,6 +4,8 @@ import CurrentCityContainer from "../components/CurrentCityContainer";
 import iconMap from "../utils/weatherIconMapper";
 import { BiChevronLeft } from "react-icons/bi";
 import Card from "../components/ui/Card";
+import formatTime from "../utils/timeFormatter";
+import CardTitle from "../components/ui/CardTitle";
 
 function CityWeatherDetail() {
   const { state } = useLocation();
@@ -22,6 +24,7 @@ function CityWeatherDetail() {
       pressure: currentWeatherInfo.pressure,
       sunrise: currentWeatherInfo.sunrise,
       sunset: currentWeatherInfo.sunset,
+      chanceOfRain: currentWeatherInfo.chanceOfRain,
     },
   ];
 
@@ -43,15 +46,39 @@ function CityWeatherDetail() {
 
       {cityInfo.map((info, index) => {
         return (
-          <div className="grid grid-cols-2 mt-2">
-            <Card>{info.uvIndex}</Card>
-            <Card>{info.wind}</Card>
-            <Card>{info.uvIndex}</Card>
-            <Card>{info.wind}</Card>
-            <Card>{info.uvIndex}</Card>
-            <Card>{info.wind}</Card>
-            <Card>{info.uvIndex}</Card>
-            <Card>{info.wind}</Card>
+          <div className="grid grid-cols-2 mt-2 w-[100%] gap-x-4">
+            <Card>
+              <CardTitle title={"UV INDEX"} />
+              {info.uvIndex}
+            </Card>
+            <Card>
+              <CardTitle title={"WIND"} />
+              {info.wind}km/h
+            </Card>
+            <Card>
+              <CardTitle title={"HUMIDITY"} />
+              {info.humidity}%
+            </Card>
+            <Card>
+              <CardTitle title={"VISIBILITY"} />
+              {info.visibility / 1000}km
+            </Card>
+            <Card>
+              <CardTitle title={"FEELS LIKE"} />
+              {Math.floor(info.feelsLike)}&deg;
+            </Card>
+            <Card>
+              <CardTitle title={"CHANCE OF RAIN"} />
+              {info.chanceOfRain}%
+            </Card>
+            <Card>
+              <CardTitle title={"PRESSURE"} />
+              {info.pressure}hPa
+            </Card>
+            <Card>
+              <CardTitle title={"SUNSET"} />
+              {formatTime(info.sunset)}
+            </Card>
           </div>
         );
       })}
