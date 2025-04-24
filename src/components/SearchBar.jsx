@@ -9,7 +9,7 @@ function SearchBar() {
   }
 
   return (
-    <div>
+    <div >
       <form onSubmit={handleSubmit} className={"flex gap-2"}>
         <input
           className={"border"}
