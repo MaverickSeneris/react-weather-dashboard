@@ -1,97 +1,78 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import CityCard from "./ui/CityCard";
 
-const mockData = [
-  {
-    name: "Barcelona",
-    temp: 29,
-    condition: "sunny",
-    time: 1745600580,
-    id: 12341234,
-  },
-  {
-    name: "Bilbao",
-    temp: 27,
-    condition: "rainy",
-    time: 1745600580,
-    id: 56785678,
-  },
-  {
-    name: "Madrid",
-    temp: 31,
-    condition: "sunny",
-    time: 1745604180,
-    id: 578567856,
-  },
-  {
-    name: "Malaga",
-    temp: 33,
-    condition: "cloudy",
-    time: 1745600580,
-    id: 90678234,
-  },
-];
+
+
+const url = import.meta.env.VITE_OPENWEATHER_ONECALL_API_URL;
+const key = import.meta.env.VITE_OPENWEATHER_API_KEY;
 
 function SearchBar() {
-  const [cities, setCities] = useState(mockData);
+  const [cities, setCities] = useState({});
   const [searchMode, setSearchMode] = useState(false);
   const [search, setSearch] = useState("");
+  const [weatherData, setWeatherData] = useState([]);
 
-  const filteredCities = cities.filter((city) =>
-    city.name.toLowerCase().includes(search.toLowerCase())
-  );
+  console.log(cities)
 
-  function handleSubmit(e) {
-    e.preventDefault();
-    console.log(cityName);
-    setSearchMode(!searchMode);
-  }
+  // Fetch city coordinates from Geocoding API
+  const fetchCities = async (query) => {
+    if (!query) return;
 
-  function toggleSearch() {
-    setSearchMode(!searchMode);
-  }
+    const res = await fetch(
+      `https://api.openweathermap.org/geo/1.0/direct?q=${query}&limit=5&appid=${key}`
+    );
+    const data = await res.json();
+    setCities(data);
+  };
 
-  console.log(searchMode);
+  // Fetch weather data for each city
+  const fetchWeather = async () => {
+    const promises = cities.map(async (city) => {
+      const res = await fetch(
+        `https://api.openweathermap.org/data/3.0/onecall?lat=${city.lat}&lon=${city.lon}&exclude=minutely,hourly,daily,alerts&units=metric&appid=${key}`
+      );
+      const data = await res.json();
+      return {
+        name: city.name,
+        temp: data.current.temp,
+        condition: data.current.weather[0].main.toLowerCase(),
+      };
+    });
+
+    const results = await Promise.all(promises);
+    setWeatherData(results);
+  };
+
+  // Search and fetch on typing
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      fetchCities(search);
+    }, 500); // debounce typing
+
+    return () => clearTimeout(timeout);
+  }, [search]);
+
+  useEffect(() => {
+    if (cities.length > 0) {
+      fetchWeather();
+    }
+  }, [cities]);
 
   return (
-    <div className="app">
+    <div>
       <input
         type="text"
         placeholder="Search city"
+        className="mb-4 p-2 w-full rounded-[10px] bg-gray-800"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        className="bg-gray-800 rounded-[10px] my-4 px-2 py-3 w-[100%]"
       />
-      <div className="city-list">
-        {filteredCities.map((city, index) => (
-          <CityCard key={index} data={city} />
-        ))}
+
+      <div>
+        <CityCard weatherData={weatherData}/>
       </div>
     </div>
 
-    // <div>
-    //   {!searchMode ? (
-    //     <div
-    //       onClick={toggleSearch}
-    //       className="bg-gray-800 rounded-[10px] my-4 px-2 py-3"
-    //     >
-    //       <p>Search for cities</p>
-    //     </div>
-    //   ) : (
-    //     <form onSubmit={handleSubmit} className={"flex gap-2"}>
-    //       <input
-    //         className={"border"}
-    //         type="text"
-    //         placeholder="enter city name..."
-    //         value={cityName}
-    //         onChange={(e) => setCityname(e.target.value)}
-    //       />
-    //       <button type="submit" className={"border rounded p-1"}>
-    //         Search
-    //       </button>
-    //     </form>
-    //   )}
-    // </div>
   );
 }
 

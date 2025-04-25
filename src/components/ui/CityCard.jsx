@@ -8,23 +8,29 @@ const icons = {
   cloudy: "⛅",
 };
 
-const CityCard = ({ data }) => {
+const CityCard = ({ weatherData }) => {
+    console.log(weatherData)
+
   return (
-    <div className="mb-4">
-      <Card className="city-card">
-        <div className="flex items-center justify-between">
-          <div className="text-5xl">{icons[data.condition]}</div>
-          <div>{data.name}</div>
-          <div>{data.temp}�</div>
-          <div>
-            {new Date().toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
-          </div>
+    <>
+      {weatherData.map((city, index) => (
+        <div key={index} className="mb-4">
+          <Card>
+            <button
+              key={index}
+              // className="flex justify-between items-center bg-gray-800 p-4 rounded"
+              className="flex items-center justify-between w-[100%]"
+            >
+              <div>
+                <div className="text-lg">{city.name}</div>
+                <div className="text-sm">{city.condition}</div>
+              </div>
+              <div className="text-xl">{Math.round(city.temp)}&deg;</div>
+            </button>
+          </Card>
         </div>
-      </Card>
-    </div>
+      ))}
+    </>
   );
 };
 
