@@ -30,14 +30,14 @@ function SearchBar() {
         `https://api.openweathermap.org/data/3.0/onecall?lat=${city.lat}&lon=${city.lon}&exclude=minutely,hourly,daily,alerts&units=metric&appid=${key}`
       );
       const data = await res.json();
-      console.log(data.current.dt);
+      console.log(data);
 
       return {
         name: city.name,
         temp: data.current.temp,
         condition: data.current.weather[0].main.toLowerCase(),
         weatherIcon: data.current.weather[0].icon,
-        time: data.current.dt
+        time: data.current.dt,
       };
     });
 
@@ -65,7 +65,7 @@ function SearchBar() {
       <input
         type="text"
         placeholder="Search city"
-        className="mb-4 p-2 w-full rounded-[10px] bg-gray-800"
+        className="my-4 p-2 w-full rounded-[10px] bg-gray-800"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />

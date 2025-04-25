@@ -13,22 +13,22 @@ const CityCard = ({ weatherData }) => {
           <Card>
             <button
               key={index}
-              className="flex items-center justify-between w-[100%]"
+              className="flex items-center justify-between w-[100%] h-8"
             >
-              <div className="flex gap-5">
+              <div className="flex items-center gap-5">
                 <img
                   src={iconMap[city.weatherIcon]}
                   alt="weatherIcon"
-                  className="w-15"
+                  className="w-15 mt-3"
                 />
                 <div className="flex flex-col items-start">
-                  <div className="text-lg">{city.name}</div>
-                  <div>{timeFormatter(city.time)}</div>
+                  <div className="text-xl font-medium text-gray-300">{city.name}</div>
+                  <div className="text-sm font-semibold text-gray-400">{timeFormatter(city.time)}</div>
                   {/* <div className="text-sm">{city.condition}</div> */}
                 </div>
               </div>
 
-              <div className="text-xl">{Math.round(city.temp)}&deg;</div>
+              <div className="text-3xl self-start font-medium">{Math.round(city.temp)}&deg;</div>
             </button>
           </Card>
         </div>
