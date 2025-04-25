@@ -1,55 +1,80 @@
 import React, { useState, useEffect } from "react";
 import CityCard from "./ui/CityCard";
 
+// API configuration
 const url = import.meta.env.VITE_OPENWEATHER_ONECALL_API_URL;
 const key = import.meta.env.VITE_OPENWEATHER_API_KEY;
 
 function SearchBar() {
+  // State declarations
   const [cities, setCities] = useState({});
   const [searchMode, setSearchMode] = useState(false);
   const [search, setSearch] = useState("");
   const [weatherData, setWeatherData] = useState([]);
 
-  console.log(cities);
+  console.log("[SearchBar: line 12] Initial cities state:", cities);
 
   // Fetch city coordinates from Geocoding API
   const fetchCities = async (query) => {
     if (!query) return;
 
-    const res = await fetch(
-      `https://api.openweathermap.org/geo/1.0/direct?q=${query}&limit=5&appid=${key}`
-    );
-    const data = await res.json();
-    setCities(data);
-    console.log("city:", data)
-  };
-
-  // Fetch weather data for each city
-  const fetchWeather = async () => {
-    const promises = cities.map(async (city) => {
+    try {
       const res = await fetch(
-        `https://api.openweathermap.org/data/3.0/onecall?lat=${city.lat}&lon=${city.lon}&exclude=minutely,hourly,daily,alerts&units=metric&appid=${key}`
+        `https://api.openweathermap.org/geo/1.0/direct?q=${query}&limit=5&appid=${key}`
       );
+      if (!res.ok) throw new Error(`Status: ${res.status}`);
+
       const data = await res.json();
-      console.log(data);
-
-      return {
-        name: city.name,
-        state: city.state,
-        country: city.country,
-        temp: data.current.temp,
-        condition: data.current.weather[0].main.toLowerCase(),
-        weatherIcon: data.current.weather[0].icon,
-        time: data.current.dt,
-    
-      };
-    });
-
-    const results = await Promise.all(promises);
-    setWeatherData(results);
+      setCities(data);
+      console.log("[fetchCities: line 22] Fetched cities:", data);
+    } catch (error) {
+      console.error("[fetchCities: line 26] Error fetching cities:", error);
+    }
   };
 
-  // Search and fetch on typing
+  // Fetch weather data for each city from OneCall API
+  const fetchWeather = async () => {
+    try {
+      const promises = cities.map(async (city) => {
+        try {
+          const res = await fetch(
+            `https://api.openweathermap.org/data/3.0/onecall?lat=${city.lat}&lon=${city.lon}&exclude=minutely,hourly,daily,alerts&units=metric&appid=${key}`
+          );
+          if (!res.ok) throw new Error(`Status: ${res.status}`);
+
+          const data = await res.json();
+          console.log(
+            "[fetchWeather: line 39] Weather data for city:",
+            city.name,
+            data
+          );
+
+          return {
+            name: city.name,
+            state: city.state,
+            country: city.country,
+            temp: data.current.temp,
+            condition: data.current.weather[0].main.toLowerCase(),
+            weatherIcon: data.current.weather[0].icon,
+            time: data.current.dt,
+          };
+        } catch (innerErr) {
+          console.error(
+            `[fetchWeather: line 50] Error fetching weather for ${city.name}:`,
+            innerErr
+          );
+          return null; // So Promise.all still works
+        }
+      });
+
+      const results = await Promise.all(promises);
+      setWeatherData(results.filter(Boolean)); // remove any null entries
+    } catch (err) {
+      console.error("[fetchWeather: line 57] General error:", err);
+    }
+  };
+
+  // Debounced search input
   useEffect(() => {
     const timeout = setTimeout(() => {
       fetchCities(search);
@@ -58,6 +83,7 @@ function SearchBar() {
     return () => clearTimeout(timeout);
   }, [search]);
 
+  // Trigger weather fetch once cities are set
   useEffect(() => {
     if (cities.length > 0) {
       fetchWeather();
