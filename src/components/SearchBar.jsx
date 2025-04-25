@@ -5,7 +5,7 @@ import CityCard from "./ui/CityCard";
 const url = import.meta.env.VITE_OPENWEATHER_ONECALL_API_URL;
 const key = import.meta.env.VITE_OPENWEATHER_API_KEY;
 
-function SearchBar() {
+function SearchBar({ toggleSearchMode }) {
   const [cities, setCities] = useState({});
   const [searchMode, setSearchMode] = useState(false);
   const [search, setSearch] = useState("");
@@ -131,13 +131,22 @@ function SearchBar() {
 
   return (
     <div>
-      <input
-        type="text"
-        placeholder="Search city"
-        className="my-4 p-2 w-full rounded-[10px] bg-gray-800"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-      />
+      <div className="flex gap-2 items-center">
+        <input
+          type="text"
+          placeholder="Search city"
+          className="my-4 p-2 w-full rounded-[10px] bg-gray-800 outline-0"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+        <button
+          onClick={toggleSearchMode}
+          className="border-0 p-2 h-[100%] rounded-[10px] bg-[#d53d3d] hover:bg-red-400 active:bg-red-400 focus:bg-red-400 flex items-center justify-center font-semibold text-sm
+    transition duration-150 active:scale-95"
+        >
+          Cancel
+        </button>
+      </div>
 
       <div>
         <CityCard weatherData={weatherData} />
