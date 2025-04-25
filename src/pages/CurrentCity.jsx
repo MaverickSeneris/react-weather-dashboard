@@ -38,6 +38,7 @@ function CurrentCity() {
     // Gets user's location on component mount or when unit changes (metric/imperial)
     navigator.geolocation.getCurrentPosition(
       ({ coords: { latitude, longitude } }) => {
+        console.log("coordinates:", latitude, longitude)
         fetchLocation(latitude, longitude); // Fetch city/village/etc. info
         fetchWeather(latitude, longitude); // Fetch current, hourly, and daily weather
       },
