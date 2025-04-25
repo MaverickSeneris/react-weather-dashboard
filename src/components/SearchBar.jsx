@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
 import CityCard from "./ui/CityCard";
 
-
-
 const url = import.meta.env.VITE_OPENWEATHER_ONECALL_API_URL;
 const key = import.meta.env.VITE_OPENWEATHER_API_KEY;
 
@@ -12,7 +10,7 @@ function SearchBar() {
   const [search, setSearch] = useState("");
   const [weatherData, setWeatherData] = useState([]);
 
-  console.log(cities)
+  console.log(cities);
 
   // Fetch city coordinates from Geocoding API
   const fetchCities = async (query) => {
@@ -32,10 +30,14 @@ function SearchBar() {
         `https://api.openweathermap.org/data/3.0/onecall?lat=${city.lat}&lon=${city.lon}&exclude=minutely,hourly,daily,alerts&units=metric&appid=${key}`
       );
       const data = await res.json();
+      console.log(data.current.dt);
+
       return {
         name: city.name,
         temp: data.current.temp,
         condition: data.current.weather[0].main.toLowerCase(),
+        weatherIcon: data.current.weather[0].icon,
+        time: data.current.dt
       };
     });
 
@@ -69,10 +71,9 @@ function SearchBar() {
       />
 
       <div>
-        <CityCard weatherData={weatherData}/>
+        <CityCard weatherData={weatherData} />
       </div>
     </div>
-
   );
 }
 
