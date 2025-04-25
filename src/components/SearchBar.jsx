@@ -21,6 +21,7 @@ function SearchBar() {
     );
     const data = await res.json();
     setCities(data);
+    console.log("city:", data)
   };
 
   // Fetch weather data for each city
@@ -34,10 +35,13 @@ function SearchBar() {
 
       return {
         name: city.name,
+        state: city.state,
+        country: city.country,
         temp: data.current.temp,
         condition: data.current.weather[0].main.toLowerCase(),
         weatherIcon: data.current.weather[0].icon,
         time: data.current.dt,
+    
       };
     });
 

@@ -22,13 +22,23 @@ const CityCard = ({ weatherData }) => {
                   className="w-15 mt-3"
                 />
                 <div className="flex flex-col items-start">
-                  <div className="text-xl font-medium text-gray-300">{city.name}</div>
-                  <div className="text-sm font-semibold text-gray-400">{timeFormatter(city.time)}</div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-[1rem] text-gray-300">
+                      {city.name}
+                    </span>
+                    <span className="text-xs font-regular">{city.country}</span>
+                  </div>
+                  <div><p className="text-xs">{ city.state}</p></div>
+                  <div className="text-sm font-semibold text-gray-400">
+                    {timeFormatter(city.time)}
+                  </div>
                   {/* <div className="text-sm">{city.condition}</div> */}
                 </div>
               </div>
 
-              <div className="text-3xl self-start font-medium">{Math.round(city.temp)}&deg;</div>
+              <div className="text-3xl self-start font-medium">
+                {Math.round(city.temp)}&deg;
+              </div>
             </button>
           </Card>
         </div>
