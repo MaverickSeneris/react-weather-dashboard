@@ -13,6 +13,7 @@ function SearchBar({ toggleSearchMode }) {
   const [weatherData, setWeatherData] = useState([]);
   const [loading, setLoading] = useState(false); // Console-only loading state
 
+  console.log(weatherData)
   console.log(
     "🔍 Info [SearchBar.jsx > useState()] — Initial cities state:",
     cities
@@ -70,7 +71,7 @@ function SearchBar({ toggleSearchMode }) {
 
         try {
           const res = await fetch(
-            `https://api.openweathermap.org/data/3.0/onecall?lat=${city.lat}&lon=${city.lon}&exclude=minutely,hourly,daily,alerts&units=metric&appid=${key}`
+            `https://api.openweathermap.org/data/3.0/onecall?lat=${city.lat}&lon=${city.lon}&exclude=minutely,hourly,alerts&units=metric&appid=${key}`
           );
           if (!res.ok) throw new Error(`Status: ${res.status}`);
 
@@ -89,6 +90,15 @@ function SearchBar({ toggleSearchMode }) {
             condition: data.current.weather[0].main.toLowerCase(),
             weatherIcon: data.current.weather[0].icon,
             time: data.current.dt,
+            uvIndex: data.current.uvi,
+            windSpeed: data.current.wind_speed,
+            humidity: data.current.humidity,
+            visibility: data.current.visibility,
+            feelsLike: data.current.feels_like,
+            pressure: data.current.pressure,
+            sunset: data.current.sunset,
+            sunrise: data.current.sunrise,
+            chanceOfRain: Math.round(data.daily[0].weather.pop * 100),
           };
         } catch (innerErr) {
           console.error(
