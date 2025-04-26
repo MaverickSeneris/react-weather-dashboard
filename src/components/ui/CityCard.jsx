@@ -3,6 +3,7 @@ import React from "react";
 import Card from "./Card";
 import iconMap from "../../utils/weatherIconMapper";
 import timeFormatter from "../../utils/timeFormatter";
+
 const CityCard = ({ weatherData }) => {
   console.log(weatherData);
 
@@ -28,7 +29,9 @@ const CityCard = ({ weatherData }) => {
                     </span>
                     <span className="text-xs font-regular">{city.country}</span>
                   </div>
-                  <div><p className="text-xs">{ city.state}</p></div>
+                  <div>
+                    <p className="text-xs">{city.state}</p>
+                  </div>
                   <div className="text-sm font-semibold text-gray-400">
                     {timeFormatter(city.time)}
                   </div>
