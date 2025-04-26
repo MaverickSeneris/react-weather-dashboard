@@ -102,7 +102,7 @@ function CurrentCity() {
         feelsLike: data.current.feels_like || 0,
         uvIndex: data.current.uvi || 0,
         windSpeed: data.current.wind_speed || 0,
-        chanceOfRain: data.daily?.[0]?.pop ?? 0,
+        chanceOfRain: Math.round(data.daily?.[0]?.pop * 100) ?? 0,
         pressure: data.current.pressure || "",
         visibility: data.current.visibility || "",
         humidity: data.current.humidity || "",
@@ -152,7 +152,7 @@ function CurrentCity() {
     <div className="flex flex-col items-center w-screen px-4 mt-10 pb-2">
       <CurrentCityContainer
         cityName={currentLocation.village}
-        popValue={Math.round(currentWeatherInfo.chanceOfRain * 100)}
+        popValue={currentWeatherInfo.chanceOfRain}
         weatherIcon={iconMap[currentWeatherInfo.weatherIcon]}
         tempValue={Math.floor(currentWeatherInfo.temperature)}
       />

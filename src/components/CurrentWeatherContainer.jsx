@@ -46,7 +46,7 @@ function CurrentWeatherContainer({ currentWeatherInfo, cityName }) {
             <p className="font-semibold text-gray-400">Chance of Rain</p>
           </div>
           <span className="pl-7 font-bold text-gray-300">
-            {Math.floor(currentWeatherInfo.chanceOfRain * 100)}%
+            {currentWeatherInfo.chanceOfRain}%
           </span>
         </div>
         <div className="ml-4">
