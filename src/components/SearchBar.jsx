@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import CityCard from "./ui/CityCard";
 import CancelButton from "./ui/CancelButton";
+import generateUUID from "../utils/uuidGenerator";
 
 // API configuration
 const url = import.meta.env.VITE_OPENWEATHER_ONECALL_API_URL;
@@ -83,6 +84,7 @@ function SearchBar({ toggleSearchMode }) {
           );
 
           return {
+            cityId: generateUUID(),
             name: city.name,
             state: city.state,
             country: city.country,
@@ -98,7 +100,7 @@ function SearchBar({ toggleSearchMode }) {
             pressure: data.current.pressure,
             sunset: data.current.sunset,
             sunrise: data.current.sunrise,
-            chanceOfRain: Math.round(data.daily[0].weather.pop * 100),
+            chanceOfRain: Math.round(data.daily[0].pop * 100),
           };
         } catch (innerErr) {
           console.error(
