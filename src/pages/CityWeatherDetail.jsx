@@ -64,7 +64,7 @@ function CityWeatherDetail() {
       {/* Top current weather display */}
       <CurrentCityContainer
         cityName={cityName}
-        popValue={Math.round(currentWeatherInfo.chanceOfRain * 100)} // convert decimal to percentage
+        popValue={currentWeatherInfo.chanceOfRain}
         weatherIcon={iconMap[currentWeatherInfo.weatherIcon]} // map API icon to local icon
         tempValue={Math.floor(currentWeatherInfo.temperature)} // round temp
       />
@@ -74,7 +74,7 @@ function CityWeatherDetail() {
         <div key={index} className="grid grid-cols-2 mt-2 w-[100%] gap-x-4">
           <Card>
             <CardTitle title={"UV INDEX"} />
-            <ValueContainer value={Math.ceil(info.uvIndex)} />
+            <ValueContainer value={info.uvIndex}/>
           </Card>
           <Card>
             <CardTitle title={"WIND"} />
@@ -91,7 +91,7 @@ function CityWeatherDetail() {
           </Card>
           <Card>
             <CardTitle title={"FEELS LIKE"} />
-            <ValueContainer value={Math.floor(info.feelsLike)} unit={"°"} />
+            <ValueContainer value={info.feelsLike} unit={"°"} />
           </Card>
           <Card>
             <CardTitle title={"CHANCE OF RAIN"} />

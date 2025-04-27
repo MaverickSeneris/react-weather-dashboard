@@ -13,7 +13,7 @@ function CurrentWeatherContainer({ currentWeatherInfo, cityName }) {
       <div className="flex items-center justify-between">
         <CardTitle title={"CURRENT CONDITION"} />
         <Link
-          to={`/city/${cityName || "unknown"}`}
+          to={`/city/${currentWeatherInfo.cityId || "unknown"}`}
           state={{ currentWeatherInfo, cityName }}
           className=" flex justify-center items-center mb-2 bg-blue-500 px-2 py-1 rounded-full hover:bg-blue-600 transition"
         >
@@ -28,7 +28,7 @@ function CurrentWeatherContainer({ currentWeatherInfo, cityName }) {
             <p className="font-semibold text-gray-400">Real Feel</p>
           </div>
           <span className="pl-7 font-bold text-gray-300">
-            {Math.floor(currentWeatherInfo.feelsLike)}&deg;
+            {currentWeatherInfo.feelsLike}&deg;
           </span>
         </div>
         <div className="pb-4 ml-4">

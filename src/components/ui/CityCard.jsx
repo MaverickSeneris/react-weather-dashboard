@@ -3,6 +3,7 @@ import React from "react";
 import Card from "./Card";
 import iconMap from "../../utils/weatherIconMapper";
 import timeFormatter from "../../utils/timeFormatter";
+import { Link } from "react-router";
 
 const CityCard = ({ weatherData }) => {
   console.log(weatherData);
@@ -10,11 +11,13 @@ const CityCard = ({ weatherData }) => {
   return (
     <>
       {weatherData.map((city, index) => (
-        <div key={index} className="mb-4">
+        <div key={city.cityId} className="mb-4">
           <Card>
-            <button
-              key={index}
-              className="flex items-center justify-between w-[100%] h-8"
+            <Link
+              to={`/city/${city.cityId || "unknown"}`}
+              key={city.cityId}
+              state={{ currentWeatherInfo: city, cityName: city.name }}
+              className="flex items-center justify-between w-[100%] h-8 visited:text-white"
             >
               <div className="flex items-center gap-5">
                 <img
@@ -40,9 +43,9 @@ const CityCard = ({ weatherData }) => {
               </div>
 
               <div className="text-3xl self-start font-medium">
-                {Math.round(city.temp)}&deg;
+                {Math.round(city.temperature)}&deg;
               </div>
-            </button>
+            </Link>
           </Card>
         </div>
       ))}

@@ -22,7 +22,7 @@ function App() {
           <Route path="settings" element={<Settings />} />
           <Route path="test" element={<WeatherCityCard />} />
 
-          <Route path="city/:name" element={<CityWeatherDetail />} />
+          <Route path="city/:id" element={<CityWeatherDetail />} />
         </Route>
       </Routes>
     </BrowserRouter>

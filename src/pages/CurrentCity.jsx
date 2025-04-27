@@ -7,6 +7,7 @@ import CurrentCityContainer from "../components/CurrentCityContainer";
 import HourlyContainer from "../components/HourlyContainer";
 import DailyContainer from "../components/DailyContainer";
 import CurrentWeatherContainer from "../components/CurrentWeatherContainer";
+import generateUUID from "../utils/uuidGenerator";
 
 function CurrentCity() {
   const [currentLocation, setCurrentLocation] = useState({
@@ -96,11 +97,12 @@ function CurrentCity() {
 
       // Current weather state
       setCurrentWeatherInfo({
-        temperature: data.current.temp || "",
+        cityId: generateUUID(),
+        temperature:Math.floor(data.current.temp) || "",
         weatherIcon: data.current.weather[0]?.icon || "",
         description: data.current.weather[0]?.description || "",
-        feelsLike: data.current.feels_like || 0,
-        uvIndex: data.current.uvi || 0,
+        feelsLike: Math.floor(data.current.feels_like) || 0,
+        uvIndex: Math.ceil(data.current.uvi) || 0,
         windSpeed: data.current.wind_speed || 0,
         chanceOfRain: Math.round(data.daily?.[0]?.pop * 100) ?? 0,
         pressure: data.current.pressure || "",
@@ -154,7 +156,7 @@ function CurrentCity() {
         cityName={currentLocation.village}
         popValue={currentWeatherInfo.chanceOfRain}
         weatherIcon={iconMap[currentWeatherInfo.weatherIcon]}
-        tempValue={Math.floor(currentWeatherInfo.temperature)}
+        tempValue={currentWeatherInfo.temperature}
       />
       <HourlyContainer hourlyWeatherInfo={hourlyWeatherInfo} />
       <DailyContainer dailyWeatherInfo={dailyWeatherInfo} />

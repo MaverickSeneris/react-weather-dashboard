@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import CityCard from "./ui/CityCard";
 import CancelButton from "./ui/CancelButton";
 import generateUUID from "../utils/uuidGenerator";
+import iconMap from "../utils/weatherIconMapper";
 
 // API configuration
 const url = import.meta.env.VITE_OPENWEATHER_ONECALL_API_URL;
@@ -88,15 +89,15 @@ function SearchBar({ toggleSearchMode }) {
             name: city.name,
             state: city.state,
             country: city.country,
-            temp: data.current.temp,
+            temperature: Math.floor(data.current.temp),
             condition: data.current.weather[0].main.toLowerCase(),
             weatherIcon: data.current.weather[0].icon,
             time: data.current.dt,
-            uvIndex: data.current.uvi,
+            uvIndex: Math.ceil(data.current.uvi),
             windSpeed: data.current.wind_speed,
             humidity: data.current.humidity,
             visibility: data.current.visibility,
-            feelsLike: data.current.feels_like,
+            feelsLike: Math.floor(data.current.feels_like),
             pressure: data.current.pressure,
             sunset: data.current.sunset,
             sunrise: data.current.sunrise,
