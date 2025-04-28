@@ -6,7 +6,7 @@ import sampleIcon from "../assets/weather-icons/00_missing_data.svg";
 import DailyContainer from "./DailyContainer";
 import HourlyContainer from "./HourlyContainer";
 
-function WeatherCityCard({ children }) {
+function CityOverview({ children }) {
   return (
     <div className="flex flex-col items-center w-100 px-4 mt-10 pb-2">
       <CurrentCityContainer
@@ -32,4 +32,4 @@ function WeatherCityCard({ children }) {
   );
 }
 
-export default WeatherCityCard;
+export default CityOverview;
