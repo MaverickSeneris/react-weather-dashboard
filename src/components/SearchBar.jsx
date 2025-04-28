@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import CityCard from "./ui/CityCard";
 import CancelButton from "./ui/CancelButton";
 import generateUUID from "../utils/uuidGenerator";
-import iconMap from "../utils/weatherIconMapper";
+import formatTime from "../utils/timeFormatter";
+import getDayLabel from "../utils/dayLabel";
 
 // API configuration
 const url = import.meta.env.VITE_OPENWEATHER_ONECALL_API_URL;
@@ -15,7 +16,7 @@ function SearchBar({ toggleSearchMode }) {
   const [weatherData, setWeatherData] = useState([]);
   const [loading, setLoading] = useState(false); // Console-only loading state
 
-  console.log(weatherData)
+  console.log(weatherData);
   console.log(
     "🔍 Info [SearchBar.jsx > useState()] — Initial cities state:",
     cities
@@ -73,7 +74,7 @@ function SearchBar({ toggleSearchMode }) {
 
         try {
           const res = await fetch(
-            `https://api.openweathermap.org/data/3.0/onecall?lat=${city.lat}&lon=${city.lon}&exclude=minutely,hourly,alerts&units=metric&appid=${key}`
+            `https://api.openweathermap.org/data/3.0/onecall?lat=${city.lat}&lon=${city.lon}&exclude=minutely,alerts&units=metric&appid=${key}`
           );
           if (!res.ok) throw new Error(`Status: ${res.status}`);
 
@@ -84,11 +85,31 @@ function SearchBar({ toggleSearchMode }) {
             data
           );
 
+          const hourlyData = data.hourly
+            .filter((_, i) => i >= 2 && (i - 2) % 3 === 0)
+            .slice(0, 3)
+            .map((d) => ({
+              time: formatTime(d.dt),
+              temperature: d.temp,
+              icon: d.weather?.[0]?.icon,
+            }));
+
+          const dailyData = data.daily.slice(0, 7).map((d, i) => ({
+            day: getDayLabel(d.dt, i),
+            icon: d.weather[0]?.icon || "",
+            description: d.weather[0]?.description || "",
+            tempHigh: Math.round(d.temp.max),
+            tempLow: Math.round(d.temp.min),
+          }));
+
           return {
             cityId: generateUUID(),
+            // City data:
             name: city.name,
             state: city.state,
             country: city.country,
+
+            // Current Weather Data
             temperature: Math.floor(data.current.temp),
             condition: data.current.weather[0].main.toLowerCase(),
             weatherIcon: data.current.weather[0].icon,
@@ -102,6 +123,16 @@ function SearchBar({ toggleSearchMode }) {
             sunset: data.current.sunset,
             sunrise: data.current.sunrise,
             chanceOfRain: Math.round(data.daily[0].pop * 100),
+
+            hourlyWeatherInfo: {
+              hourlyTime: hourlyData.map((i) => i.time),
+              hourlyTemperature: hourlyData.map((i) => i.temperature),
+              hourlyWeatherIcon: hourlyData.map((i) => i.icon),
+            },
+            
+            //TODO MON, 04/28/25: RENDER DAILY(7-day forcast) WEATHER INFORMATION
+            dailyWeatherInfo: dailyData
+
           };
         } catch (innerErr) {
           console.error(
@@ -153,7 +184,7 @@ function SearchBar({ toggleSearchMode }) {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-        <CancelButton nameSymbol={"Cancel"} toggler={toggleSearchMode}/>
+        <CancelButton nameSymbol={"Cancel"} toggler={toggleSearchMode} />
       </div>
 
       <div>

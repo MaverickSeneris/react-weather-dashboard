@@ -1,33 +1,40 @@
 import React from "react";
 import CardTitle from "./ui/CardTitle";
-import Card from "./ui/Card";
 import CurrentCityContainer from "./CurrentCityContainer";
-import sampleIcon from "../assets/weather-icons/00_missing_data.svg";
 import DailyContainer from "./DailyContainer";
 import HourlyContainer from "./HourlyContainer";
+import { useLocation, useNavigate } from "react-router";
+import CurrentWeatherContainer from "./CurrentWeatherContainer";
 
 function CityOverview({ children }) {
+  const { state } = useLocation();
+  const { currentWeatherInfo, cityName } = state || {};
+  console.log(currentWeatherInfo.dailyWeatherInfo);
   return (
     <div className="flex flex-col items-center w-100 px-4 mt-10 pb-2">
       <CurrentCityContainer
-        cityName={"City Here"}
-        popValue={0}
-        weatherIcon={sampleIcon}
-        tempValue={0}
+        cityName={cityName}
+        popValue={currentWeatherInfo.chanceOfRain}
+        weatherIcon={currentWeatherInfo.weatherIcon}
+        tempValue={currentWeatherInfo.temperature}
       />
-      <Card>
-        <CardTitle title={"TODAY'S FORECAST"} />
-        <HourlyContainer
-          hourlyWeatherInfo={{ time: [], icon: [], temperature: [] }}
-        />
-      </Card>
-      <Card>
-        <CardTitle title={"7-DAY FORECAST"} />
-        <DailyContainer />
-      </Card>
-      <Card>
-        <CardTitle title={"CURRENT CONDITION"} />
-      </Card>
+
+      <CardTitle title={"TODAY'S FORECAST"} />
+      <HourlyContainer
+        hourlyWeatherInfo={{
+          time: currentWeatherInfo.hourlyWeatherInfo.hourlyTime,
+          icon: currentWeatherInfo.hourlyWeatherInfo.hourlyWeatherIcon,
+          temperature: currentWeatherInfo.hourlyWeatherInfo.hourlyTemperature,
+        }}
+      />
+
+      <CardTitle title={"7-DAY FORECAST"} />
+      <DailyContainer dailyWeatherInfo={currentWeatherInfo.dailyWeatherInfo} />
+
+      <CurrentWeatherContainer
+        currentWeatherInfo={currentWeatherInfo}
+        cityName={cityName}
+      />
     </div>
   );
 }

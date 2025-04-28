@@ -14,7 +14,12 @@ const CityCard = ({ weatherData }) => {
         <div key={city.cityId} className="mb-4">
           <Card>
             <Link
-              to={`/city/${city.cityId || "unknown"}`}
+              // Uncomment to render CiteWeatherDetail page:
+              // to={`/city/${city.cityId || "unknown"}`}
+
+              // Uncomment to render CityOverview (! under construction) page:
+              to={`/test/${city.cityId || "unknown"}`} //TODO MON, 04/28/25: RENDER ALL WEATHER INFORMATION
+
               key={city.cityId}
               state={{ currentWeatherInfo: city, cityName: city.name }}
               className="flex items-center justify-between w-[100%] h-8 visited:text-white"
