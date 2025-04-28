@@ -1,0 +1,75 @@
+{
+  "cityId": "123e4567-e89b-12d3-a456-426614174000",
+  "name": "Manila",
+  "state": "NCR",
+  "country": "PH",
+  "temperature": 30,
+  "condition": "clear",
+  "weatherIcon": "01d",
+  "time": 1714356000,
+  "uvIndex": 7,
+  "windSpeed": 5,
+  "humidity": 70,
+  "visibility": 10000,
+  "feelsLike": 33,
+  "pressure": 1012,
+  "sunset": 1714399200,
+  "sunrise": 1714342800,
+  "chanceOfRain": 10,
+  "hourlyWeatherInfo": {
+    "hourlyTime": [1714359600, 1714363200, 1714366800],
+    "hourlyTemperature": [30, 29, 28],
+    "hourlyWeatherIcon": ["01d", "02d", "03d"]
+  },
+  "dailyWeatherInfo": [
+    {
+      "day": "Today",
+      "icon": "01d",
+      "description": "clear sky",
+      "tempHigh": 32,
+      "tempLow": 25
+    },
+    {
+      "day": "Tue",
+      "icon": "02d",
+      "description": "few clouds",
+      "tempHigh": 31,
+      "tempLow": 26
+    },
+    {
+      "day": "Wed",
+      "icon": "03d",
+      "description": "scattered clouds",
+      "tempHigh": 30,
+      "tempLow": 25
+    },
+    {
+      "day": "Thu",
+      "icon": "04d",
+      "description": "broken clouds",
+      "tempHigh": 29,
+      "tempLow": 24
+    },
+    {
+      "day": "Fri",
+      "icon": "09d",
+      "description": "shower rain",
+      "tempHigh": 28,
+      "tempLow": 24
+    },
+    {
+      "day": "Sat",
+      "icon": "10d",
+      "description": "rain",
+      "tempHigh": 27,
+      "tempLow": 23
+    },
+    {
+      "day": "Sun",
+      "icon": "11d",
+      "description": "thunderstorm",
+      "tempHigh": 26,
+      "tempLow": 22
+    }
+  ]
+}
