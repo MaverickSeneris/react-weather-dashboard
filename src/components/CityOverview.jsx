@@ -28,7 +28,6 @@ function CityOverview({ children }) {
         tempValue={currentWeatherInfo.temperature}
       />
 
-      <CardTitle title={"TODAY'S FORECAST"} />
       <HourlyContainer
         hourlyWeatherInfo={{
           time: currentWeatherInfo.hourlyWeatherInfo.hourlyTime,
@@ -37,7 +36,6 @@ function CityOverview({ children }) {
         }}
       />
 
-      <CardTitle title={"7-DAY FORECAST"} />
       <DailyContainer dailyWeatherInfo={currentWeatherInfo.dailyWeatherInfo} />
 
       <CurrentWeatherContainer
