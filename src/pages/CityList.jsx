@@ -2,10 +2,10 @@ import React, { useState } from "react";
 import SearchBar from "../components/SearchBar";
 import Header from "../components/ui/Header";
 import PageContainer from "../components/ui/PageContainer";
-import currentWeatherData from "../../src/mockWeatherData.json";
 import mockCities from "../mockCities";
 import Card from "../components/ui/Card";
 import formatTime from "../utils/timeFormatter";
+import { IoCloseSharp } from "react-icons/io5";
 
 function CityList() {
   const [searchMode, setSearchMode] = useState(false);
@@ -93,9 +93,9 @@ function CityList() {
               {draggedId === city.cityId && swiped && (
                 <button
                   onClick={() => handleDelete(city.cityId)}
-                  className="ml-4 flex-shrink-0 bg-red-500 text-white px-4 py-2 rounded-[15px] h-[100px] w-[20%]"
+                  className="ml-4 flex-shrink-0 p-5 bg-[#d53d3d] hover:bg-red-400 active:bg-red-400 focus:bg-red-400 text-white rounded-[15px] h-[100px] w-[20%]"
                 >
-                  ✖
+                  <IoCloseSharp size={"35px"} />
                 </button>
               )}
             </div>
