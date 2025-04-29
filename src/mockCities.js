@@ -1,3 +1,6 @@
+import formatTime from "./utils/timeFormatter";
+
+
 const mockCities = [
   {
     cityId: "city-001",
@@ -18,19 +21,65 @@ const mockCities = [
     sunrise: 1714342800,
     chanceOfRain: 10,
     hourlyWeatherInfo: {
-      hourlyTime: [1714359600, 1714363200, 1714366800],
+      hourlyTime: [
+        formatTime(1714359600),
+        formatTime(1714363200),
+        formatTime(1714366800),
+      ],
       hourlyTemperature: [30, 29, 28],
-      hourlyWeatherIcon: ["01d", "02d", "03d"]
+      hourlyWeatherIcon: ["01d", "02d", "03d"],
     },
     dailyWeatherInfo: [
-      { day: "Today", icon: "01d", description: "clear sky", tempHigh: 32, tempLow: 25 },
-      { day: "Tue", icon: "02d", description: "few clouds", tempHigh: 31, tempLow: 26 },
-      { day: "Wed", icon: "03d", description: "scattered clouds", tempHigh: 30, tempLow: 25 },
-      { day: "Thu", icon: "04d", description: "broken clouds", tempHigh: 29, tempLow: 24 },
-      { day: "Fri", icon: "09d", description: "shower rain", tempHigh: 28, tempLow: 24 },
-      { day: "Sat", icon: "10d", description: "rain", tempHigh: 27, tempLow: 23 },
-      { day: "Sun", icon: "11d", description: "thunderstorm", tempHigh: 26, tempLow: 22 }
-    ]
+      {
+        day: "Today",
+        icon: "01d",
+        description: "clear sky",
+        tempHigh: 32,
+        tempLow: 25,
+      },
+      {
+        day: "Tue",
+        icon: "02d",
+        description: "few clouds",
+        tempHigh: 31,
+        tempLow: 26,
+      },
+      {
+        day: "Wed",
+        icon: "03d",
+        description: "scattered clouds",
+        tempHigh: 30,
+        tempLow: 25,
+      },
+      {
+        day: "Thu",
+        icon: "04d",
+        description: "broken clouds",
+        tempHigh: 29,
+        tempLow: 24,
+      },
+      {
+        day: "Fri",
+        icon: "09d",
+        description: "shower rain",
+        tempHigh: 28,
+        tempLow: 24,
+      },
+      {
+        day: "Sat",
+        icon: "10d",
+        description: "rain",
+        tempHigh: 27,
+        tempLow: 23,
+      },
+      {
+        day: "Sun",
+        icon: "11d",
+        description: "thunderstorm",
+        tempHigh: 26,
+        tempLow: 22,
+      },
+    ],
   },
   {
     cityId: "city-002",
@@ -51,19 +100,65 @@ const mockCities = [
     sunrise: 1714341000,
     chanceOfRain: 20,
     hourlyWeatherInfo: {
-      hourlyTime: [1714359600, 1714363200, 1714366800],
+      hourlyTime: [
+        formatTime(1714359600),
+        formatTime(1714363200),
+        formatTime(1714366800),
+      ],
       hourlyTemperature: [22, 21, 20],
-      hourlyWeatherIcon: ["03d", "04d", "04d"]
+      hourlyWeatherIcon: ["03d", "04d", "04d"],
     },
     dailyWeatherInfo: [
-      { day: "Today", icon: "03d", description: "scattered clouds", tempHigh: 24, tempLow: 18 },
-      { day: "Tue", icon: "04d", description: "broken clouds", tempHigh: 23, tempLow: 19 },
-      { day: "Wed", icon: "10d", description: "rain", tempHigh: 22, tempLow: 18 },
-      { day: "Thu", icon: "10d", description: "rain", tempHigh: 21, tempLow: 17 },
-      { day: "Fri", icon: "03d", description: "scattered clouds", tempHigh: 22, tempLow: 18 },
-      { day: "Sat", icon: "01d", description: "clear sky", tempHigh: 24, tempLow: 19 },
-      { day: "Sun", icon: "01d", description: "clear sky", tempHigh: 25, tempLow: 20 }
-    ]
+      {
+        day: "Today",
+        icon: "03d",
+        description: "scattered clouds",
+        tempHigh: 24,
+        tempLow: 18,
+      },
+      {
+        day: "Tue",
+        icon: "04d",
+        description: "broken clouds",
+        tempHigh: 23,
+        tempLow: 19,
+      },
+      {
+        day: "Wed",
+        icon: "10d",
+        description: "rain",
+        tempHigh: 22,
+        tempLow: 18,
+      },
+      {
+        day: "Thu",
+        icon: "10d",
+        description: "rain",
+        tempHigh: 21,
+        tempLow: 17,
+      },
+      {
+        day: "Fri",
+        icon: "03d",
+        description: "scattered clouds",
+        tempHigh: 22,
+        tempLow: 18,
+      },
+      {
+        day: "Sat",
+        icon: "01d",
+        description: "clear sky",
+        tempHigh: 24,
+        tempLow: 19,
+      },
+      {
+        day: "Sun",
+        icon: "01d",
+        description: "clear sky",
+        tempHigh: 25,
+        tempLow: 20,
+      },
+    ],
   },
   {
     cityId: "city-003",
@@ -84,19 +179,65 @@ const mockCities = [
     sunrise: 1714338000,
     chanceOfRain: 70,
     hourlyWeatherInfo: {
-      hourlyTime: [1714359600, 1714363200, 1714366800],
+      hourlyTime: [
+        formatTime(1714359600),
+        formatTime(1714363200),
+        formatTime(1714366800),
+      ],
       hourlyTemperature: [18, 17, 16],
-      hourlyWeatherIcon: ["09d", "10d", "10d"]
+      hourlyWeatherIcon: ["09d", "10d", "10d"],
     },
     dailyWeatherInfo: [
-      { day: "Today", icon: "09d", description: "shower rain", tempHigh: 19, tempLow: 14 },
-      { day: "Tue", icon: "10d", description: "rain", tempHigh: 18, tempLow: 13 },
-      { day: "Wed", icon: "10d", description: "rain", tempHigh: 17, tempLow: 12 },
-      { day: "Thu", icon: "04d", description: "broken clouds", tempHigh: 18, tempLow: 13 },
-      { day: "Fri", icon: "01d", description: "clear sky", tempHigh: 20, tempLow: 14 },
-      { day: "Sat", icon: "01d", description: "clear sky", tempHigh: 22, tempLow: 15 },
-      { day: "Sun", icon: "02d", description: "few clouds", tempHigh: 23, tempLow: 16 }
-    ]
+      {
+        day: "Today",
+        icon: "09d",
+        description: "shower rain",
+        tempHigh: 19,
+        tempLow: 14,
+      },
+      {
+        day: "Tue",
+        icon: "10d",
+        description: "rain",
+        tempHigh: 18,
+        tempLow: 13,
+      },
+      {
+        day: "Wed",
+        icon: "10d",
+        description: "rain",
+        tempHigh: 17,
+        tempLow: 12,
+      },
+      {
+        day: "Thu",
+        icon: "04d",
+        description: "broken clouds",
+        tempHigh: 18,
+        tempLow: 13,
+      },
+      {
+        day: "Fri",
+        icon: "01d",
+        description: "clear sky",
+        tempHigh: 20,
+        tempLow: 14,
+      },
+      {
+        day: "Sat",
+        icon: "01d",
+        description: "clear sky",
+        tempHigh: 22,
+        tempLow: 15,
+      },
+      {
+        day: "Sun",
+        icon: "02d",
+        description: "few clouds",
+        tempHigh: 23,
+        tempLow: 16,
+      },
+    ],
   },
   {
     cityId: "city-004",
@@ -117,19 +258,65 @@ const mockCities = [
     sunrise: 1714344000,
     chanceOfRain: 15,
     hourlyWeatherInfo: {
-      hourlyTime: [1714359600, 1714363200, 1714366800],
+      hourlyTime: [
+        formatTime(1714359600),
+        formatTime(1714363200),
+        formatTime(1714366800),
+      ],
       hourlyTemperature: [16, 15, 14],
-      hourlyWeatherIcon: ["02d", "03d", "04d"]
+      hourlyWeatherIcon: ["02d", "03d", "04d"],
     },
     dailyWeatherInfo: [
-      { day: "Today", icon: "02d", description: "few clouds", tempHigh: 18, tempLow: 12 },
-      { day: "Tue", icon: "03d", description: "scattered clouds", tempHigh: 17, tempLow: 13 },
-      { day: "Wed", icon: "04d", description: "broken clouds", tempHigh: 16, tempLow: 12 },
-      { day: "Thu", icon: "09d", description: "shower rain", tempHigh: 15, tempLow: 11 },
-      { day: "Fri", icon: "10d", description: "rain", tempHigh: 14, tempLow: 10 },
-      { day: "Sat", icon: "01d", description: "clear sky", tempHigh: 17, tempLow: 12 },
-      { day: "Sun", icon: "02d", description: "few clouds", tempHigh: 18, tempLow: 13 }
-    ]
+      {
+        day: "Today",
+        icon: "02d",
+        description: "few clouds",
+        tempHigh: 18,
+        tempLow: 12,
+      },
+      {
+        day: "Tue",
+        icon: "03d",
+        description: "scattered clouds",
+        tempHigh: 17,
+        tempLow: 13,
+      },
+      {
+        day: "Wed",
+        icon: "04d",
+        description: "broken clouds",
+        tempHigh: 16,
+        tempLow: 12,
+      },
+      {
+        day: "Thu",
+        icon: "09d",
+        description: "shower rain",
+        tempHigh: 15,
+        tempLow: 11,
+      },
+      {
+        day: "Fri",
+        icon: "10d",
+        description: "rain",
+        tempHigh: 14,
+        tempLow: 10,
+      },
+      {
+        day: "Sat",
+        icon: "01d",
+        description: "clear sky",
+        tempHigh: 17,
+        tempLow: 12,
+      },
+      {
+        day: "Sun",
+        icon: "02d",
+        description: "few clouds",
+        tempHigh: 18,
+        tempLow: 13,
+      },
+    ],
   },
   {
     cityId: "city-005",
@@ -150,20 +337,66 @@ const mockCities = [
     sunrise: 1714347000,
     chanceOfRain: 5,
     hourlyWeatherInfo: {
-      hourlyTime: [1714359600, 1714363200, 1714366800],
+      hourlyTime: [
+        formatTime(1714359600),
+        formatTime(1714363200),
+        formatTime(1714366800),
+      ],
       hourlyTemperature: [24, 23, 22],
-      hourlyWeatherIcon: ["01d", "01d", "01d"]
+      hourlyWeatherIcon: ["01d", "01d", "01d"],
     },
     dailyWeatherInfo: [
-      { day: "Today", icon: "01d", description: "clear sky", tempHigh: 26, tempLow: 20 },
-      { day: "Tue", icon: "01d", description: "clear sky", tempHigh: 27, tempLow: 21 },
-      { day: "Wed", icon: "02d", description: "few clouds", tempHigh: 28, tempLow: 22 },
-      { day: "Thu", icon: "02d", description: "few clouds", tempHigh: 29, tempLow: 23 },
-      { day: "Fri", icon: "03d", description: "scattered clouds", tempHigh: 28, tempLow: 22 },
-      { day: "Sat", icon: "01d", description: "clear sky", tempHigh: 27, tempLow: 21 },
-      { day: "Sun", icon: "01d", description: "clear sky", tempHigh: 26, tempLow: 20 }
-    ]
-  }
+      {
+        day: "Today",
+        icon: "01d",
+        description: "clear sky",
+        tempHigh: 26,
+        tempLow: 20,
+      },
+      {
+        day: "Tue",
+        icon: "01d",
+        description: "clear sky",
+        tempHigh: 27,
+        tempLow: 21,
+      },
+      {
+        day: "Wed",
+        icon: "02d",
+        description: "few clouds",
+        tempHigh: 28,
+        tempLow: 22,
+      },
+      {
+        day: "Thu",
+        icon: "02d",
+        description: "few clouds",
+        tempHigh: 29,
+        tempLow: 23,
+      },
+      {
+        day: "Fri",
+        icon: "03d",
+        description: "scattered clouds",
+        tempHigh: 28,
+        tempLow: 22,
+      },
+      {
+        day: "Sat",
+        icon: "01d",
+        description: "clear sky",
+        tempHigh: 27,
+        tempLow: 21,
+      },
+      {
+        day: "Sun",
+        icon: "01d",
+        description: "clear sky",
+        tempHigh: 26,
+        tempLow: 20,
+      },
+    ],
+  },
 ];
 
 export default mockCities;

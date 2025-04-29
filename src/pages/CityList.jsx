@@ -6,6 +6,7 @@ import mockCities from "../mockCities";
 import Card from "../components/ui/Card";
 import formatTime from "../utils/timeFormatter";
 import { IoCloseSharp } from "react-icons/io5";
+import { Link } from "react-router";
 
 function CityList() {
   const [searchMode, setSearchMode] = useState(false);
@@ -74,12 +75,21 @@ function CityList() {
               >
                 <Card>
                   <div className="flex justify-between items-center">
-                    <div className="flex flex-col">
+                    <Link
+                      to={`/test/${city.cityId || "unknown"}`} //TODO MON, 04/28/25: RENDER ALL WEATHER INFORMATION
+                      key={city.cityId}
+                      state={{
+                        currentWeatherInfo: city,
+                        cityName: city.name,
+                      }}
+                      className="flex items-center justify-between w-[100%] h-8 visited:text-white"
+                      className="flex flex-col"
+                    >
                       <h2 className="font-bold text-2xl">{city.name}</h2>
                       <span className="text-sm font-bold text-gray-400">
                         {formatTime(city.time)}
                       </span>
-                    </div>
+                    </Link>
                     <div>
                       <span className="text-5xl font-medium">
                         {city.temperature}&deg;
