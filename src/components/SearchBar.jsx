@@ -130,10 +130,9 @@ function SearchBar({ toggleSearchMode }) {
               hourlyTemperature: hourlyData.map((i) => i.temperature),
               hourlyWeatherIcon: hourlyData.map((i) => i.icon),
             },
-            
-            //TODO MON, 04/28/25: RENDER DAILY(7-day forcast) WEATHER INFORMATION
-            dailyWeatherInfo: dailyData
 
+            //TODO MON, 04/28/25: RENDER DAILY(7-day forcast) WEATHER INFORMATION
+            dailyWeatherInfo: dailyData,
           };
         } catch (innerErr) {
           console.error(
@@ -189,7 +188,8 @@ function SearchBar({ toggleSearchMode }) {
       </div>
 
       <div>
-        <CityCard weatherData={mockCities} />
+        {/* Please replace weatherdata when in production*/}
+        <CityCard weatherData={weatherData} />
       </div>
     </div>
   );
