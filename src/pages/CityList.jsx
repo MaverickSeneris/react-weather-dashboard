@@ -11,16 +11,26 @@ function CityList() {
   const [searchMode, setSearchMode] = useState(false);
   const [favoriteCities, setFavoriteCities] = useState(mockCities);
 
-  console.log(favoriteCities);
+  // Track the city being dragged/swiped
+  const [draggedId, setDraggedId] = useState(null);
+  const [swiped, setSwiped] = useState(false);
 
   function toggleSearchMode() {
     setSearchMode((prevMode) => !prevMode);
   }
 
+  function handleDelete(id) {
+    setFavoriteCities(favoriteCities.filter((city) => city.cityId !== id));
+    setDraggedId(null);
+    setSwiped(false);
+  }
+
   return (
     <PageContainer>
+      {/* Header */}
       {!searchMode && <Header title={"My Cities"} />}
 
+      {/* Search */}
       {searchMode ? (
         <SearchBar toggleSearchMode={toggleSearchMode} />
       ) : (
@@ -31,14 +41,40 @@ function CityList() {
           Search City
         </div>
       )}
+
+      {/* City Cards */}
       {!searchMode && (
         <div className="mt-6">
-          {favoriteCities.map((city) => {
-            return (
-              <div className="mb-4">
+          {favoriteCities.map((city) => (
+            <div
+              key={city.cityId}
+              className="relative flex items-center h-[100%]" // Parent flex container
+              onTouchStart={() => {
+                setDraggedId(city.cityId);
+              }}
+              onTouchMove={(e) => {
+                const touchX = e.touches[0].clientX;
+                if (touchX < 150) {
+                  setSwiped(true); // activate squeezed look
+                }
+              }}
+              onTouchEnd={() => {
+                // optional: reset swipe if you want automatic return
+                // setDraggedId(null);
+                // setSwiped(false);
+              }}
+            >
+              {/* Card */}
+              <div
+                className={`transition-all duration-400  ${
+                  draggedId === city.cityId && swiped
+                    ? "flex-grow-[0.95]" // squeezed when swiped
+                    : "flex-grow"
+                }`}
+              >
                 <Card>
                   <div className="flex justify-between items-center">
-                    <div className="flex flex-col ">
+                    <div className="flex flex-col">
                       <h2 className="font-bold text-2xl">{city.name}</h2>
                       <span className="text-sm font-bold text-gray-400">
                         {formatTime(city.time)}
@@ -52,8 +88,18 @@ function CityList() {
                   </div>
                 </Card>
               </div>
-            );
-          })}
+
+              {/* Delete Button - only if swiped this card */}
+              {draggedId === city.cityId && swiped && (
+                <button
+                  onClick={() => handleDelete(city.cityId)}
+                  className="ml-4 flex-shrink-0 bg-red-500 text-white px-4 py-2 rounded-[15px] h-[100px] w-[20%]"
+                >
+                  ✖
+                </button>
+              )}
+            </div>
+          ))}
         </div>
       )}
     </PageContainer>
