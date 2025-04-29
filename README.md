@@ -1,12 +1,85 @@
-# React + Vite
+Absolutely! Here's a solid `README.md` template you can use and customize for your **React Weather Dashboard**:
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+---
 
-Currently, two official plugins are available:
+```markdown
+# 🌦️ React Weather Dashboard
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+A sleek and minimal weather dashboard built with React and Vite. Search for any city and get real-time weather updates with a clean, responsive UI.
 
-## Expanding the ESLint configuration
+![screenshot](screenshot.png) <!-- Optional: add a screenshot -->
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## 🚀 Features
+
+- 🌤️ Current weather data (temperature, conditions, etc.)
+- 📍 Search by city
+- 🌡️ Feels like, humidity, wind speed, and more
+- 📱 Responsive design (works on mobile and desktop)
+- ⚡ Fast performance using Vite
+
+## 🛠️ Tech Stack
+
+- [React](https://reactjs.org/)
+- [Vite](https://vitejs.dev/)
+- [OpenWeatherMap API](https://openweathermap.org/api)
+- [Axios](https://axios-http.com/) for HTTP requests
+- [Tailwind CSS](https://tailwindcss.com/) (if you're using it)
+
+## 🧑‍💻 Installation
+
+1. **Clone the repo:**
+
+   ```bash
+   git clone https://github.com/MaverickSeneris/react-weather-dashboard.git
+   cd react-weather-dashboard
+   ```
+
+2. **Install dependencies:**
+
+   ```bash
+   npm install
+   ```
+
+3. **Add your API key:**
+
+   Create a `.env` file in the root folder:
+
+   ```
+   VITE_WEATHER_API_KEY=your_api_key_here
+   ```
+
+   Replace `your_api_key_here` with your actual key from [OpenWeatherMap](https://openweathermap.org/api).
+
+4. **Run the app:**
+
+   ```bash
+   npm run dev
+   ```
+
+## 📁 Folder Structure
+
+```
+src/
+├── components/
+│   └── WeatherCard.jsx
+├── api/
+│   └── weather.js
+├── App.jsx
+├── main.jsx
+```
+
+## 🧪 TODO
+
+- [ ] Add forecast data (hourly/daily)
+- [ ] Add loading and error states
+- [ ] Add theme toggle (dark/light)
+- [ ] Add animations or transitions
+
+## 🧙 Author
+
+- **Maverick Seneris**  
+  [@MaverickSeneris](https://github.com/MaverickSeneris)
+
+## 📜 License
+
+MIT – feel free to fork, modify, and build something great.
