@@ -1,8 +1,4 @@
-Absolutely! Here's a solid `README.md` template you can use and customize for your **React Weather Dashboard**:
 
----
-
-```markdown
 # 🌦️ React Weather Dashboard
 
 A sleek and minimal weather dashboard built with React and Vite. Search for any city and get real-time weather updates with a clean, responsive UI.
