@@ -57,7 +57,7 @@ function CityList() {
               tempHigh: Math.round(d.temp.max),
               tempLow: Math.round(d.temp.min),
             }));
-        
+
             const updatedCity = {
               ...city,
               temperature: Math.floor(data.current.temp),
@@ -96,7 +96,10 @@ function CityList() {
     };
 
     fetchLiveWeatherData();
-  }, [searchMode]);
+    const interval = setInterval(fetchLiveWeatherData, 5 * 60 * 1000); // every 5 mins
+
+    return () => clearInterval(interval);
+  }, []);
 
   function toggleSearchMode() {
     setSearchMode((prevMode) => !prevMode);
