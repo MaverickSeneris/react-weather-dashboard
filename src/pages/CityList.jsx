@@ -99,7 +99,7 @@ function CityList() {
     const interval = setInterval(fetchLiveWeatherData, 5 * 60 * 1000); // every 5 mins
 
     return () => clearInterval(interval);
-  }, []);
+  }, [searchMode]);
 
   function toggleSearchMode() {
     setSearchMode((prevMode) => !prevMode);
