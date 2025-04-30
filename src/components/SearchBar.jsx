@@ -10,7 +10,7 @@ import mockCities from "../mockCities";
 const url = import.meta.env.VITE_OPENWEATHER_ONECALL_API_URL;
 const key = import.meta.env.VITE_OPENWEATHER_API_KEY;
 
-function SearchBar({ toggleSearchMode }) {
+function SearchBar({ toggleSearchMode, handleAddCity }) {
   const [cities, setCities] = useState({});
   const [searchMode, setSearchMode] = useState(false);
   const [search, setSearch] = useState("");
@@ -109,6 +109,8 @@ function SearchBar({ toggleSearchMode }) {
             name: city.name,
             state: city.state,
             country: city.country,
+            lat: city.lat,
+            lon: city.lon,
 
             // Current Weather Data
             temperature: Math.floor(data.current.temp),
@@ -189,7 +191,7 @@ function SearchBar({ toggleSearchMode }) {
 
       <div>
         {/* Please replace weatherdata when in production*/}
-        <CityCard weatherData={weatherData} />
+        <CityCard weatherData={weatherData}/>
       </div>
     </div>
   );

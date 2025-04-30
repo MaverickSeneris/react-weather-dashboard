@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import SearchBar from "../components/SearchBar";
 import Header from "../components/ui/Header";
 import PageContainer from "../components/ui/PageContainer";
@@ -10,21 +10,28 @@ import { Link } from "react-router";
 
 function CityList() {
   const [searchMode, setSearchMode] = useState(false);
-  const [favoriteCities, setFavoriteCities] = useState(mockCities);
+  const [favoriteCities, setFavoriteCities] = useState([]);
 
   // Track the city being dragged/swiped
   const [draggedId, setDraggedId] = useState(null);
   const [swiped, setSwiped] = useState(false);
 
+  useEffect(() => {
+    const stored = JSON.parse(localStorage.getItem("savedCities")) || [];
+    setFavoriteCities(stored);
+  }, [searchMode]);
+
   function toggleSearchMode() {
     setSearchMode((prevMode) => !prevMode);
   }
+function handleDelete(id) {
+  const updated = favoriteCities.filter((city) => city.cityId !== id);
+  setFavoriteCities(updated);
+  localStorage.setItem("savedCities", JSON.stringify(updated)); // \u2190 update storage
+  setDraggedId(null);
+  setSwiped(false);
+}
 
-  function handleDelete(id) {
-    setFavoriteCities(favoriteCities.filter((city) => city.cityId !== id));
-    setDraggedId(null);
-    setSwiped(false);
-  }
 
   return (
     <PageContainer>
@@ -43,7 +50,7 @@ function CityList() {
         </div>
       )}
 
-      {/* City Cards */}
+      {/* Favorite City Cards */}
       {!searchMode && (
         <div className="mt-6">
           {favoriteCities.map((city) => (
@@ -74,16 +81,15 @@ function CityList() {
                 }`}
               >
                 <Card>
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between">
                     <Link
-                      to={`/test/${city.cityId || "unknown"}`} //TODO MON, 04/28/25: RENDER ALL WEATHER INFORMATION
+                      to={`/test/${city.cityId || "unknown"}`}
                       key={city.cityId}
                       state={{
                         currentWeatherInfo: city,
                         cityName: city.name,
                       }}
-                      className="flex items-center justify-between w-[100%] h-8 visited:text-white"
-                      className="flex flex-col"
+                      className="flex flex-col justify-between h-8 visited:text-white"
                     >
                       <h2 className="font-bold text-2xl">{city.name}</h2>
                       <span className="text-sm font-bold text-gray-400">
@@ -91,7 +97,7 @@ function CityList() {
                       </span>
                     </Link>
                     <div>
-                      <span className="text-5xl font-medium">
+                      <span className="text-5xl font-regular">
                         {city.temperature}&deg;
                       </span>
                     </div>
