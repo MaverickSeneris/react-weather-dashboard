@@ -79,7 +79,7 @@ function CityList() {
                 hourlyWeatherIcon: hourlyData.map((i) => i.icon),
               },
 
-              dailyWeatherInfo: dailyData, // 🔥 ADD THIS
+              dailyWeatherInfo: dailyData, 
             };
 
             console.log(`Fetched weather data for ${name}:`, updatedCity);
@@ -96,9 +96,9 @@ function CityList() {
     };
 
     fetchLiveWeatherData();
-    const interval = setInterval(fetchLiveWeatherData, 30 * 60 * 1000); // every 30 mins
+    // const interval = setInterval(fetchLiveWeatherData, 30 * 60 * 1000); // every 30 mins
 
-    return () => clearInterval(interval);
+    // return () => clearInterval(interval);
   }, [searchMode]);
 
   function toggleSearchMode() {
