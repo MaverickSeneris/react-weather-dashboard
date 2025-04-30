@@ -19,11 +19,6 @@ const CityCard = ({ weatherData }) => {
       name: city.name,
       lat: city.lat,
       lon: city.lon,
-      country: city.country,
-      state: city.state,
-      temperature: city.temperature,
-      time: city.time,
-      weatherIcon: city.weatherIcon,
     };
 
     const saved = JSON.parse(localStorage.getItem("savedCities")) || [];
