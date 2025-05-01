@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-
+import Header from "./ui/Header";
 
 const overlayOptions = ["wind", "temp", "rain", "clouds"];
 
@@ -61,37 +61,20 @@ const WindyMapEmbed = () => {
 
   return (
     <div className="flex flex-col gap-4">
+      <Header title={locationName} />
       {/* Location Name */}
-      <div className="text-center">
+      {/* <div className="text-center">
         {locationName && <h2 className="font-bold text-3xl">{locationName}</h2>}
-      </div>
-
-      {/* Overlay Buttons */}
-
-      <div className="flex flex-wrap items-center justify-center gap-2">
-        {overlayOptions.map((option) => (
-          <button
-            key={option}
-            onClick={() => handleOverlayChange(option)}
-            className={`px-4 py-1 rounded-full text-sm font-semibold border ${
-              overlay === option
-                ? "bg-green-500 text-white border-green-500"
-                : "bg-gray-800 text-white border-gray-500"
-            }`}
-          >
-            {option}
-          </button>
-        ))}
-      </div>
+      </div> */}
 
       {/* Iframe with Loading */}
       <div
         className="relative w-full overflow-hidden rounded-[15px] shadow-md"
-        style={{ height: `${windowHeight - 250}px` }}
+        style={{ height: `${windowHeight - 200}px` }}
       >
         {error && <p className="text-red-500">{error}</p>}
         {loading && (
-          <div className="absolute inset-0 z-10 bg-black bg-opacity-60 flex items-center justify-center">
+          <div className="absolute inset-0 z-10 bg-gray-800 bg-opacity-60 flex items-center justify-center">
             <p className="text-white font-semibold text-lg">
               Loading {overlay} map...
             </p>
@@ -103,6 +86,23 @@ const WindyMapEmbed = () => {
           frameBorder="0"
           title="Windy Map"
         />
+      </div>
+      {/* Overlay Buttons */}
+
+      <div className="flex flex-wrap items-center justify-start gap-2">
+        {overlayOptions.map((option) => (
+          <button
+            key={option}
+            onClick={() => handleOverlayChange(option)}
+            className={`px-4 py-1 rounded-full text-sm font-bold border ${
+              overlay === option
+                ? "bg-green-500 text-white font-bold border-green-500"
+                : "bg-gray-800 text-gray-300 font-bold border-gray-500"
+            }`}
+          >
+            {option}
+          </button>
+        ))}
       </div>
     </div>
   );
