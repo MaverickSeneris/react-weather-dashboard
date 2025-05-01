@@ -61,8 +61,26 @@ const WindyMapEmbed = () => {
 
   return (
     <div className="flex flex-col gap-4">
-      <Header title={locationName} />
       {/* Location Name */}
+
+      <Header title={locationName} />
+      {/* Overlay Buttons */}
+
+      <div className="flex flex-wrap items-center justify-start gap-2 mt-4">
+        {overlayOptions.map((option) => (
+          <button
+            key={option}
+            onClick={() => handleOverlayChange(option)}
+            className={`px-4 py-1 rounded-full text-sm font-bold border ${
+              overlay === option
+                ? "bg-green-500 text-white font-bold border-green-500"
+                : "bg-gray-800 text-gray-300 font-bold border-gray-500"
+            }`}
+          >
+            {option}
+          </button>
+        ))}
+      </div>
       {/* <div className="text-center">
         {locationName && <h2 className="font-bold text-3xl">{locationName}</h2>}
       </div> */}
@@ -70,7 +88,7 @@ const WindyMapEmbed = () => {
       {/* Iframe with Loading */}
       <div
         className="relative w-full overflow-hidden rounded-[15px] shadow-md"
-        style={{ height: `${windowHeight - 200}px` }}
+        style={{ height: `${windowHeight - 220}px` }}
       >
         {error && <p className="text-red-500">{error}</p>}
         {loading && (
@@ -86,23 +104,6 @@ const WindyMapEmbed = () => {
           frameBorder="0"
           title="Windy Map"
         />
-      </div>
-      {/* Overlay Buttons */}
-
-      <div className="flex flex-wrap items-center justify-start gap-2">
-        {overlayOptions.map((option) => (
-          <button
-            key={option}
-            onClick={() => handleOverlayChange(option)}
-            className={`px-4 py-1 rounded-full text-sm font-bold border ${
-              overlay === option
-                ? "bg-green-500 text-white font-bold border-green-500"
-                : "bg-gray-800 text-gray-300 font-bold border-gray-500"
-            }`}
-          >
-            {option}
-          </button>
-        ))}
       </div>
     </div>
   );
