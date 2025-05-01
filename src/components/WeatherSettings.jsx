@@ -43,8 +43,8 @@ export default function WeatherSettings() {
             onClick={() => updateSetting(key, option)}
             className={`${
               key === "pressure" || key === "windSpeed"
-                ? "w-[90px] text-xs px-2 py-1"
-                : "min-w-[10%] px-10 py-1.5 text-sm"
+                ? "w-[32%] text-xs px-2 py-1"
+                : "w-[49%] min-w-[10%] px-10 py-1.5 text-sm"
             } text-center rounded-[7px] transition-all ${
               settings[key] === option
                 ? "bg-gray-700 text-white shadow-md"
@@ -68,7 +68,7 @@ export default function WeatherSettings() {
           onChange={() => toggleSetting(key)}
           className="sr-only"
         />
-        <div className="w-10 h-5 bg-gray-600 rounded-full peer peer-checked:bg-blue-500 relative transition-all">
+        <div className="w-10 h-5 bg-blue-600 rounded-full peer peer-checked:bg-blue-500 relative transition-all">
           <div
             className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform ${
               settings[key] ? "translate-x-5" : ""
