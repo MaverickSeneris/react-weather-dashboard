@@ -1,9 +1,15 @@
 import React from "react";
+import Header from "../components/ui/Header";
+import WindyMapEmbed from "../components/WindyMap"
+
 
 function WeatherMap() {
   return (
-    <div className="flex justify-center w-100">
-      <h1>Weather map is under construction</h1>
+    <div className="px-4 pt-8">
+      <Header title={"Map"} />
+      <div className="mt-4">
+        <WindyMapEmbed />
+      </div>
     </div>
   );
 }
