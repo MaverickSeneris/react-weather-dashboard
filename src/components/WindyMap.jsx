@@ -62,10 +62,8 @@ const WindyMapEmbed = () => {
   return (
     <div className="flex flex-col gap-4">
       {/* Location Name */}
-
       <Header title={locationName} />
       {/* Overlay Buttons */}
-
       <div className="flex flex-wrap items-center justify-start gap-2 mt-4">
         {overlayOptions.map((option) => (
           <button
@@ -81,10 +79,6 @@ const WindyMapEmbed = () => {
           </button>
         ))}
       </div>
-      {/* <div className="text-center">
-        {locationName && <h2 className="font-bold text-3xl">{locationName}</h2>}
-      </div> */}
-
       {/* Iframe with Loading */}
       <div
         className="relative w-full overflow-hidden rounded-[15px] shadow-md"
