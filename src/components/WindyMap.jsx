@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import Card from "../components/ui/Card";
+
 
 const overlayOptions = ["wind", "temp", "rain", "clouds"];
 
@@ -57,7 +57,7 @@ const WindyMapEmbed = () => {
     setTimeout(() => setLoading(false), 1000); // simulate loading
   };
 
-  const iframeSrc = `https://embed.windy.com/embed2.html?lat=${coordinates.lat}&lon=${coordinates.lon}&detailLat=${coordinates.lat}&detailLon=${coordinates.lon}&zoom=20&level=surface&overlay=${overlay}&menu=true&message=true&marker=true&pressure=true&type=map&location=coordinates&detail=true&metricWind=default&metricTemp=default&radarRange=-1`;
+  const iframeSrc = `https://embed.windy.com/embed2.html?lat=${coordinates.lat}&lon=${coordinates.lon}&detailLat=${coordinates.lat}&detailLon=${coordinates.lon}&zoom=9&level=surface&overlay=${overlay}&menu=true&message=true&marker=true&pressure=true&type=map&location=coordinates&detail=true&metricWind=default&metricTemp=default&radarRange=-1`;
 
   return (
     <div className="flex flex-col gap-4">
@@ -87,7 +87,7 @@ const WindyMapEmbed = () => {
       {/* Iframe with Loading */}
       <div
         className="relative w-full overflow-hidden rounded-[15px] shadow-md"
-        style={{ height: `${windowHeight - 150}px` }}
+        style={{ height: `${windowHeight - 250}px` }}
       >
         {error && <p className="text-red-500">{error}</p>}
         {loading && (
