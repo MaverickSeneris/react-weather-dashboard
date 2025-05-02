@@ -1,33 +1,9 @@
-import React, { useState, useEffect } from "react";
-import Card from "../components/ui/Card"
-const defaultSettings = {
-  temperature: "Celsius", // Metric
-  windSpeed: "km/h", // Metric
-  pressure: "mm", // Metric
-  precipitation: "Millimeters", // Metric
-  distance: "Kilometers", // Metric
-  notifications: true,
-  timeFormat: true, // true = 12-Hour
-  location: true,
-};
+import React from "react";
+import Card from "../components/ui/Card";
+import { useWeatherSettings } from "../utils/hooks/useWeatherSettings";
 
 export default function WeatherSettings() {
-  const [settings, setSettings] = useState(() => {
-    const saved = localStorage.getItem("weatherSettings");
-    return saved ? JSON.parse(saved) : defaultSettings;
-  });
-
-  useEffect(() => {
-    localStorage.setItem("weatherSettings", JSON.stringify(settings));
-  }, [settings]);
-
-  const updateSetting = (key, value) => {
-    setSettings((prev) => ({ ...prev, [key]: value }));
-  };
-
-  const toggleSetting = (key) => {
-    setSettings((prev) => ({ ...prev, [key]: !prev[key] }));
-  };
+  const { settings, updateSetting, toggleSetting } = useWeatherSettings();
 
   const renderOptionGroup = (title, key, options) => (
     <div className="flex flex-col">
@@ -81,35 +57,33 @@ export default function WeatherSettings() {
 
   return (
     <Card>
-      {/* <div className="p-6 bg-gray-900 text-white w-full max-w-xs rounded-2xl shadow-xl"> */}
-        {renderOptionGroup("Temperature", "temperature", [
-          "Celsius",
-          "Fahrenheit",
-        ])}
-        {renderOptionGroup("Wind Speed", "windSpeed", ["km/h", "m/s", "Knots"])}
-        {renderOptionGroup("Pressure", "pressure", [
-          "hPa",
-          "Inches",
-          "kPa",
-          "mm",
-        ])}
-        {renderOptionGroup("Precipitation", "precipitation", [
-          "Millimeters",
-          "Inches",
-        ])}
-        {renderOptionGroup("Distance", "distance", ["Kilometers", "Miles"])}
+      {renderOptionGroup("Temperature", "temperature", [
+        "Celsius",
+        "Fahrenheit",
+      ])}
+      {renderOptionGroup("Wind Speed", "windSpeed", ["km/h", "m/s", "Knots"])}
+      {renderOptionGroup("Pressure", "pressure", [
+        "hPa",
+        "Inches",
+        "kPa",
+        "mm",
+      ])}
+      {renderOptionGroup("Precipitation", "precipitation", [
+        "Millimeters",
+        "Inches",
+      ])}
+      {renderOptionGroup("Distance", "distance", ["Kilometers", "Miles"])}
 
-        <div className="mt-6 border-t border-gray-700 pt-4">
-          <h4 className="text-gray-400 font-semibold mb-2">Notifications</h4>
-          {renderToggle("Be aware of the weather", "notifications")}
-        </div>
+      <div className="mt-6 border-t border-gray-700 pt-4">
+        <h4 className="text-gray-400 font-semibold mb-2">Notifications</h4>
+        {renderToggle("Be aware of the weather", "notifications")}
+      </div>
 
-        <div className="mt-6 border-t border-gray-700 pt-4">
-          <h4 className="text-gray-400 font-semibold mb-2">General</h4>
-          {renderToggle("12-Hour Time", "timeFormat")}
-          {renderToggle("Location", "location")}
-        </div>
-      {/* </div> */}
+      <div className="mt-6 border-t border-gray-700 pt-4">
+        <h4 className="text-gray-400 font-semibold mb-2">General</h4>
+        {renderToggle("12-Hour Time", "timeFormat")}
+        {renderToggle("Location", "location")}
+      </div>
     </Card>
   );
 }

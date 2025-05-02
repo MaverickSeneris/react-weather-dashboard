@@ -2,8 +2,17 @@ import React from "react";
 import Card from "./ui/Card";
 import CardTitle from "./ui/CardTitle";
 import iconMap from "../utils/weatherIconMapper";
+import { useWeatherSettings } from "../utils/hooks/useWeatherSettings";
 
 function DailyContainer({ dailyWeatherInfo }) {
+  const { settings } = useWeatherSettings();
+
+  const convertTemp = (temp) => {
+    return settings.temperature === "Fahrenheit"
+      ? Math.round((temp * 9) / 5 + 32)
+      : Math.round(temp);
+  };
+
   return (
     <Card>
       <div className="space-y-3">
@@ -24,8 +33,12 @@ function DailyContainer({ dailyWeatherInfo }) {
               </span>
             </div>
             <div>
-              <span className="font-bold text-lg">{day.tempHigh}</span>
-              <span className="text-gray-400 text-lg">/{day.tempLow}</span>
+              <span className="font-bold text-lg">
+                {convertTemp(day.tempHigh)}&deg;
+              </span>
+              <span className="text-gray-400 text-lg">
+                /{convertTemp(day.tempLow)}&deg;
+              </span>
             </div>
           </div>
         ))}

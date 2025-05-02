@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import Header from "./ui/Header";
+import { useWeatherSettings } from "../utils/hooks/useWeatherSettings";
 
 const overlayOptions = ["wind", "temp", "rain", "clouds"];
 
@@ -10,6 +11,7 @@ const WindyMapEmbed = () => {
   const [overlay, setOverlay] = useState("wind");
   const [loading, setLoading] = useState(false);
   const [locationName, setLocationName] = useState("");
+  const { settings } = useWeatherSettings(); // Access settings
 
   console.log(locationName);
 
@@ -57,8 +59,22 @@ const WindyMapEmbed = () => {
     setTimeout(() => setLoading(false), 1000); // simulate loading
   };
 
-  const iframeSrc = `https://embed.windy.com/embed2.html?lat=${coordinates.lat}&lon=${coordinates.lon}&detailLat=${coordinates.lat}&detailLon=${coordinates.lon}&zoom=9&level=surface&overlay=${overlay}&menu=true&message=true&marker=true&pressure=true&type=map&location=coordinates&detail=true&metricWind=default&metricTemp=default&radarRange=-1`;
+  const windUnitParam =
+    settings.windSpeed === "km/h"
+      ? "km/h"
+      : settings.windSpeed === "m/s"
+      ? "m/s"
+      : settings.windSpeed === "Knots"
+      ? "kt"
+      : "default";
 
+  const tempUnitParam =
+    settings.temperature === "Fahrenheit" ? "°F" : "default";
+  
+  const rainUnitParam =
+  settings.precipitation ===  "Millimeters" ? "mm" : settings.precipitation === "Inches" ? "in" : "default"
+
+  const iframeSrc = `https://embed.windy.com/embed2.html?lat=${coordinates.lat}&lon=${coordinates.lon}&detailLat=${coordinates.lat}&detailLon=${coordinates.lon}&zoom=9&level=surface&overlay=${overlay}&menu=true&message=true&marker=true&pressure=true&type=map&location=coordinates&detail=true&metricWind=${windUnitParam}&metricTemp=${tempUnitParam}&metricRain=${rainUnitParam}&radarRange=-1`;
   return (
     <div className="flex flex-col gap-4">
       {/* Location Name */}

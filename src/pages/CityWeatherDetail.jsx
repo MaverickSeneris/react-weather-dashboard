@@ -4,14 +4,19 @@ import CurrentCityContainer from "../components/CurrentCityContainer";
 import iconMap from "../utils/weatherIconMapper";
 import { BiChevronLeft } from "react-icons/bi";
 import Card from "../components/ui/Card";
-import formatTime from "../utils/timeFormatter"; //Helper function to convert raw UNIX sunrise and sunset time
+import formatTime from "../utils/timeFormatter"; // Helper function to convert raw UNIX sunrise and sunset time
 import CardTitle from "../components/ui/CardTitle";
+import { useWeatherSettings } from "../utils/hooks/useWeatherSettings"; // Import the hook
+import { convertTemperature, convertWindSpeed, convertPressure, convertDistance } from "../utils/unitConverter"; // Import the unit converters
 
 function CityWeatherDetail() {
   // Accessing route state (data passed from previous route)
   const { state } = useLocation();
   const { currentWeatherInfo, cityName } = state || {};
   const navigate = useNavigate(); // for going back to previous page
+
+  // Use weather settings
+  const { settings } = useWeatherSettings();
 
   // Get current time
   const now = new Date();
@@ -30,13 +35,24 @@ function CityWeatherDetail() {
   // This array helps organize and iterate over the weather data
   const cityInfo = [
     {
-      temperature: currentWeatherInfo.temperature,
+      temperature: convertTemperature(
+        currentWeatherInfo.temperature,
+        settings.temperature
+      ), // Apply temperature setting
       uvIndex: currentWeatherInfo.uvIndex,
-      wind: currentWeatherInfo.windSpeed,
-      feelsLike: currentWeatherInfo.feelsLike,
-      pressure: currentWeatherInfo.pressure,
+      wind: convertWindSpeed(currentWeatherInfo.windSpeed, settings.windSpeed), // Apply wind speed setting
+      feelsLike: convertTemperature(
+        currentWeatherInfo.feelsLike,
+        settings.temperature
+      ), // Apply temperature setting for feels like
+      pressure: convertPressure(currentWeatherInfo.pressure, settings.pressure), // Apply pressure setting
       humidity: currentWeatherInfo.humidity,
-      visibility: currentWeatherInfo.visibility,
+      // visibility: currentWeatherInfo.visibility,
+      visibility: convertDistance(
+        currentWeatherInfo.visibility / 1000,
+        settings.distance
+      ),
+
       sunrise: sunrise,
       sunset: sunset,
       chanceOfRain: currentWeatherInfo.chanceOfRain,
@@ -44,12 +60,49 @@ function CityWeatherDetail() {
   ];
 
   // Component to format and display the value with optional units
-  const ValueContainer = ({ value, unit }) => (
-    <span className="font-bold text-[1.4rem] text-gray-300">
-      {value}
-      {unit}
-    </span>
-  );
+  // const ValueContainer = ({ value, unit }) => (
+  //   <span className="font-bold text-[1.4rem] text-gray-300">
+  //     {value}
+  //     {unit}
+  //   </span>
+  // );
+
+  //  const ValueContainer = ({ value, unit }) => (
+  //    <span className="font-bold text-[1.4rem] text-gray-300">
+  //      {typeof value === "number" ? value.toFixed(1) : value}{" "}
+  //      {/* Round to 1 decimal place if it's a number */}
+  //      {unit}
+  //    </span>
+  //  );
+  //  const ValueContainer = ({ value, unit }) => (
+  //    <span className="font-bold text-[1.4rem] text-gray-300">
+  //      {unit === " miles" && typeof value === "number"
+  //        ? value.toFixed(1)
+  //        : value}
+  //      {unit}
+  //    </span>
+  //  );
+  // Component to format and display the value with optional units
+  const ValueContainer = ({ value, unit }) => {
+    let displayValue = value;
+    let displayUnit = unit;
+
+    if (unit === settings.pressure && typeof value === "number") {
+      displayValue = value.toFixed(0); // Round pressure to 0 decimal places (whole number)
+      displayUnit = ` ${unit}`;
+    } else if (unit === settings.windSpeed) {
+      displayUnit = ` ${unit}`;
+    } else if (unit === " miles" && typeof value === "number") {
+      displayValue = value.toFixed(1); // Round miles value to 1 decimal place
+    }
+
+    return (
+      <span className="font-bold text-[1.4rem] text-gray-300">
+        {displayValue}
+        {displayUnit}
+      </span>
+    );
+  };
 
   return (
     <div className="flex flex-col items-center w-screen px-4 mt-5 pb-2">
@@ -74,11 +127,11 @@ function CityWeatherDetail() {
         <div key={index} className="grid grid-cols-2 mt-2 w-[100%] gap-x-4">
           <Card>
             <CardTitle title={"UV INDEX"} />
-            <ValueContainer value={info.uvIndex}/>
+            <ValueContainer value={info.uvIndex} />
           </Card>
           <Card>
             <CardTitle title={"WIND"} />
-            <ValueContainer value={info.wind} unit={" km/h"} />
+            <ValueContainer value={info.wind} unit={settings.windSpeed} />
           </Card>
           <Card>
             <CardTitle title={"HUMIDITY"} />
@@ -86,8 +139,10 @@ function CityWeatherDetail() {
           </Card>
           <Card>
             <CardTitle title={"VISIBILITY"} />
-            <ValueContainer value={info.visibility / 1000} unit={" km"} />
-            {/* convert meters to km */}
+            <ValueContainer
+              value={info.visibility}
+              unit={settings.distance === "Miles" ? " miles" : " km"}
+            />
           </Card>
           <Card>
             <CardTitle title={"FEELS LIKE"} />
@@ -99,7 +154,7 @@ function CityWeatherDetail() {
           </Card>
           <Card>
             <CardTitle title={"PRESSURE"} />
-            <ValueContainer value={info.pressure} unit={" hPa"} />
+            <ValueContainer value={info.pressure} unit={settings.pressure} />
           </Card>
           <Card>
             <CardTitle title={displayLabel} />

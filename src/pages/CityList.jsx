@@ -9,6 +9,7 @@ import { IoCloseSharp } from "react-icons/io5";
 import { Link } from "react-router";
 import axios from "axios";
 import getDayLabel from "../utils/dayLabel";
+import { useWeatherSettings } from "../utils/hooks/useWeatherSettings";
 
 const key = import.meta.env.VITE_OPENWEATHER_API_KEY;
 const url = import.meta.env.VITE_OPENWEATHER_ONECALL_API_URL;
@@ -16,7 +17,13 @@ const url = import.meta.env.VITE_OPENWEATHER_ONECALL_API_URL;
 function CityList() {
   const [searchMode, setSearchMode] = useState(false);
   const [favoriteCities, setFavoriteCities] = useState([]);
+  const { settings } = useWeatherSettings();
 
+  const convertTemp = (temp) => {
+    return settings.temperature === "Fahrenheit"
+      ? Math.round((temp * 9) / 5 + 32)
+      : Math.round(temp);
+  };
   // Track the city being dragged/swiped
   const [draggedId, setDraggedId] = useState(null);
   const [swiped, setSwiped] = useState(false);
@@ -79,7 +86,7 @@ function CityList() {
                 hourlyWeatherIcon: hourlyData.map((i) => i.icon),
               },
 
-              dailyWeatherInfo: dailyData, 
+              dailyWeatherInfo: dailyData,
             };
 
             console.log(`Fetched weather data for ${name}:`, updatedCity);
@@ -177,7 +184,7 @@ function CityList() {
                     </Link>
                     <div>
                       <span className="text-5xl font-regular">
-                        {city.temperature}&deg;
+                        {convertTemp(city.temperature)}&deg;
                       </span>
                     </div>
                   </div>

@@ -10,6 +10,7 @@ const CityCard = ({ weatherData }) => {
   const [swiped, setSwiped] = useState(false);
   const [saveMessages, setSaveMessages] = useState({});
 
+
   function handleSaveCity(cityId) {
     const city = weatherData.find((c) => c.cityId === cityId);
     if (!city) return;
