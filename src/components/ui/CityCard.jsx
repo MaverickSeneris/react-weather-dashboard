@@ -113,10 +113,10 @@ const CityCard = ({ weatherData }) => {
                     <div className="text-3xl font-medium">
                       {convertTemp(city.temperature)}&deg;
                     </div>
-                    <div className="text-xs text-gray-400">
+                    {/* <div className="text-xs text-gray-400">
                       💨 {convertWind(city.windSpeed)}{" "}
                       {settings.windSpeed === "mph" ? "mph" : "km/h"}
-                    </div>
+                    </div> */}
                   </div>
                 </Link>
               )}
