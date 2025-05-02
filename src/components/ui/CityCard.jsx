@@ -2,14 +2,26 @@ import React, { useState } from "react";
 import Card from "./Card";
 import iconMap from "../../utils/weatherIconMapper";
 import timeFormatter from "../../utils/timeFormatter";
-import { Link } from "react-router"; // NOTE: should be react-router-dom kung error
+import { Link } from "react-router"; // or "react-router-dom" if needed
 import { IoAddSharp } from "react-icons/io5";
+import { useWeatherSettings } from "../../utils/hooks/useWeatherSettings"; // ✅ import
 
 const CityCard = ({ weatherData }) => {
   const [draggedId, setDraggedId] = useState(null);
   const [swiped, setSwiped] = useState(false);
   const [saveMessages, setSaveMessages] = useState({});
 
+  const { settings } = useWeatherSettings(); // ✅ use settings
+
+  const convertTemp = (temp) =>
+    settings.temperature === "Fahrenheit"
+      ? Math.round((temp * 9) / 5 + 32)
+      : Math.round(temp);
+
+  const convertWind = (speedKph) =>
+    settings.windSpeed === "mph"
+      ? Math.round(speedKph / 1.609)
+      : Math.round(speedKph);
 
   function handleSaveCity(cityId) {
     const city = weatherData.find((c) => c.cityId === cityId);
@@ -31,9 +43,7 @@ const CityCard = ({ weatherData }) => {
       ? "\u26a0\ufe0f Already saved."
       : "\u2705 City saved!";
 
-    // Show message for this city only
     setSaveMessages((prev) => ({ ...prev, [cityId]: newMessage }));
-
     setTimeout(() => {
       setSaveMessages((prev) => ({ ...prev, [cityId]: "" }));
     }, 3000);
@@ -54,22 +64,11 @@ const CityCard = ({ weatherData }) => {
         <div
           key={city.cityId}
           className="relative flex items-center"
-          onTouchStart={() => {
-            setDraggedId(city.cityId);
-          }}
+          onTouchStart={() => setDraggedId(city.cityId)}
           onTouchMove={(e) => {
-            const touchX = e.touches[0].clientX;
-            if (touchX < 150) {
-              setSwiped(true);
-            }
-          }}
-          onTouchEnd={() => {
-            // optional: reset if you want
-            // setDraggedId(null);
-            // setSwiped(false);
+            if (e.touches[0].clientX < 150) setSwiped(true);
           }}
         >
-          {/* Card */}
           <div
             className={`transition-all duration-500 ${
               draggedId === city.cityId && swiped
@@ -110,15 +109,20 @@ const CityCard = ({ weatherData }) => {
                     </div>
                   </div>
 
-                  <div className="text-3xl self-start font-medium">
-                    {Math.round(city.temperature)}&deg;
+                  <div className="flex flex-col items-end self-start">
+                    <div className="text-3xl font-medium">
+                      {convertTemp(city.temperature)}&deg;
+                    </div>
+                    <div className="text-xs text-gray-400">
+                      💨 {convertWind(city.windSpeed)}{" "}
+                      {settings.windSpeed === "mph" ? "mph" : "km/h"}
+                    </div>
                   </div>
                 </Link>
               )}
             </Card>
           </div>
 
-          {/* Save Button */}
           {draggedId === city.cityId && swiped && (
             <button
               onClick={() => handleSaveCity(city.cityId)}
