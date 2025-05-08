@@ -14,9 +14,10 @@ export default defineConfig({
         name: "Ernie",
         short_name: "Earnie",
         description: "Smart weather app",
-        theme_color: "#ffffff",
-        background_color: "#ffffff",
+        start_url: "/", // Ensures proper routing when launched from home screen
         display: "standalone",
+        theme_color: "#0b0b1d",
+        background_color: "#0b0b1d",
         icons: [
           {
             src: "pwa-192x192.png",
