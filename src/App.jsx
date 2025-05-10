@@ -13,14 +13,14 @@ function App() {
   const { settings } = useWeatherSettings();
 
   useEffect(() => {
-    // const themeColor = settings.dark ? "#0b0b1d" : "#ffffff"; // dark: Tailwind gray-800
+    const themeColor = settings.dark ? "#0b0b1d" : "#ffffff"; // dark: Tailwind gray-800
     let meta = document.querySelector('meta[name="theme-color"]');
     if (!meta) {
       meta = document.createElement("meta");
       meta.name = "theme-color";
       document.head.appendChild(meta);
     }
-    // meta.setAttribute("content", themeColor);
+    meta.setAttribute("content", themeColor);
   }, [settings.dark]);
 
   return (

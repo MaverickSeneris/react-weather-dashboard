@@ -12,6 +12,7 @@ const WindyMapEmbed = () => {
   const [loading, setLoading] = useState(false);
   const [locationName, setLocationName] = useState("");
   const { settings } = useWeatherSettings(); // Access settings
+  const [showSpotForecast, setShowSpotForecast] = useState(true);
 
   console.log(locationName);
 
@@ -70,11 +71,27 @@ const WindyMapEmbed = () => {
 
   const tempUnitParam =
     settings.temperature === "Fahrenheit" ? "°F" : "default";
-  
-  const rainUnitParam =
-  settings.precipitation ===  "Millimeters" ? "mm" : settings.precipitation === "Inches" ? "in" : "default"
 
-  const iframeSrc = `https://embed.windy.com/embed2.html?lat=${coordinates.lat}&lon=${coordinates.lon}&detailLat=${coordinates.lat}&detailLon=${coordinates.lon}&zoom=9&level=surface&overlay=${overlay}&menu=true&message=true&marker=true&pressure=true&type=map&location=coordinates&detail=true&metricWind=${windUnitParam}&metricTemp=${tempUnitParam}&metricRain=${rainUnitParam}&radarRange=-1`;
+  const rainUnitParam =
+    settings.precipitation === "Millimeters"
+      ? "mm"
+      : settings.precipitation === "Inches"
+      ? "in"
+      : "default";
+
+  // const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+
+  // const embedType = prefersDark ? "dark" : "map";
+
+  // const iframeSrc = `https://embed.windy.com/embed2.html?lat=${coordinates.lat}&lon=${coordinates.lon}&detailLat=${coordinates.lat}&detailLon=${coordinates.lon}&zoom=9&level=surface&overlay=${overlay}&menu=true&message=true&marker=true&pressure=true&type=map&location=coordinates&detail=true&metricWind=${windUnitParam}&metricTemp=${tempUnitParam}&metricRain=${rainUnitParam}&radarRange=-1`;
+  const iframeSrc = `https://embed.windy.com/embed2.html?lat=${
+    coordinates.lat
+  }&lon=${coordinates.lon}&detailLat=${coordinates.lat}&detailLon=${
+    coordinates.lon
+  }&zoom=9&level=surface&overlay=${overlay}&menu=true&message=true&marker=true&pressure=true&type=map&location=coordinates${
+    showSpotForecast ? "&detail=true" : ""
+  }&metricWind=${windUnitParam}&metricTemp=${tempUnitParam}&metricRain=${rainUnitParam}&radarRange=-1`;
+
   return (
     <div className="flex flex-col gap-4">
       {/* Location Name */}
@@ -85,19 +102,29 @@ const WindyMapEmbed = () => {
           <button
             key={option}
             onClick={() => handleOverlayChange(option)}
-            className={`px-4 py-1 rounded-full text-sm font-bold border ${
+            className={`px-4 py-1 rounded-full text-sm font-bold ${
               overlay === option
-                ? "bg-green-500 text-white font-bold border-green-500"
-                :"bg-slate-300 dark:bg-gray-800 dark:text-gray-300 font-bold dark:border-gray-500"
+                ? "bg-green-400 text-white font-bold border-green-500 border-2"
+                : "bg-slate-300 dark:bg-gray-800 dark:text-gray-300 font-bold dark:border-gray-500"
             }`}
           >
             {option}
           </button>
         ))}
+        <button
+          onClick={() => setShowSpotForecast(!showSpotForecast)}
+          className={`px-4 py-1 rounded-full text-sm font-bold  ${
+            showSpotForecast
+              ? "bg-amber-200 dark:bg-yellow-400 border-2 dark:border-amber-500 border-amber-400"
+              : "dark:bg-gray-800 bg-slate-300 dark:text-gray-300 font-bold dark:border-gray-500"
+          } text-black`}
+        >
+          Forecast
+        </button>
       </div>
       {/* Iframe with Loading */}
       <div
-        className="relative w-full overflow-hidden rounded-[15px] shadow-md"
+        className="relative w-full overflow-hidden rounded-[15px] shadow-md pb-4"
         style={{ height: `${windowHeight - 220}px` }}
       >
         {error && <p className="text-red-500">{error}</p>}
