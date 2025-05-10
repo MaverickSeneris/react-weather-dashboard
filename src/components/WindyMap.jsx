@@ -97,7 +97,7 @@ const WindyMapEmbed = () => {
       {/* Location Name */}
       <Header title={locationName} />
       {/* Overlay Buttons */}
-      <div className="flex flex-wrap items-center justify-start gap-2 mt-4">
+      <div className="flex flex-wrap items-center justify-start gap-1 mt-4">
         {overlayOptions.map((option) => (
           <button
             key={option}
