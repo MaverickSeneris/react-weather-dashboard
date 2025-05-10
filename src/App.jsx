@@ -13,7 +13,7 @@ function App() {
   const { settings } = useWeatherSettings();
 
   useEffect(() => {
-    const themeColor = settings.dark ? "#ffffff " : "#0b0b1d"; // dark: Tailwind gray-800
+    const themeColor = settings.dark ? "#0b0b1d" : "#ffffff"; // dark: Tailwind gray-800
     let meta = document.querySelector('meta[name="theme-color"]');
     if (!meta) {
       meta = document.createElement("meta");
