@@ -105,7 +105,7 @@ export default function WeatherSettings() {
         <h4 className="dark:text-gray-400 font-semibold mb-2">General</h4>
         {renderToggle("12-Hour Time", "timeFormat")}
         {renderToggle("Location", "location")}
-        {/* {renderToggle(settings.dark ? "Dark Mode" : "Light Mode", "dark")} */}
+        {renderToggle(settings.dark ? "Dark Mode" : "Light Mode", "dark")}
       </div>
     </Card>
   );
