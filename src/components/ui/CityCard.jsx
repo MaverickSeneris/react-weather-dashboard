@@ -95,7 +95,7 @@ const CityCard = ({ weatherData }) => {
                     />
                     <div className="flex flex-col items-start">
                       <div className="flex items-center gap-2">
-                        <span className="font-bold text-[1rem] text-gray-300">
+                        <span className="font-bold text-[1rem] dark:text-gray-300">
                           {city.name}
                         </span>
                         <span className="text-xs font-regular">

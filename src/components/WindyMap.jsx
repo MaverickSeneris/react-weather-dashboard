@@ -88,7 +88,7 @@ const WindyMapEmbed = () => {
             className={`px-4 py-1 rounded-full text-sm font-bold border ${
               overlay === option
                 ? "bg-green-500 text-white font-bold border-green-500"
-                : "bg-gray-800 text-gray-300 font-bold border-gray-500"
+                :"bg-slate-300 dark:bg-gray-800 dark:text-gray-300 font-bold dark:border-gray-500"
             }`}
           >
             {option}
@@ -102,8 +102,8 @@ const WindyMapEmbed = () => {
       >
         {error && <p className="text-red-500">{error}</p>}
         {loading && (
-          <div className="absolute inset-0 z-10 bg-gray-800 bg-opacity-60 flex items-center justify-center">
-            <p className="text-white font-semibold text-lg">
+          <div className="absolute inset-0 z-10 bg-slate-100 dark:bg-gray-800 bg-opacity-60 flex items-center justify-center">
+            <p className="dark:text-white font-semibold text-lg">
               Loading {overlay} map...
             </p>
           </div>

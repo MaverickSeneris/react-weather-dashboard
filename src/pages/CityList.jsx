@@ -130,7 +130,7 @@ function CityList() {
       ) : (
         <div
           onClick={toggleSearchMode}
-          className="bg-gray-800 rounded-[10px] text-gray-500 p-2 mt-4"
+          className="bg-slate-100 dark:bg-gray-800 rounded-[10px] text-gray-400 dark:text-gray-500 p-2 mt-4"
         >
           Search City
         </div>
