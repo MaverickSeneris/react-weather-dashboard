@@ -25,14 +25,8 @@ body {
 
 @media (prefers-color-scheme: light) {
   :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
+    color: #1d293d;
+    background-color: white;
   }
 }
 
@@ -40,10 +34,12 @@ body {
   word-spacing: 0.15rem;
 }
 
-/* .bg-white.dark\:bg-black {
+/* Example */
+.bg-white.dark\:bg-black {
   background-color: white;
-} */
+}
 
-/* .dark .your-class {
+.dark .your-class {
   background-color: #111;
-} */
+}
+

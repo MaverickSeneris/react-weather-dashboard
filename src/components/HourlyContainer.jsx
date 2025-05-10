@@ -21,7 +21,7 @@ function HourlyContainer({ hourlyWeatherInfo }) {
           {hourlyWeatherInfo.time.map((time, index) => (
             <span
               key={index}
-              className="w-max font-bold pb-2 text-gray-400 text-center"
+              className="w-max font-bold pb-2 text-slate-400 dark:text-gray-400 text-center"
             >
               {time}
             </span>

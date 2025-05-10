@@ -97,7 +97,7 @@ function CityWeatherDetail() {
     }
 
     return (
-      <span className="font-bold text-[1.4rem] text-gray-300">
+      <span className="font-bold text-[1.4rem] dark:text-gray-300">
         {displayValue}
         {displayUnit}
       </span>
@@ -109,7 +109,7 @@ function CityWeatherDetail() {
       {/* Back button */}
       <button
         onClick={() => navigate(-1)}
-        className="self-start font-medium text-white hover:text-blue-400 mb-4"
+        className="self-start font-medium dark:text-white hover:text-blue-400 mb-4"
       >
         <BiChevronLeft className="w-8 h-8 mr-1" />
       </button>

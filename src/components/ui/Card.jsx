@@ -1,16 +1,8 @@
 import React from "react";
-import { useWeatherSettings } from "../../utils/hooks/useWeatherSettings";
 
 function Card({ children }) {
-  const { settings } = useWeatherSettings();
-
-
   return (
-    <div
-      className={`border-0 p-6 h-max rounded-[20px] my-2 w-full ${
-        settings.dark ? "bg-gray-800 text-white" : "bg-gray-100 text-black"
-      }`}
-    >
+    <div className="border-0 p-6 h-max rounded-[20px] my-2 bg-slate-100 dark:bg-gray-800 w-[100%]">
       {children}
     </div>
   );

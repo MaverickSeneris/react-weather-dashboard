@@ -182,7 +182,7 @@ function SearchBar({ toggleSearchMode, handleAddCity }) {
         <input
           type="text"
           placeholder="Search city"
-          className="my-4 p-2 w-full rounded-[10px] bg-gray-800 outline-0"
+          className="my-4 p-2 w-full rounded-[10px] bg-slate-100 dark:bg-gray-800 outline-0"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
