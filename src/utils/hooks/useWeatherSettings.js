@@ -9,6 +9,7 @@ const defaultSettings = {
   notifications: true,
   timeFormat: true,
   location: true,
+  dark: false, 
 };
 
 export function useWeatherSettings() {
@@ -33,6 +34,18 @@ export function useWeatherSettings() {
     console.log(`[TOGGLE] ${key} → ${!settings[key]}`);
     setSettings((prev) => ({ ...prev, [key]: !prev[key] }));
   };
+
+  // useEffect(() => {
+  //   if (settings.dark) {
+  //     document.documentElement.classList.add("dark");
+  //   } else {
+  //     document.documentElement.classList.remove("dark");
+  //   }
+  // }, [settings.dark]);
+
+   useEffect(() => {
+     document.documentElement.classList.toggle("dark", settings.dark);
+   }, [settings.dark]);
 
   return { settings, updateSetting, toggleSetting };
 }

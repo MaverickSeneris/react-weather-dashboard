@@ -8,8 +8,10 @@ import HourlyContainer from "../components/HourlyContainer";
 import DailyContainer from "../components/DailyContainer";
 import CurrentWeatherContainer from "../components/CurrentWeatherContainer";
 import generateUUID from "../utils/uuidGenerator";
+import { useWeatherSettings } from "../utils/hooks/useWeatherSettings";
 
 function CurrentCity() {
+  const { settings } = useWeatherSettings();
   const [currentLocation, setCurrentLocation] = useState({
     town: "",
     state: "",
@@ -98,7 +100,7 @@ function CurrentCity() {
       // Current weather state
       setCurrentWeatherInfo({
         cityId: generateUUID(),
-        temperature:Math.floor(data.current.temp) || "",
+        temperature: Math.floor(data.current.temp) || "",
         weatherIcon: data.current.weather[0]?.icon || "",
         description: data.current.weather[0]?.description || "",
         feelsLike: Math.floor(data.current.feels_like) || 0,
@@ -151,7 +153,7 @@ function CurrentCity() {
   };
 
   return (
-    <div className="flex flex-col items-center w-screen px-4 mt-10 pb-2">
+    <div className={`flex flex-col items-center w-screen px-4 pt-10 pb-2 ${settings.dark ? "bg-neutral-900 text-white": "bg-white text-black"}`} >
       <CurrentCityContainer
         cityName={currentLocation.village}
         popValue={currentWeatherInfo.chanceOfRain}
