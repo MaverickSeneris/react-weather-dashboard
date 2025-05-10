@@ -124,7 +124,7 @@ const WindyMapEmbed = () => {
       </div>
       {/* Iframe with Loading */}
       <div
-        className="relative w-full overflow-hidden rounded-[15px] shadow-md pb-4"
+        className="relative w-full overflow-hidden rounded-[15px] shadow-md"
         style={{ height: `${windowHeight - 220}px` }}
       >
         {error && <p className="text-red-500">{error}</p>}
