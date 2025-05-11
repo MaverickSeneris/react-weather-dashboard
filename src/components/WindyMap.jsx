@@ -100,7 +100,7 @@ const WindyMapEmbed = () => {
       {/* Location Name */}
       <Header title={locationName} />
       {/* Overlay Buttons */}
-      {!loading && (
+      {!loading ? (
         <div className="flex flex-wrap items-center justify-start gap-1 mt-4">
           {overlayOptions.map((option) => (
             <button
@@ -126,6 +126,17 @@ const WindyMapEmbed = () => {
             Forecast
           </button>
         </div>
+      ) : (
+        <>
+          <div className="w-35 h-15 rounded-[10px] my-4  bg-slate-100 dark:bg-gray-800 animate-pulse"></div>
+          <div className=" gap-1 bg-opacity-60 flex items-center justify-around animate-pulse">
+            <div className=" flex justify-center items-center w-18 h-7 rounded-[20px]  bg-slate-100 dark:bg-gray-800"></div>
+            <div className=" flex justify-center items-center w-18 h-7 rounded-[20px]  bg-slate-100 dark:bg-gray-800"></div>
+            <div className=" flex justify-center items-center w-18 h-7 rounded-[20px]  bg-slate-100 dark:bg-gray-800"></div>
+            <div className=" flex justify-center items-center w-18 h-7 rounded-[20px]  bg-slate-100 dark:bg-gray-800"></div>
+            <div className=" flex justify-center items-center w-25 h-7 rounded-[20px]  bg-slate-100 dark:bg-gray-800"></div>
+          </div>
+        </>
       )}
       {/* Iframe with Loading */}
       <div
@@ -134,8 +145,10 @@ const WindyMapEmbed = () => {
       >
         {error && <p className="text-red-500">{error}</p>}
         {loading ? (
-          <div className="absolute inset-0 z-10 bg-slate-100 dark:bg-gray-800 bg-opacity-60 flex items-center justify-center">
-            <div className="w-3/4 h-3/4 bg-gray-300 dark:bg-gray-700 rounded-lg animate-pulse"></div>
+          <div className="absolute inset-0 z-10 bg-slate-100 dark:bg-gray-800 bg-opacity-60 flex items-center justify-center animate-pulse">
+            <p className="text-gray-500 dark:text-gray-300">
+              Loading map, please wait...
+            </p>
           </div>
         ) : (
           <iframe
