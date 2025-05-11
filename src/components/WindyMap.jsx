@@ -8,13 +8,15 @@ const WindyMapEmbed = () => {
   const [coordinates, setCoordinates] = useState({ lat: 14.6, lon: 121.0 });
   const [error, setError] = useState(null);
   const [windowHeight, setWindowHeight] = useState(window.innerHeight);
-  const [overlay, setOverlay] = useState("wind");
-  const [loading, setLoading] = useState(false);
+  const [overlay, setOverlay] = useState(
+    localStorage.getItem("overlayPreference") || "wind" // Load saved preference or default to "wind"
+  );
+  const [loading, setLoading] = useState(true);
   const [locationName, setLocationName] = useState("");
-  const { settings } = useWeatherSettings(); // Access settings
-  const [showSpotForecast, setShowSpotForecast] = useState(true);
-
-  console.log(locationName);
+  const { settings } = useWeatherSettings();
+  const [showSpotForecast, setShowSpotForecast] = useState(
+    JSON.parse(localStorage.getItem("spotForecastPreference")) ?? true // Load saved preference or default to true
+  );
 
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
@@ -28,7 +30,6 @@ const WindyMapEmbed = () => {
           );
           const data = await res.json();
           const components = data.results[0]?.components;
-          console.log(components);
           const town =
             components.village ||
             components.city ||
@@ -37,15 +38,17 @@ const WindyMapEmbed = () => {
             components.county ||
             "Unknown location";
           setLocationName(town);
-          console.log(town);
         } catch (err) {
           console.error("OpenCage error:", err);
           setLocationName("Unknown location");
+        } finally {
+          setLoading(false);
         }
       },
       (err) => {
         console.error("Geolocation error:", err.message);
         setError("Failed to get your location. Showing default location.");
+        setLoading(false);
       }
     );
 
@@ -55,9 +58,14 @@ const WindyMapEmbed = () => {
   }, []);
 
   const handleOverlayChange = (option) => {
-    setLoading(true);
     setOverlay(option);
-    setTimeout(() => setLoading(false), 1000); // simulate loading
+    localStorage.setItem("overlayPreference", option); // Save preference to localStorage
+  };
+
+  const toggleSpotForecast = () => {
+    const newValue = !showSpotForecast;
+    setShowSpotForecast(newValue);
+    localStorage.setItem("spotForecastPreference", JSON.stringify(newValue)); // Save preference to localStorage
   };
 
   const windUnitParam =
@@ -92,50 +100,51 @@ const WindyMapEmbed = () => {
       {/* Location Name */}
       <Header title={locationName} />
       {/* Overlay Buttons */}
-      <div className="flex flex-wrap items-center justify-start gap-1 mt-4">
-        {overlayOptions.map((option) => (
+      {!loading && (
+        <div className="flex flex-wrap items-center justify-start gap-1 mt-4">
+          {overlayOptions.map((option) => (
+            <button
+              key={option}
+              onClick={() => handleOverlayChange(option)}
+              className={`px-4 py-1 rounded-full text-sm font-bold ${
+                overlay === option
+                  ? "bg-green-400 text-white font-bold border-green-500 border-2"
+                  : "bg-slate-300 dark:bg-gray-800 dark:text-gray-300 font-bold dark:border-gray-500"
+              }`}
+            >
+              {option}
+            </button>
+          ))}
           <button
-            key={option}
-            onClick={() => handleOverlayChange(option)}
-            className={`px-4 py-1 rounded-full text-sm font-bold ${
-              overlay === option
-                ? "bg-green-400 text-white font-bold border-green-500 border-2"
-                : "bg-slate-300 dark:bg-gray-800 dark:text-gray-300 font-bold dark:border-gray-500"
-            }`}
+            onClick={toggleSpotForecast}
+            className={`px-4 py-1 rounded-full text-sm font-bold  ${
+              showSpotForecast
+                ? "bg-amber-200 dark:bg-yellow-400 border-2 dark:border-amber-500 border-amber-400"
+                : "dark:bg-gray-800 bg-slate-300 dark:text-gray-300 font-bold dark:border-gray-500"
+            } text-black`}
           >
-            {option}
+            Forecast
           </button>
-        ))}
-        <button
-          onClick={() => setShowSpotForecast(!showSpotForecast)}
-          className={`px-4 py-1 rounded-full text-sm font-bold  ${
-            showSpotForecast
-              ? "bg-amber-200 dark:bg-yellow-400 border-2 dark:border-amber-500 border-amber-400"
-              : "dark:bg-gray-800 bg-slate-300 dark:text-gray-300 font-bold dark:border-gray-500"
-          } text-black`}
-        >
-          Forecast
-        </button>
-      </div>
+        </div>
+      )}
       {/* Iframe with Loading */}
       <div
         className="relative w-full overflow-hidden rounded-[15px] shadow-md"
         style={{ height: `${windowHeight - 220}px` }}
       >
         {error && <p className="text-red-500">{error}</p>}
-        {loading && (
+        {loading ? (
           <div className="absolute inset-0 z-10 bg-slate-100 dark:bg-gray-800 bg-opacity-60 flex items-center justify-center">
-            <p className="dark:text-white font-semibold text-lg">
-              Loading {overlay} map...
-            </p>
+            <div className="w-3/4 h-3/4 bg-gray-300 dark:bg-gray-700 rounded-lg animate-pulse"></div>
           </div>
+        ) : (
+          <iframe
+            className="w-full h-full rounded-[15px]"
+            src={iframeSrc}
+            frameBorder="0"
+            title="Windy Map"
+          />
         )}
-        <iframe
-          className="w-full h-full rounded-[15px]"
-          src={iframeSrc}
-          frameBorder="0"
-          title="Windy Map"
-        />
       </div>
     </div>
   );

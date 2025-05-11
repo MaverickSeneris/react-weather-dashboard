@@ -26,8 +26,8 @@ function Dashboard() {
               <Icon
                 className={`text-2xl ${
                   pathname === to
-                    ? "text-slate-400 dark:text-gray-300"
-                    : "text-slate-500 dark:text-gray-500"
+                    ? "text-slate-600 dark:text-gray-300"
+                    : "text-slate-400 dark:text-gray-500"
                 }`}
               />
             </Link>
