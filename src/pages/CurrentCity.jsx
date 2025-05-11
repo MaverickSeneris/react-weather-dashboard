@@ -9,49 +9,35 @@ import DailyContainer from "../components/DailyContainer";
 import CurrentWeatherContainer from "../components/CurrentWeatherContainer";
 import generateUUID from "../utils/uuidGenerator";
 
+function LoadingSkeleton() {
+  return (
+    <div className="flex flex-col items-center w-screen px-4 mt-10 pb-2 animate-pulse">
+      <div className="w-40 h-12 bg-gray-300 rounded-[15px] mb-4"></div>
+      <div className="w-50 h-8 bg-gray-300 rounded-[10px] mb-4"></div>
+      <div className="w-50 h-50 bg-gray-300 rounded-[50%] mb-4"></div>
+      <div className="w-29 h-15 bg-gray-300 rounded-[15px] my-6"></div>
+      <div className="w-full h-24 bg-gray-300 rounded-[15px] mb-4 mt-2"></div>
+      <div className="w-full h-40 bg-gray-300 rounded-[15px] mb-4"></div>
+      <div className="w-full h-30 bg-gray-300 rounded-[15px]"></div>
+    </div>
+  );
+}
+
 function CurrentCity() {
-  const [currentLocation, setCurrentLocation] = useState({
-    town: "",
-    state: "",
-    country: "",
-    village: "",
-    region: "",
-  });
-
-  const [currentWeatherInfo, setCurrentWeatherInfo] = useState({
-    temperature: "",
-    weatherIcon: "",
-    description: "",
-    feelsLike: 0,
-    uvIndex: 0,
-    windSpeed: 0,
-    chanceOfRain: 0,
-  });
-
-  const [hourlyWeatherInfo, setHourlyWeatherInfo] = useState({
-    time: [],
-    temperature: [],
-    icon: [],
-  });
-
-  const [dailyWeatherInfo, setDailyWeatherInfo] = useState([]);
+  const [currentWeatherInfo, setCurrentWeatherInfo] = useState(null);
   const [unit, setUnit] = useState("metric");
 
   useEffect(() => {
-    console.log("📡 Fetching geolocation...");
     navigator.geolocation.getCurrentPosition(
       ({ coords: { latitude, longitude } }) => {
-        console.log("✅ Coordinates:", latitude, longitude);
-        fetchLocation(latitude, longitude);
-        fetchWeather(latitude, longitude);
+        fetchAllWeatherInfo(latitude, longitude);
       },
       (error) => {
-        console.error("❌ Geolocation error (line 38):", error.message);
+        console.error("❌ Geolocation error:", error.message);
       }
     );
   }, [unit]);
 
-  // Fetch city/village/region from OpenCage API
   const fetchLocation = async (lat, lon) => {
     console.log("⏳ Loading location data...");
     try {
@@ -78,41 +64,24 @@ function CurrentCity() {
     }
   };
 
-  // Fetch weather data from OpenWeather API
-  const fetchWeather = async (lat, lon) => {
-    console.log("⏳ Loading weather data...");
+  const fetchAllWeatherInfo = async (lat, lon) => {
     try {
-      const url = import.meta.env.VITE_OPENWEATHER_ONECALL_API_URL;
-      const key = import.meta.env.VITE_OPENWEATHER_API_KEY;
+      const geoKey = import.meta.env.VITE_OPENCAGE_API_KEY;
+      const weatherUrl = import.meta.env.VITE_OPENWEATHER_ONECALL_API_URL;
+      const weatherKey = import.meta.env.VITE_OPENWEATHER_API_KEY;
 
-      const res = await axios.get(
-        `${url}lat=${lat}&lon=${lon}&appid=${key}&units=${unit}`
-      );
-      const data = res.data;
+      const [geoRes, weatherRes] = await Promise.all([
+        axios.get(
+          `https://api.opencagedata.com/geocode/v1/json?q=${lat}+${lon}&key=${geoKey}`
+        ),
+        axios.get(
+          `${weatherUrl}lat=${lat}&lon=${lon}&appid=${weatherKey}&units=${unit}`
+        ),
+      ]);
 
-      console.log("🌤️ Full weather data:", data);
-      console.log("🌡️ Current weather:", data.current);
-      console.log("🕒 Hourly weather (raw):", data.hourly);
-      console.log("📆 Daily weather (raw):", data.daily);
+      const locationData = geoRes.data.results[0].components;
+      const data = weatherRes.data;
 
-      // Current weather state
-      setCurrentWeatherInfo({
-        cityId: generateUUID(),
-        temperature:Math.floor(data.current.temp) || "",
-        weatherIcon: data.current.weather[0]?.icon || "",
-        description: data.current.weather[0]?.description || "",
-        feelsLike: Math.floor(data.current.feels_like) || 0,
-        uvIndex: Math.ceil(data.current.uvi) || 0,
-        windSpeed: data.current.wind_speed || 0,
-        chanceOfRain: Math.round(data.daily?.[0]?.pop * 100) ?? 0,
-        pressure: data.current.pressure || "",
-        visibility: data.current.visibility || "",
-        humidity: data.current.humidity || "",
-        sunset: data.current.sunset || "",
-        sunrise: data.current.sunrise || "",
-      });
-
-      // Hourly forecast state
       const hourlyData = data.hourly
         .filter((_, i) => i >= 2 && (i - 2) % 3 === 0)
         .slice(0, 3)
@@ -122,15 +91,6 @@ function CurrentCity() {
           icon: d.weather?.[0]?.icon,
         }));
 
-      console.log("🕒 Formatted hourly data:", hourlyData);
-
-      setHourlyWeatherInfo({
-        time: hourlyData.map((i) => i.time),
-        temperature: hourlyData.map((i) => i.temperature),
-        icon: hourlyData.map((i) => i.icon),
-      });
-
-      // Daily forecast state
       const dailyData = data.daily.slice(0, 7).map((d, i) => ({
         day: getDayLabel(d.dt, i),
         icon: d.weather[0]?.icon || "",
@@ -139,30 +99,57 @@ function CurrentCity() {
         tempLow: Math.round(d.temp.min),
       }));
 
-      console.log("📆 Formatted daily data:", dailyData);
-
-      setDailyWeatherInfo(dailyData);
+      setCurrentWeatherInfo({
+        cityId: generateUUID(),
+        location: {
+          town: locationData.town || "",
+          state: locationData.state || "",
+          country: locationData.country || "",
+          village: locationData.village || "",
+          region: locationData.region || "",
+        },
+        current: {
+          temperature: Math.floor(data.current.temp),
+          weatherIcon: data.current.weather[0]?.icon || "",
+          description: data.current.weather[0]?.description || "",
+          feelsLike: Math.floor(data.current.feels_like),
+          uvIndex: Math.ceil(data.current.uvi),
+          windSpeed: data.current.wind_speed,
+          chanceOfRain: Math.round(data.daily?.[0]?.pop * 100) ?? 0,
+          pressure: data.current.pressure,
+          visibility: data.current.visibility,
+          humidity: data.current.humidity,
+          sunset: data.current.sunset,
+          sunrise: data.current.sunrise,
+        },
+        hourly: {
+          time: hourlyData.map((i) => i.time),
+          temperature: hourlyData.map((i) => i.temperature),
+          icon: hourlyData.map((i) => i.icon),
+        },
+        daily: dailyData,
+      });
     } catch (err) {
-      console.error(
-        "❌ Error in [CurrentCity.jsx > fetchWeather()] —  possibly at line 75",
-        err
-      );
+      console.error("\u274c Error in fetchAllWeatherInfo():", err);
     }
   };
+
+  if (!currentWeatherInfo) return <LoadingSkeleton />;
 
   return (
     <div className="flex flex-col items-center w-screen px-4 mt-10 pb-2">
       <CurrentCityContainer
-        cityName={currentLocation.village}
-        popValue={currentWeatherInfo.chanceOfRain}
-        weatherIcon={iconMap[currentWeatherInfo.weatherIcon]}
-        tempValue={currentWeatherInfo.temperature}
+        cityName={currentWeatherInfo.location.village}
+        popValue={currentWeatherInfo.current.chanceOfRain}
+        weatherIcon={iconMap[currentWeatherInfo.current.weatherIcon]}
+        tempValue={currentWeatherInfo.current.temperature}
       />
-      <HourlyContainer hourlyWeatherInfo={hourlyWeatherInfo} />
-      <DailyContainer dailyWeatherInfo={dailyWeatherInfo} />
+
+      <HourlyContainer hourlyWeatherInfo={currentWeatherInfo.hourly} />
+      <DailyContainer dailyWeatherInfo={currentWeatherInfo.daily} />
       <CurrentWeatherContainer
-        currentWeatherInfo={currentWeatherInfo}
-        cityName={currentLocation.village}
+        currentWeatherInfo={currentWeatherInfo.current}
+        cityName={currentWeatherInfo.location.village}
       />
     </div>
   );

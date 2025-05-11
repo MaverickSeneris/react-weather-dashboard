@@ -81,9 +81,9 @@ function CityList() {
               sunrise: data.current.sunrise,
               chanceOfRain: Math.round(data.daily[0].pop * 100),
               hourlyWeatherInfo: {
-                hourlyTime: hourlyData.map((i) => i.time),
-                hourlyTemperature: hourlyData.map((i) => i.temperature),
-                hourlyWeatherIcon: hourlyData.map((i) => i.icon),
+                time: hourlyData.map((i) => i.time),
+                temperature: hourlyData.map((i) => i.temperature),
+                icon: hourlyData.map((i) => i.icon),
               },
 
               dailyWeatherInfo: dailyData,

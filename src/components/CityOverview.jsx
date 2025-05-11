@@ -12,7 +12,7 @@ function CityOverview({ children }) {
   const { state } = useLocation();
   const { currentWeatherInfo, cityName } = state || {};
   const navigate = useNavigate(); // for going back to previous page
-  console.log(currentWeatherInfo.weatherIcon);
+  console.log("CityOverview.jsx:",currentWeatherInfo.hourlyWeatherInfo);
   return (
     <div className="flex flex-col items-center w-[100%] px-4 mt-4 pb-2">
       <button
@@ -29,11 +29,7 @@ function CityOverview({ children }) {
       />
 
       <HourlyContainer
-        hourlyWeatherInfo={{
-          time: currentWeatherInfo.hourlyWeatherInfo.hourlyTime,
-          icon: currentWeatherInfo.hourlyWeatherInfo.hourlyWeatherIcon,
-          temperature: currentWeatherInfo.hourlyWeatherInfo.hourlyTemperature,
-        }}
+        hourlyWeatherInfo={currentWeatherInfo.hourlyWeatherInfo}
       />
 
       <DailyContainer dailyWeatherInfo={currentWeatherInfo.dailyWeatherInfo} />

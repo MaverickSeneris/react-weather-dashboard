@@ -34,7 +34,7 @@ body {
   word-spacing: 0.15rem;
 }
 
-/* Example */
+
 .bg-white.dark\:bg-black {
   background-color: white;
 }

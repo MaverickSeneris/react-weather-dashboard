@@ -79,11 +79,6 @@ const WindyMapEmbed = () => {
       ? "in"
       : "default";
 
-  // const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-
-  // const embedType = prefersDark ? "dark" : "map";
-
-  // const iframeSrc = `https://embed.windy.com/embed2.html?lat=${coordinates.lat}&lon=${coordinates.lon}&detailLat=${coordinates.lat}&detailLon=${coordinates.lon}&zoom=9&level=surface&overlay=${overlay}&menu=true&message=true&marker=true&pressure=true&type=map&location=coordinates&detail=true&metricWind=${windUnitParam}&metricTemp=${tempUnitParam}&metricRain=${rainUnitParam}&radarRange=-1`;
   const iframeSrc = `https://embed.windy.com/embed2.html?lat=${
     coordinates.lat
   }&lon=${coordinates.lon}&detailLat=${coordinates.lat}&detailLon=${

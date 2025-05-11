@@ -13,38 +13,51 @@ function HourlyContainer({ hourlyWeatherInfo }) {
       : Math.round(temp);
   };
 
+  const { time = [], icon = [], temperature = [] } = hourlyWeatherInfo || {};
+
+  const hasData = time.length && icon.length && temperature.length;
+
+  console.log("hourlyWeatherInfo", hourlyWeatherInfo);
+
+
   return (
     <Card>
       <CardTitle title={"TODAY'S FORECAST"} />
-      <div className={`flex flex-col my-2 items-center w-[100%]`}>
-        <div className="w-[100%] flex justify-between">
-          {hourlyWeatherInfo.time.map((time, index) => (
-            <span
-              key={index}
-              className="w-max font-bold pb-2 text-slate-400 dark:text-gray-400 text-center"
-            >
-              {time}
-            </span>
-          ))}
+      {hasData ? (
+        <div className="flex flex-col my-2 items-center w-full">
+          <div className="w-full flex justify-between">
+            {time.map((t, index) => (
+              <span
+                key={index}
+                className="w-max font-bold pb-2 text-slate-400 dark:text-gray-400 text-center"
+              >
+                {t}
+              </span>
+            ))}
+          </div>
+          <div className="w-full flex justify-between">
+            {icon.map((i, index) => (
+              <img
+                className="w-16"
+                key={index}
+                src={iconMap[i]}
+                alt="weather icon"
+              />
+            ))}
+          </div>
+          <div className="w-[88%] flex justify-between">
+            {temperature.map((temp, index) => (
+              <span key={index} className="font-extrabold text-xl">
+                {convertTemp(temp)}&deg;
+              </span>
+            ))}
+          </div>
         </div>
-        <div className="w-[100%] flex justify-between">
-          {hourlyWeatherInfo.icon.map((icon, index) => (
-            <img
-              className="w-16"
-              key={index}
-              src={iconMap[icon]}
-              alt="weather icon"
-            />
-          ))}
-        </div>
-        <div className="w-[88%] flex justify-between">
-          {hourlyWeatherInfo.temperature.map((temp, index) => (
-            <span key={index} className="font-extrabold text-xl">
-              {convertTemp(temp)}&deg;
-            </span>
-          ))}
-        </div>
-      </div>
+      ) : (
+        <p className="text-center text-gray-400 dark:text-gray-500 py-4">
+          Loading forecast...
+        </p>
+      )}
     </Card>
   );
 }
