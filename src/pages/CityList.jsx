@@ -175,7 +175,7 @@ function CityList() {
                         currentWeatherInfo: city,
                         cityName: city.name,
                       }}
-                      className="flex flex-col justify-between h-8 visited:text-white"
+                      className="flex flex-col justify-between h-8 dark:text-white"
                     >
                       <h2 className="font-bold text-2xl">{city.name}</h2>
                       <span className="text-sm font-bold text-gray-400">

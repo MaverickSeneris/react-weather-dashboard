@@ -1,11 +1,11 @@
 import { Outlet, Link, useLocation } from "react-router";
-import { TiWeatherPartlySunny } from "react-icons/ti";
+import { IoPartlySunnySharp } from "react-icons/io5";
 import { FaListUl } from "react-icons/fa6";
 import { IoMapSharp } from "react-icons/io5";
 import { ImEqualizer } from "react-icons/im";
 
 const navItems = [
-  { to: "/", icon: TiWeatherPartlySunny },
+  { to: "/", icon: IoPartlySunnySharp },
   { to: "/city-list", icon: FaListUl },
   { to: "/weather-map", icon: IoMapSharp },
   { to: "/settings", icon: ImEqualizer },
@@ -25,7 +25,9 @@ function Dashboard() {
             <Link to={to} key={to}>
               <Icon
                 className={`text-2xl ${
-                  pathname === to ? "text-slate-400 dark:text-gray-300" : "text-slate-500 dark:text-gray-500"
+                  pathname === to
+                    ? "text-slate-400 dark:text-gray-300"
+                    : "text-slate-500 dark:text-gray-500"
                 }`}
               />
             </Link>

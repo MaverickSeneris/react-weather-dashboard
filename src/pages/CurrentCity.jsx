@@ -16,9 +16,9 @@ function LoadingSkeleton() {
       <div className="w-50 h-8 bg-gray-300 rounded-[10px] mb-4"></div>
       <div className="w-50 h-50 bg-gray-300 rounded-[50%] mb-4"></div>
       <div className="w-29 h-15 bg-gray-300 rounded-[15px] my-6"></div>
-      <div className="w-full h-24 bg-gray-300 rounded-[15px] mb-4 mt-2"></div>
-      <div className="w-full h-40 bg-gray-300 rounded-[15px] mb-4"></div>
-      <div className="w-full h-30 bg-gray-300 rounded-[15px]"></div>
+      <div className="w-full h-35 bg-gray-300 rounded-[15px] mb-4 mt-2"></div>
+      <div className="w-full h-100 bg-gray-300 rounded-[15px] mb-4"></div>
+      <div className="w-full h-40 bg-gray-300 rounded-[15px]"></div>
     </div>
   );
 }
