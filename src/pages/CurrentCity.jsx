@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { FiRefreshCw } from "react-icons/fi";
 import iconMap from "../utils/weatherIconMapper";
 import formatTime from "../utils/timeFormatter";
 import getDayLabel from "../utils/dayLabel";
@@ -33,6 +32,7 @@ function CurrentCity() {
   );
   const [unit, setUnit] = useState("metric");
   const [loading, setLoading] = useState(false);
+  const [showLastUpdate, setShowLastUpdate] = useState(false);
 
   useEffect(() => {
     if (!currentWeatherInfo) {
@@ -45,6 +45,25 @@ function CurrentCity() {
         }
       );
     }
+
+    const handleScroll = () => {
+      if (window.scrollY > 100) {
+        setShowLastUpdate(true);
+        navigator.geolocation.getCurrentPosition(
+          ({ coords: { latitude, longitude } }) => {
+            fetchAllWeatherInfo(latitude, longitude);
+          },
+          (error) => {
+            console.error("❌ Geolocation error:", error.message);
+          }
+        );
+      } else {
+        setShowLastUpdate(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, [unit]);
 
   const fetchAllWeatherInfo = async (lat, lon) => {
@@ -127,27 +146,15 @@ function CurrentCity() {
     }
   };
 
-  const handleRefresh = () => {
-    navigator.geolocation.getCurrentPosition(
-      ({ coords: { latitude, longitude } }) => {
-        fetchAllWeatherInfo(latitude, longitude);
-      },
-      (error) => {
-        console.error("❌ Geolocation error:", error.message);
-      }
-    );
-  };
-
   if (!currentWeatherInfo || loading) return <LoadingSkeleton />;
 
   return (
     <div className="flex flex-col items-center w-screen px-4 mt-10 pb-2">
-      <button
-        onClick={handleRefresh}
-        className="self-start p-2 text-slate-300 dark:text-white rounded-full hover:bg-blue-600"
-      >
-        <FiRefreshCw size={20} />
-      </button>
+      {showLastUpdate && lastFetchTime && (
+        <div className="fixed top-0 left-0 w-full bg-blue-600 text-white text-center py-2">
+          Last updated: {lastFetchTime}
+        </div>
+      )}
 
       <CurrentCityContainer
         cityName={currentWeatherInfo.location.village}
@@ -155,11 +162,6 @@ function CurrentCity() {
         weatherIcon={iconMap[currentWeatherInfo.current.weatherIcon]}
         tempValue={currentWeatherInfo.current.temperature}
       />
-      {lastFetchTime && (
-        <p className="text-[0.7rem] text-slate-300 dark:text-gray-500">
-          Last updated: {lastFetchTime}
-        </p>
-      )}
 
       <HourlyContainer hourlyWeatherInfo={currentWeatherInfo.hourly} />
       <DailyContainer dailyWeatherInfo={currentWeatherInfo.daily} />
