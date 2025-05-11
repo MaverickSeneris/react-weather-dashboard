@@ -33,7 +33,6 @@ function CurrentCity() {
   );
   const [unit, setUnit] = useState("metric");
   const [loading, setLoading] = useState(false);
-  const [showLastUpdate, setShowLastUpdate] = useState(false);
 
   useEffect(() => {
     if (!currentWeatherInfo) {
@@ -46,25 +45,6 @@ function CurrentCity() {
         }
       );
     }
-
-    const handleScroll = () => {
-      if (window.scrollY > 100) {
-        setShowLastUpdate(true);
-        navigator.geolocation.getCurrentPosition(
-          ({ coords: { latitude, longitude } }) => {
-            fetchAllWeatherInfo(latitude, longitude);
-          },
-          (error) => {
-            console.error("❌ Geolocation error:", error.message);
-          }
-        );
-      } else {
-        setShowLastUpdate(false);
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
   }, [unit]);
 
   const fetchAllWeatherInfo = async (lat, lon) => {
@@ -147,18 +127,23 @@ function CurrentCity() {
     }
   };
 
+  const handleRefresh = () => {
+    navigator.geolocation.getCurrentPosition(
+      ({ coords: { latitude, longitude } }) => {
+        fetchAllWeatherInfo(latitude, longitude);
+      },
+      (error) => {
+        console.error("❌ Geolocation error:", error.message);
+      }
+    );
+  };
+
   if (!currentWeatherInfo || loading) return <LoadingSkeleton />;
 
   return (
     <div className="flex flex-col items-center w-screen px-4 mt-10 pb-2">
-      {showLastUpdate && lastFetchTime && (
-        <div className="fixed top-0 left-0 w-full bg-blue-600 text-white text-center py-2">
-          Last updated: {lastFetchTime}
-        </div>
-      )}
-
       <button
-        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+        onClick={handleRefresh}
         className="self-start p-2 text-slate-300 dark:text-white rounded-full hover:bg-blue-600"
       >
         <FiRefreshCw size={20} />
