@@ -146,9 +146,9 @@ const WindyMapEmbed = () => {
         {error && <p className="text-red-500">{error}</p>}
         {loading ? (
           <div className="absolute inset-0 bg-slate-100 dark:bg-gray-800 bg-opacity-60 flex items-center justify-center animate-pulse">
-            <p className="text-gray-500 dark:text-gray-300">
+            {/* <p className="text-gray-500 dark:text-gray-300">
               Loading map, please wait...
-            </p>
+            </p> */}
           </div>
         ) : (
           <iframe
