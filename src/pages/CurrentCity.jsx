@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { FiRefreshCw } from "react-icons/fi";
+import PullToRefresh from "react-pull-to-refresh";
 import iconMap from "../utils/weatherIconMapper";
 import formatTime from "../utils/timeFormatter";
 import getDayLabel from "../utils/dayLabel";
@@ -33,6 +33,7 @@ function CurrentCity() {
   );
   const [unit, setUnit] = useState("metric");
   const [loading, setLoading] = useState(false);
+  const [showFetchTime, setShowFetchTime] = useState(false);
 
   useEffect(() => {
     if (!currentWeatherInfo) {
@@ -120,6 +121,9 @@ function CurrentCity() {
       const fetchTime = new Date().toLocaleString();
       setLastFetchTime(fetchTime);
       localStorage.setItem("lastFetchTime", fetchTime);
+
+      setShowFetchTime(true);
+      setTimeout(() => setShowFetchTime(false), 3000);
     } catch (err) {
       console.error("\u274c Error in fetchAllWeatherInfo():", err);
     } finally {
@@ -128,46 +132,44 @@ function CurrentCity() {
   };
 
   const handleRefresh = () => {
-    navigator.geolocation.getCurrentPosition(
-      ({ coords: { latitude, longitude } }) => {
-        fetchAllWeatherInfo(latitude, longitude);
-      },
-      (error) => {
-        console.error("❌ Geolocation error:", error.message);
-      }
-    );
+    return new Promise((resolve) => {
+      navigator.geolocation.getCurrentPosition(
+        ({ coords: { latitude, longitude } }) => {
+          fetchAllWeatherInfo(latitude, longitude).then(resolve);
+        },
+        (error) => {
+          console.error("❌ Geolocation error:", error.message);
+          resolve();
+        }
+      );
+    });
   };
 
   if (!currentWeatherInfo || loading) return <LoadingSkeleton />;
 
   return (
-    <div className="flex flex-col items-center w-screen px-4 mt-10 pb-2">
-      <button
-        onClick={handleRefresh}
-        className="self-start p-2 text-slate-300 dark:text-white rounded-full hover:bg-blue-600"
-      >
-        <FiRefreshCw size={20} />
-      </button>
+    <PullToRefresh onRefresh={handleRefresh}>
+      <div className="flex flex-col items-center w-screen px-4 mt-10 pb-2">
+        <CurrentCityContainer
+          cityName={currentWeatherInfo.location.village}
+          popValue={currentWeatherInfo.current.chanceOfRain}
+          weatherIcon={iconMap[currentWeatherInfo.current.weatherIcon]}
+          tempValue={currentWeatherInfo.current.temperature}
+        />
+        {lastFetchTime && (
+          <p className="text-[0.7rem] text-slate-300 dark:text-gray-500">
+            Last updated: {lastFetchTime}
+          </p>
+        )}
 
-      <CurrentCityContainer
-        cityName={currentWeatherInfo.location.village}
-        popValue={currentWeatherInfo.current.chanceOfRain}
-        weatherIcon={iconMap[currentWeatherInfo.current.weatherIcon]}
-        tempValue={currentWeatherInfo.current.temperature}
-      />
-      {lastFetchTime && (
-        <p className="text-[0.7rem] text-slate-300 dark:text-gray-500">
-          Last updated: {lastFetchTime}
-        </p>
-      )}
-
-      <HourlyContainer hourlyWeatherInfo={currentWeatherInfo.hourly} />
-      <DailyContainer dailyWeatherInfo={currentWeatherInfo.daily} />
-      <CurrentWeatherContainer
-        currentWeatherInfo={currentWeatherInfo.current}
-        cityName={currentWeatherInfo.location.village}
-      />
-    </div>
+        <HourlyContainer hourlyWeatherInfo={currentWeatherInfo.hourly} />
+        <DailyContainer dailyWeatherInfo={currentWeatherInfo.daily} />
+        <CurrentWeatherContainer
+          currentWeatherInfo={currentWeatherInfo.current}
+          cityName={currentWeatherInfo.location.village}
+        />
+      </div>
+    </PullToRefresh>
   );
 }
 
