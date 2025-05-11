@@ -144,9 +144,9 @@ function CurrentCity() {
     <div className="flex flex-col items-center w-screen px-4 mt-10 pb-2">
       <button
         onClick={handleRefresh}
-        className="self-start p-2 dark:text-white rounded-full hover:bg-blue-600"
+        className="self-start p-2 text-slate-300 dark:text-white rounded-full hover:bg-blue-600"
       >
-        <FiRefreshCw size={15} />
+        <FiRefreshCw size={20} />
       </button>
 
       <CurrentCityContainer
@@ -156,7 +156,7 @@ function CurrentCity() {
         tempValue={currentWeatherInfo.current.temperature}
       />
       {lastFetchTime && (
-        <p className="text-[0.7rem] dark:text-gray-500">
+        <p className="text-[0.7rem] text-slate-300 dark:text-gray-500">
           Last updated: {lastFetchTime}
         </p>
       )}
