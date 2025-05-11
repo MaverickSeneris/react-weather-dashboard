@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { FiRefreshCw } from "react-icons/fi";
 import iconMap from "../utils/weatherIconMapper";
 import formatTime from "../utils/timeFormatter";
 import getDayLabel from "../utils/dayLabel";
@@ -156,12 +157,24 @@ function CurrentCity() {
         </div>
       )}
 
+      <button
+        onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+        className="self-start p-2 text-slate-300 dark:text-white rounded-full hover:bg-blue-600"
+      >
+        <FiRefreshCw size={20} />
+      </button>
+
       <CurrentCityContainer
         cityName={currentWeatherInfo.location.village}
         popValue={currentWeatherInfo.current.chanceOfRain}
         weatherIcon={iconMap[currentWeatherInfo.current.weatherIcon]}
         tempValue={currentWeatherInfo.current.temperature}
       />
+      {lastFetchTime && (
+        <p className="text-[0.7rem] text-slate-300 dark:text-gray-500">
+          Last updated: {lastFetchTime}
+        </p>
+      )}
 
       <HourlyContainer hourlyWeatherInfo={currentWeatherInfo.hourly} />
       <DailyContainer dailyWeatherInfo={currentWeatherInfo.daily} />
