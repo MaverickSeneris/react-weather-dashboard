@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { FiRefreshCw } from "react-icons/fi";
 import iconMap from "../utils/weatherIconMapper";
 import formatTime from "../utils/timeFormatter";
 import getDayLabel from "../utils/dayLabel";
@@ -24,47 +25,30 @@ function LoadingSkeleton() {
 }
 
 function CurrentCity() {
-  const [currentWeatherInfo, setCurrentWeatherInfo] = useState(null);
+  const [currentWeatherInfo, setCurrentWeatherInfo] = useState(
+    JSON.parse(localStorage.getItem("weatherData")) || null
+  );
+  const [lastFetchTime, setLastFetchTime] = useState(
+    localStorage.getItem("lastFetchTime") || null
+  );
   const [unit, setUnit] = useState("metric");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    navigator.geolocation.getCurrentPosition(
-      ({ coords: { latitude, longitude } }) => {
-        fetchAllWeatherInfo(latitude, longitude);
-      },
-      (error) => {
-        console.error("❌ Geolocation error:", error.message);
-      }
-    );
-  }, [unit]);
-
-  const fetchLocation = async (lat, lon) => {
-    console.log("⏳ Loading location data...");
-    try {
-      const geoKey = import.meta.env.VITE_OPENCAGE_API_KEY;
-      const res = await axios.get(
-        `https://api.opencagedata.com/geocode/v1/json?q=${lat}+${lon}&key=${geoKey}`
-      );
-      const c = res.data.results[0].components;
-
-      console.log("🌍 Location data:", c);
-
-      setCurrentLocation({
-        town: c.town || "",
-        state: c.state || "",
-        country: c.country || "",
-        village: c.village || "",
-        region: c.region || "",
-      });
-    } catch (err) {
-      console.error(
-        "❌ Error in [CurrentCity.jsx > fetchLocation()] —  possibly at line 51",
-        err
+    if (!currentWeatherInfo) {
+      navigator.geolocation.getCurrentPosition(
+        ({ coords: { latitude, longitude } }) => {
+          fetchAllWeatherInfo(latitude, longitude);
+        },
+        (error) => {
+          console.error("❌ Geolocation error:", error.message);
+        }
       );
     }
-  };
+  }, [unit]);
 
   const fetchAllWeatherInfo = async (lat, lon) => {
+    setLoading(true);
     try {
       const geoKey = import.meta.env.VITE_OPENCAGE_API_KEY;
       const weatherUrl = import.meta.env.VITE_OPENWEATHER_ONECALL_API_URL;
@@ -99,7 +83,7 @@ function CurrentCity() {
         tempLow: Math.round(d.temp.min),
       }));
 
-      setCurrentWeatherInfo({
+      const weatherInfo = {
         cityId: generateUUID(),
         location: {
           town: locationData.town || "",
@@ -128,22 +112,54 @@ function CurrentCity() {
           icon: hourlyData.map((i) => i.icon),
         },
         daily: dailyData,
-      });
+      };
+
+      setCurrentWeatherInfo(weatherInfo);
+      localStorage.setItem("weatherData", JSON.stringify(weatherInfo));
+
+      const fetchTime = new Date().toLocaleString();
+      setLastFetchTime(fetchTime);
+      localStorage.setItem("lastFetchTime", fetchTime);
     } catch (err) {
       console.error("\u274c Error in fetchAllWeatherInfo():", err);
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (!currentWeatherInfo) return <LoadingSkeleton />;
+  const handleRefresh = () => {
+    navigator.geolocation.getCurrentPosition(
+      ({ coords: { latitude, longitude } }) => {
+        fetchAllWeatherInfo(latitude, longitude);
+      },
+      (error) => {
+        console.error("❌ Geolocation error:", error.message);
+      }
+    );
+  };
+
+  if (!currentWeatherInfo || loading) return <LoadingSkeleton />;
 
   return (
     <div className="flex flex-col items-center w-screen px-4 mt-10 pb-2">
+      <button
+        onClick={handleRefresh}
+        className="self-start p-2 dark:text-white rounded-full hover:bg-blue-600"
+      >
+        <FiRefreshCw size={15} />
+      </button>
+
       <CurrentCityContainer
         cityName={currentWeatherInfo.location.village}
         popValue={currentWeatherInfo.current.chanceOfRain}
         weatherIcon={iconMap[currentWeatherInfo.current.weatherIcon]}
         tempValue={currentWeatherInfo.current.temperature}
       />
+      {lastFetchTime && (
+        <p className="text-[0.7rem] dark:text-gray-500">
+          Last updated: {lastFetchTime}
+        </p>
+      )}
 
       <HourlyContainer hourlyWeatherInfo={currentWeatherInfo.hourly} />
       <DailyContainer dailyWeatherInfo={currentWeatherInfo.daily} />
