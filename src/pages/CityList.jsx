@@ -150,7 +150,7 @@ function CityList() {
               }}
               onTouchEnd={() => {
                 // optional: reset swipe if you want automatic return
-                setDraggedId(null);
+                // setDraggedId(null);
                 setSwiped(false);
               }}
             >
