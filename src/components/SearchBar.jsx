@@ -4,7 +4,7 @@ import CancelButton from "./ui/CancelButton";
 import generateUUID from "../utils/uuidGenerator";
 import formatTime from "../utils/timeFormatter";
 import getDayLabel from "../utils/dayLabel";
-import mockCities from "../mockCities";
+
 
 // API configuration
 const url = import.meta.env.VITE_OPENWEATHER_ONECALL_API_URL;
@@ -17,7 +17,6 @@ function SearchBar({ toggleSearchMode, handleAddCity }) {
   const [weatherData, setWeatherData] = useState([]);
   const [loading, setLoading] = useState(false); // Console-only loading state
 
-  console.log(weatherData);
   console.log(
     "🔍 Info [SearchBar.jsx > useState()] — Initial cities state:",
     cities

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import SearchBar from "../components/SearchBar";
 import Header from "../components/ui/Header";
 import PageContainer from "../components/ui/PageContainer";
-// import mockCities from "../mockCities";
 import Card from "../components/ui/Card";
 import formatTime from "../utils/timeFormatter";
 import { IoCloseSharp } from "react-icons/io5";
@@ -103,9 +102,6 @@ function CityList() {
     };
 
     fetchLiveWeatherData();
-    // const interval = setInterval(fetchLiveWeatherData, 30 * 60 * 1000); // every 30 mins
-
-    // return () => clearInterval(interval);
   }, [searchMode]);
 
   function toggleSearchMode() {
@@ -154,8 +150,8 @@ function CityList() {
               }}
               onTouchEnd={() => {
                 // optional: reset swipe if you want automatic return
-                // setDraggedId(null);
-                // setSwiped(false);
+                setDraggedId(null);
+                setSwiped(false);
               }}
             >
               {/* Card */}
