@@ -78,7 +78,7 @@ const CityCard = ({ weatherData }) => {
           >
             <Card>
               {saveMessages[city.cityId] ? (
-                <div className="flex items-center justify-center w-full text-white font-bold h-[55px]">
+                <div className="flex items-center justify-center w-full dark:text-white font-bold h-[55px]">
                   {saveMessages[city.cityId]}
                 </div>
               ) : (
