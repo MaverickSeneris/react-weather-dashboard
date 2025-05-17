@@ -190,7 +190,6 @@ function SearchBar({ toggleSearchMode, handleAddCity }) {
       </div>
 
       <div>
-        {/* Please replace weatherdata when in production*/}
         <CityCard weatherData={weatherData}/>
       </div>
     </div>
