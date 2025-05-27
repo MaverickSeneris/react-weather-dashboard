@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { FiRefreshCw } from "react-icons/fi";
 import iconMap from "../utils/weatherIconMapper";
@@ -9,20 +9,7 @@ import HourlyContainer from "../components/HourlyContainer";
 import DailyContainer from "../components/DailyContainer";
 import CurrentWeatherContainer from "../components/CurrentWeatherContainer";
 import generateUUID from "../utils/uuidGenerator";
-
-function LoadingSkeleton() {
-  return (
-    <div className="flex flex-col items-center w-screen px-4 mt-10 pb-2 animate-pulse">
-      <div className="w-40 h-12 bg-slate-100 dark:bg-gray-800 rounded-[15px] mb-4"></div>
-      <div className="w-50 h-8 bg-slate-100 dark:bg-gray-800 rounded-[10px] mb-4"></div>
-      <div className="w-50 h-50 bg-slate-100 dark:bg-gray-800 rounded-[50%] mb-4"></div>
-      <div className="w-29 h-15 bg-slate-100 dark:bg-gray-800 rounded-[15px] my-6"></div>
-      <div className="w-full h-35 bg-slate-100 dark:bg-gray-800 rounded-[15px] mb-4 mt-2"></div>
-      <div className="w-full h-100 bg-slate-100 dark:bg-gray-800 rounded-[15px] mb-4"></div>
-      <div className="w-full h-40 bg-slate-100 dark:bg-gray-800 rounded-[15px]"></div>
-    </div>
-  );
-}
+import LoadingSkeleton from "../components/ui/loadingComponents/CurrentCityLoadingSkeleton";
 
 function CurrentCity() {
   const [currentWeatherInfo, setCurrentWeatherInfo] = useState(
@@ -144,7 +131,7 @@ function CurrentCity() {
     <div className="flex flex-col items-center w-screen px-4 mt-10 pb-2">
       <button
         onClick={handleRefresh}
-        className="self-start p-2 text-slate-300 dark:text-white rounded-full hover:bg-blue-600"
+        className="self-start p-2 thyuvgfext-slate-300 dark:text-white rounded-full hover:bg-blue-600"
       >
         <FiRefreshCw size={20} />
       </button>
