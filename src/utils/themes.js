@@ -171,6 +171,40 @@ export const themes = {
       orange: "#e69875",
     },
   },
+  "ily❤️": {
+    light: {
+      bg0: "#ffffff",
+      bg0_h: "#fff5f5",
+      bg1: "#ffe8e8",
+      bg2: "#ffd6d6",
+      fg: "#D6241F",
+      fg1: "#A10E14",
+      gray: "#F14721",
+      red: "#D6241F",
+      green: "#40a02b",
+      yellow: "#ff6b7d",
+      blue: "#1e66f5",
+      purple: "#ffb3d1",
+      aqua: "#179299",
+      orange: "#F14721",
+    },
+    dark: {
+      bg0: "#0D0D10",
+      bg0_h: "#A10E14",
+      bg1: "#2B2B31",
+      bg2: "#3a3a42",
+      fg: "#ffb3ba",
+      fg1: "#ff8c94",
+      gray: "#D6241F",
+      red: "#D6241F",
+      green: "#a6e3a1",
+      yellow: "#ff6b7d",
+      blue: "#89b4fa",
+      purple: "#ffb3d1",
+      aqua: "#94e2d5",
+      orange: "#F14721",
+    },
+  },
 };
 
 // Convert theme keys to CSS variable names (bg0 -> bg-0, bg0_h -> bg-0-h, etc.)
@@ -182,15 +216,58 @@ const toKebabCase = (str) => {
     .toLowerCase();
 };
 
+// Function to update PWA manifest theme colors at runtime
+export const updateManifestTheme = (themeColor) => {
+  // Find the manifest link tag
+  let manifestLink = document.querySelector('link[rel="manifest"]');
+  
+  if (manifestLink) {
+    // Get the manifest URL
+    const manifestUrl = manifestLink.getAttribute('href');
+    
+    // Fetch and update the manifest
+    if (manifestUrl && !manifestUrl.startsWith('blob:')) {
+      fetch(manifestUrl)
+        .then(response => response.json())
+        .then(manifest => {
+          // Update theme colors
+          manifest.theme_color = themeColor;
+          manifest.background_color = themeColor;
+          
+          // Create a new blob URL with updated manifest
+          const updatedManifest = JSON.stringify(manifest);
+          const blob = new Blob([updatedManifest], { type: 'application/json' });
+          const newManifestUrl = URL.createObjectURL(blob);
+          
+          // Update the manifest link
+          manifestLink.setAttribute('href', newManifestUrl);
+          
+          console.log(`[THEME] Updated manifest theme color to: ${themeColor}`);
+        })
+        .catch(err => {
+          console.warn('[THEME] Could not update manifest:', err);
+          // Fallback: try to update via service worker
+          if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistration().then(registration => {
+              if (registration) {
+                registration.update();
+              }
+            });
+          }
+        });
+    }
+  }
+};
+
 export const applyTheme = (themeName, mode) => {
   const root = document.documentElement;
   // Normalize theme name (case-insensitive)
-  const normalizedThemeName = themeName?.toLowerCase() || "gruvbox";
+  const normalizedThemeName = themeName?.toLowerCase() || "catppuccin";
   const theme = themes[normalizedThemeName]?.[mode];
   
   if (!theme) {
-    console.warn(`Theme ${normalizedThemeName} with mode ${mode} not found, using gruvbox`);
-    const fallbackTheme = themes.gruvbox[mode] || themes.gruvbox.light;
+    console.warn(`Theme ${normalizedThemeName} with mode ${mode} not found, using catppuccin`);
+    const fallbackTheme = themes.catppuccin[mode] || themes.catppuccin.dark;
     Object.entries(fallbackTheme).forEach(([key, value]) => {
       const cssVarName = toKebabCase(key);
       root.style.setProperty(`--${cssVarName}`, value);
@@ -213,7 +290,7 @@ export const applyTheme = (themeName, mode) => {
   }
   
   // Update meta theme-color tag dynamically
-  const bgColor = root.style.getPropertyValue("--bg-0") || theme?.bg0 || "#fbf1c7";
+  const bgColor = root.style.getPropertyValue("--bg-0") || theme?.bg0 || "#1e1e2e";
   let meta = document.querySelector('meta[name="theme-color"]');
   if (!meta) {
     meta = document.createElement("meta");
@@ -221,6 +298,9 @@ export const applyTheme = (themeName, mode) => {
     document.head.appendChild(meta);
   }
   meta.setAttribute("content", bgColor);
+  
+  // Update PWA manifest theme colors dynamically
+  updateManifestTheme(bgColor);
   
   console.log(`[THEME] Applied theme: ${normalizedThemeName}, mode: ${mode}, bg0: ${bgColor}`);
 };

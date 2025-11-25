@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { motion, useInView } from "framer-motion";
 import axios from "axios";
 import { FiRefreshCw } from "react-icons/fi";
 import iconMap from "../utils/weatherIconMapper";
@@ -137,43 +138,99 @@ function CurrentCity() {
 
   if (!currentWeatherInfo || loading) return <LoadingSkeleton />;
 
+  // Lazy loading wrapper component with alternating sides
+  const LazySection = ({ children, index, className = "" }) => {
+    const ref = useRef(null);
+    const isInView = useInView(ref, { once: true, margin: "-50px" });
+    const isEven = index % 2 === 0;
+
+    return (
+      <motion.div
+        ref={ref}
+        initial={{ 
+          opacity: 0, 
+          x: isEven ? -100 : 100,
+          scale: 0.85
+        }}
+        animate={isInView ? { 
+          opacity: 1, 
+          x: 0,
+          scale: 1
+        } : { 
+          opacity: 0, 
+          x: isEven ? -100 : 100,
+          scale: 0.85
+        }}
+        transition={{ 
+          type: "spring", 
+          damping: 15, 
+          stiffness: 200,
+          delay: 0.15,
+          duration: 0.6
+        }}
+        className={className}
+      >
+        {children}
+      </motion.div>
+    );
+  };
+
   return (
     <div className="flex flex-col items-center w-screen px-4 mt-10 pb-2">
-      <button
+      <motion.button
         onClick={handleRefresh}
+        whileHover={{ scale: 1.1, rotate: 180 }}
+        whileTap={{ scale: 0.9 }}
+        transition={{ type: "spring", stiffness: 400, damping: 17 }}
         className="self-start p-2 rounded-full"
         style={{ color: 'var(--fg)' }}
         onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--blue)'}
         onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
       >
         <FiRefreshCw size={20} />
-      </button>
+      </motion.button>
 
-      <CurrentCityContainer
-        cityName={currentWeatherInfo.location.village}
-        popValue={currentWeatherInfo.current.chanceOfRain}
-        weatherIcon={iconMap[currentWeatherInfo.current.weatherIcon]}
-        tempValue={currentWeatherInfo.current.temperature}
-      />
+      <LazySection index={0}>
+        <CurrentCityContainer
+          cityName={currentWeatherInfo.location.village}
+          popValue={currentWeatherInfo.current.chanceOfRain}
+          weatherIcon={iconMap[currentWeatherInfo.current.weatherIcon]}
+          tempValue={currentWeatherInfo.current.temperature}
+        />
+      </LazySection>
+      
       {lastFetchTime && (
-        <p className="text-[0.7rem]" style={{ color: 'var(--gray)' }}>
-          Last updated: {lastFetchTime}
-        </p>
+        <LazySection index={1}>
+          <p className="text-[0.7rem]" style={{ color: 'var(--gray)' }}>
+            Last updated: {lastFetchTime}
+          </p>
+        </LazySection>
       )}
 
-      <HourlyContainer hourlyWeatherInfo={currentWeatherInfo.hourly} />
-      <DailyContainer dailyWeatherInfo={currentWeatherInfo.daily} />
+      <LazySection index={2} className="w-full">
+        <HourlyContainer hourlyWeatherInfo={currentWeatherInfo.hourly} />
+      </LazySection>
+      
+      <LazySection index={3} className="w-full">
+        <DailyContainer dailyWeatherInfo={currentWeatherInfo.daily} />
+      </LazySection>
       
       {/* Weather Alerts - only shows if there are alarming conditions */}
-      <WeatherAlerts weatherData={currentWeatherInfo} />
+      <LazySection index={4} className="w-full">
+        <WeatherAlerts weatherData={currentWeatherInfo} />
+      </LazySection>
       
-      <CurrentWeatherContainer
-        currentWeatherInfo={currentWeatherInfo.current}
-        cityName={currentWeatherInfo.location.village}
-      />
+      <LazySection index={5} className="w-full">
+        <CurrentWeatherContainer
+          currentWeatherInfo={currentWeatherInfo.current}
+          cityName={currentWeatherInfo.location.village}
+        />
+      </LazySection>
       
       {/* Weather Recommendations */}
-      <WeatherRecommendations weatherData={currentWeatherInfo} />
+      <LazySection index={6} className="w-full">
+        <WeatherRecommendations weatherData={currentWeatherInfo} />
+      </LazySection>
     </div>
   );
 }

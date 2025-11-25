@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import Card from "./ui/Card";
 import { getWeatherAlerts } from "../utils/weatherRecommendations";
 import { generateWeatherAlerts as generateAIAlerts } from "../utils/aiService";
@@ -80,7 +81,7 @@ function WeatherAlerts({ weatherData }) {
           ⚠️ Weather Alerts
         </h3>
         {settings.aiEnabled && settings.aiApiKey && (
-          <span className="text-xs px-2 py-1 rounded" style={{ backgroundColor: 'var(--bg-2)', color: 'var(--green)' }}>
+          <span className="text-sm px-2 py-1 rounded font-semibold" style={{ backgroundColor: 'var(--bg-2)', color: 'var(--green)' }}>
             AI
           </span>
         )}
@@ -94,21 +95,38 @@ function WeatherAlerts({ weatherData }) {
         </p>
       )}
       <div className="space-y-3">
-        {alerts.map((alert, index) => (
-          <div
-            key={index}
-            className="p-3 rounded-lg border-2"
-            style={getAlertStyle(alert.type)}
-          >
-            <div className="flex items-start gap-2">
-              <span className="text-xl">{alert.icon}</span>
-              <div className="flex-1">
-                <h4 className="font-bold text-sm mb-1">{alert.title}</h4>
-                <p className="text-xs opacity-90">{alert.message}</p>
+        <AnimatePresence>
+          {alerts.map((alert, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, x: -20, scale: 0.9 }}
+              transition={{ 
+                type: "spring", 
+                damping: 20, 
+                stiffness: 300,
+                delay: index * 0.1 
+              }}
+              className="p-3 rounded-lg border-2"
+              style={getAlertStyle(alert.type)}
+            >
+              <div className="flex items-start gap-2">
+                <motion.span
+                  animate={{ rotate: [0, 10, -10, 0] }}
+                  transition={{ duration: 0.5, delay: index * 0.1 + 0.2 }}
+                  className="text-xl"
+                >
+                  {alert.icon}
+                </motion.span>
+                <div className="flex-1">
+                  <h4 className="font-bold text-sm mb-1">{alert.title}</h4>
+                  <p className="text-xs opacity-90">{alert.message}</p>
+                </div>
               </div>
-            </div>
-          </div>
-        ))}
+            </motion.div>
+          ))}
+        </AnimatePresence>
       </div>
     </Card>
   );

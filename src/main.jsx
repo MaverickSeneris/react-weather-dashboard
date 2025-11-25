@@ -8,14 +8,14 @@ import { applyTheme, getSystemMode } from "./utils/themes";
 const initTheme = () => {
   try {
     const saved = localStorage.getItem("weatherSettings");
-    let themeStyle = "gruvbox";
-    let themeMode = "system";
+    let themeStyle = "catppuccin";
+    let themeMode = "dark";
     
     if (saved) {
       try {
         const settings = JSON.parse(saved);
-        themeStyle = settings.themeStyle || "gruvbox";
-        themeMode = settings.themeMode || "system";
+        themeStyle = settings.themeStyle || "catppuccin";
+        themeMode = settings.themeMode || "dark";
         
         // Handle migration from old dark setting
         if (settings.dark !== undefined && !settings.themeMode) {
@@ -35,8 +35,8 @@ const initTheme = () => {
     applyTheme(themeStyle, mode);
   } catch (error) {
     console.error("Error initializing theme:", error);
-    // Fallback to gruvbox light
-    applyTheme("gruvbox", "light");
+    // Fallback to catppuccin dark
+    applyTheme("catppuccin", "dark");
   }
 };
 

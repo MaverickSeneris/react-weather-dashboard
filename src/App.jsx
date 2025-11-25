@@ -21,9 +21,9 @@ function App() {
     }
     
     // Get current theme colors
-    const themeName = settings.themeStyle?.toLowerCase() || "gruvbox";
+    const themeName = settings.themeStyle?.toLowerCase() || "catppuccin";
     const bgColor = document.documentElement.style.getPropertyValue("--bg-0") || 
-                   (mode === "dark" ? "#282828" : "#fbf1c7");
+                   (mode === "dark" ? "#1e1e2e" : "#eff1f5");
     
     let meta = document.querySelector('meta[name="theme-color"]');
     if (!meta) {

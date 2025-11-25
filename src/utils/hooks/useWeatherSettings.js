@@ -10,8 +10,8 @@ const defaultSettings = {
   notifications: true,
   timeFormat: true,
   location: true,
-  themeMode: "system", // "light", "dark", or "system"
-  themeStyle: "gruvbox", // "gruvbox", "catppuccin", "monokai", "flexbox", "everforest"
+  themeMode: "dark", // "light", "dark", or "system"
+  themeStyle: "catppuccin", // "gruvbox", "catppuccin", "monokai", "flexbox", "everforest"
   aiEnabled: false, // Toggle for AI features
   aiProvider: "openai", // "openai", "anthropic", "google"
   aiApiKey: "", // User's AI API key
@@ -29,7 +29,7 @@ export function useWeatherSettings() {
         delete parsed.dark;
       }
       if (!parsed.themeStyle) {
-        parsed.themeStyle = "gruvbox";
+        parsed.themeStyle = "catppuccin";
       }
       // Migrate AI settings
       if (parsed.aiEnabled === undefined) {
@@ -85,7 +85,7 @@ export function useWeatherSettings() {
       mode = getSystemMode();
     }
     
-    applyTheme(settings.themeStyle || "gruvbox", mode);
+    applyTheme(settings.themeStyle || "catppuccin", mode);
   }, [settings.themeMode, settings.themeStyle]);
 
   // Listen for system theme changes
@@ -94,7 +94,7 @@ export function useWeatherSettings() {
       const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
       const handleChange = () => {
         const mode = getSystemMode();
-        applyTheme(settings.themeStyle || "gruvbox", mode);
+        applyTheme(settings.themeStyle || "catppuccin", mode);
       };
       
       mediaQuery.addEventListener("change", handleChange);

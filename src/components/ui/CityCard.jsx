@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
+import { motion, AnimatePresence, useInView } from "framer-motion";
 import Card from "./Card";
 import iconMap from "../../utils/weatherIconMapper";
 import timeFormatter from "../../utils/timeFormatter";
@@ -62,15 +63,53 @@ const CityCard = ({ weatherData }) => {
 
   return (
     <>
-      {weatherData.map((city) => (
-        <div
-          key={city.cityId}
-          className="relative flex items-center"
-          onTouchStart={() => setDraggedId(city.cityId)}
-          onTouchMove={(e) => {
-            if (e.touches[0].clientX < 150) setSwiped(true);
-          }}
-        >
+      {weatherData.map((city, index) => {
+        const CardWrapper = ({ children }) => {
+          const ref = useRef(null);
+          const isInView = useInView(ref, { once: true, margin: "-100px" });
+          const isEven = index % 2 === 0;
+          
+          return (
+            <motion.div
+              ref={ref}
+              initial={{ 
+                opacity: 0, 
+                x: isEven ? -100 : 100,
+                scale: 0.85
+              }}
+              animate={isInView ? { 
+                opacity: 1, 
+                x: 0,
+                scale: 1
+              } : { 
+                opacity: 0, 
+                x: isEven ? -100 : 100,
+                scale: 0.85
+              }}
+              exit={{ opacity: 0, x: isEven ? -100 : 100 }}
+              transition={{ 
+                type: "spring", 
+                damping: 15, 
+                stiffness: 200,
+                delay: 0.15,
+                duration: 0.6
+              }}
+              className="relative flex items-center"
+            >
+              {children}
+            </motion.div>
+          );
+        };
+
+        return (
+          <CardWrapper key={city.cityId}>
+            <div
+              className="relative flex items-center w-full"
+              onTouchStart={() => setDraggedId(city.cityId)}
+              onTouchMove={(e) => {
+                if (e.touches[0].clientX < 150) setSwiped(true);
+              }}
+            >
           <div
             className={`transition-all duration-500 ${
               draggedId === city.cityId && swiped
@@ -125,22 +164,35 @@ const CityCard = ({ weatherData }) => {
             </Card>
           </div>
 
-          {draggedId === city.cityId && swiped && (
-            <button
-              onClick={() => handleSaveCity(city.cityId)}
-              className="ml-4 flex-shrink-0 p-5 rounded-[15px] h-[100px] w-[20%]"
-              style={{ 
-                backgroundColor: 'var(--green)', 
-                color: 'var(--bg-0)'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--yellow)'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--green)'}
-            >
-              <IoAddSharp size={"35px"} />
-            </button>
-          )}
-        </div>
-      ))}
+          <AnimatePresence>
+            {draggedId === city.cityId && swiped && (
+              <motion.button
+                initial={{ opacity: 0, x: -20, scale: 0.8 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                exit={{ opacity: 0, x: -20, scale: 0.8 }}
+                transition={{ type: "spring", damping: 20, stiffness: 300 }}
+                onClick={() => handleSaveCity(city.cityId)}
+                whileHover={{ scale: 1.1, backgroundColor: 'var(--yellow)' }}
+                whileTap={{ scale: 0.95 }}
+                className="ml-4 flex-shrink-0 p-5 rounded-[15px] h-[100px] w-[20%] flex items-center justify-center"
+                style={{ 
+                  backgroundColor: 'var(--green)', 
+                  color: 'var(--bg-0)'
+                }}
+              >
+                <motion.div
+                  animate={{ rotate: [0, -90, 0] }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <IoAddSharp size={35} />
+                </motion.div>
+              </motion.button>
+            )}
+          </AnimatePresence>
+            </div>
+          </CardWrapper>
+        );
+      })}
     </>
   );
 };

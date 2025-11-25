@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import Card from "./ui/Card";
 import CardTitle from "./ui/CardTitle";
 import { getWeatherRecommendations } from "../utils/weatherRecommendations";
@@ -60,7 +61,7 @@ function WeatherRecommendations({ weatherData }) {
       <div className="flex items-center justify-between mb-2">
         <CardTitle title={"RECOMMENDATIONS"} />
         {settings.aiEnabled && settings.aiApiKey && (
-          <span className="text-xs px-2 py-1 rounded" style={{ backgroundColor: 'var(--bg-2)', color: 'var(--green)' }}>
+          <span className="text-sm px-2 py-1 rounded font-semibold" style={{ backgroundColor: 'var(--bg-2)', color: 'var(--green)' }}>
             AI
           </span>
         )}
@@ -82,8 +83,17 @@ function WeatherRecommendations({ weatherData }) {
           </h4>
           <div className="flex flex-wrap gap-2">
             {recommendations.clothing.map((item, index) => (
-              <span
+              <motion.span
                 key={index}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ 
+                  type: "spring", 
+                  damping: 15, 
+                  stiffness: 200,
+                  delay: index * 0.05 
+                }}
+                whileHover={{ scale: 1.05 }}
                 className="px-3 py-1 rounded-full text-xs"
                 style={{
                   backgroundColor: 'var(--bg-2)',
@@ -91,7 +101,7 @@ function WeatherRecommendations({ weatherData }) {
                 }}
               >
                 {item}
-              </span>
+              </motion.span>
             ))}
           </div>
         </div>
@@ -105,8 +115,17 @@ function WeatherRecommendations({ weatherData }) {
           </h4>
           <div className="flex flex-wrap gap-2">
             {recommendations.accessories.map((item, index) => (
-              <span
+              <motion.span
                 key={index}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ 
+                  type: "spring", 
+                  damping: 15, 
+                  stiffness: 200,
+                  delay: index * 0.05 
+                }}
+                whileHover={{ scale: 1.05 }}
                 className="px-3 py-1 rounded-full text-xs"
                 style={{
                   backgroundColor: 'var(--bg-2)',
@@ -114,7 +133,7 @@ function WeatherRecommendations({ weatherData }) {
                 }}
               >
                 {item}
-              </span>
+              </motion.span>
             ))}
           </div>
         </div>
@@ -128,8 +147,17 @@ function WeatherRecommendations({ weatherData }) {
           </h4>
           <div className="flex flex-wrap gap-2">
             {recommendations.activities.map((activity, index) => (
-              <span
+              <motion.span
                 key={index}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ 
+                  type: "spring", 
+                  damping: 15, 
+                  stiffness: 200,
+                  delay: index * 0.05 
+                }}
+                whileHover={{ scale: 1.05 }}
                 className="px-3 py-1 rounded-full text-xs"
                 style={{
                   backgroundColor: 'var(--blue)',
@@ -137,7 +165,7 @@ function WeatherRecommendations({ weatherData }) {
                 }}
               >
                 {activity}
-              </span>
+              </motion.span>
             ))}
           </div>
         </div>
@@ -151,9 +179,21 @@ function WeatherRecommendations({ weatherData }) {
           </h4>
           <ul className="list-disc list-inside space-y-1">
             {recommendations.tips.map((tip, index) => (
-              <li key={index} className="text-xs" style={{ color: 'var(--gray)' }}>
+              <motion.li
+                key={index}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ 
+                  type: "spring", 
+                  damping: 20, 
+                  stiffness: 200,
+                  delay: index * 0.05 
+                }}
+                className="text-xs" 
+                style={{ color: 'var(--gray)' }}
+              >
                 {tip}
-              </li>
+              </motion.li>
             ))}
           </ul>
         </div>

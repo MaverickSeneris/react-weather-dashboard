@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import Header from "./ui/Header";
 import { useWeatherSettings } from "../utils/hooks/useWeatherSettings";
 import MapLoadingSkeleton from "./ui/loadingComponents/MapLoadingSkeleton";
@@ -105,14 +106,60 @@ const WindyMapEmbed = () => {
   return (
     <div className="flex flex-col gap-4">
       {/* Location Name */}
-      <Header title={locationName} />
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{
+          type: "spring",
+          damping: 25,
+          stiffness: 300,
+          delay: 0.1,
+        }}
+      >
+        <Header title={locationName} />
+      </motion.div>
       {/* Overlay Buttons */}
       {!loading ? (
-        <div className="flex flex-wrap items-center justify-start gap-1 mt-4">
-          {overlayOptions.map((option) => (
-            <button
+        <motion.div
+          className="flex flex-wrap items-center justify-start gap-1 mt-4"
+          initial="hidden"
+          animate="visible"
+          variants={{
+            visible: {
+              transition: {
+                staggerChildren: 0.1,
+                delayChildren: 0.2,
+              },
+            },
+          }}
+        >
+          {overlayOptions.map((option, index) => (
+            <motion.button
               key={option}
               onClick={() => handleOverlayChange(option)}
+              variants={{
+                hidden: {
+                  opacity: 0,
+                  scale: 0.8,
+                  y: 10,
+                },
+                visible: {
+                  opacity: 1,
+                  scale: 1,
+                  y: 0,
+                  transition: {
+                    type: "spring",
+                    damping: 20,
+                    stiffness: 300,
+                  },
+                },
+              }}
+              whileHover={{
+                scale: 1.1,
+                y: -2,
+                transition: { duration: 0.2 },
+              }}
+              whileTap={{ scale: 0.95 }}
               className="px-4 py-1 rounded-full text-sm font-bold border-2"
               style={{
                 backgroundColor: overlay === option ? 'var(--green)' : 'var(--bg-1)',
@@ -121,10 +168,33 @@ const WindyMapEmbed = () => {
               }}
             >
               {option}
-            </button>
+            </motion.button>
           ))}
-          <button
+          <motion.button
             onClick={toggleSpotForecast}
+            variants={{
+              hidden: {
+                opacity: 0,
+                scale: 0.8,
+                y: 10,
+              },
+              visible: {
+                opacity: 1,
+                scale: 1,
+                y: 0,
+                transition: {
+                  type: "spring",
+                  damping: 20,
+                  stiffness: 300,
+                },
+              },
+            }}
+            whileHover={{
+              scale: 1.1,
+              y: -2,
+              transition: { duration: 0.2 },
+            }}
+            whileTap={{ scale: 0.95 }}
             className="px-4 py-1 rounded-full text-sm font-bold border-2"
             style={{
               backgroundColor: showSpotForecast ? 'var(--yellow)' : 'var(--bg-1)',
@@ -133,8 +203,8 @@ const WindyMapEmbed = () => {
             }}
           >
             Forecast
-          </button>
-        </div>
+          </motion.button>
+        </motion.div>
       ) : (
        <MapLoadingSkeleton />
       )}

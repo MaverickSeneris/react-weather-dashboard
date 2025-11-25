@@ -182,9 +182,21 @@ function SearchBar({ toggleSearchMode, handleAddCity }) {
           type="text"
           placeholder="Search city"
           className="my-4 p-2 w-full rounded-[10px] outline-0"
-          style={{ backgroundColor: 'var(--bg-1)', color: 'var(--fg)' }}
+          style={{ 
+            backgroundColor: 'var(--bg-2)', 
+            color: 'var(--fg)',
+            border: '1px solid transparent'
+          }}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
+          onFocus={(e) => {
+            e.target.style.borderColor = 'var(--blue)';
+            e.target.style.backgroundColor = 'var(--bg-1)';
+          }}
+          onBlur={(e) => {
+            e.target.style.borderColor = 'transparent';
+            e.target.style.backgroundColor = 'var(--bg-2)';
+          }}
           autoFocus
         />
         <CancelButton nameSymbol={"Cancel"} toggler={toggleSearchMode} />

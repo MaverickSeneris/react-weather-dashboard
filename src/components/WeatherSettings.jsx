@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import Card from "../components/ui/Card";
 import { useWeatherSettings } from "../utils/hooks/useWeatherSettings";
 import { IoEye, IoEyeOff } from "react-icons/io5";
@@ -51,27 +52,78 @@ export default function WeatherSettings() {
   };
 
   // Function to render a group of option buttons
-  const renderOptionGroup = (title, key, options) => (
-    <div className="flex flex-col">
+  const renderOptionGroup = (title, key, options, groupIndex) => (
+    <motion.div
+      className="flex flex-col"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{
+        type: "spring",
+        damping: 20,
+        stiffness: 300,
+        delay: groupIndex * 0.1,
+      }}
+    >
       {/* Group title */}
-      <h4 className="font-semibold mt-1" style={{ color: 'var(--gray)' }}>{title}</h4>
-      <div
+      <motion.h4
+        className="font-semibold mt-1"
+        style={{ color: 'var(--gray)' }}
+        initial={{ opacity: 0, x: -10 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: groupIndex * 0.1 + 0.05 }}
+      >
+        {title}
+      </motion.h4>
+      <motion.div
         className={`flex gap-1 mt-2 mb-4 p-1 rounded-[10px] justify-around ${
           key === "pressure" ? "flex-nowrap" : "flex-wrap"
         }`}
         style={{ backgroundColor: 'var(--bg-2)' }}
+        initial="hidden"
+        animate="visible"
+        variants={{
+          visible: {
+            transition: {
+              staggerChildren: 0.05,
+              delayChildren: groupIndex * 0.1 + 0.1,
+            },
+          },
+        }}
       >
         {/* Render buttons for each option */}
-        {options.map((option) => {
-          // Normalize option for comparison (handle case differences)
-          const normalizedOption = option.toLowerCase();
+        {options.map((option, index) => {
+          // Normalize option for comparison (handle case differences and special theme names)
+          let normalizedOption = option.toLowerCase();
+          // Handle special theme name mapping
+          if (option === "Ily❤️") {
+            normalizedOption = "ily❤️";
+          }
           const normalizedSetting = typeof settings[key] === 'string' ? settings[key].toLowerCase() : settings[key];
           const isSelected = normalizedSetting === normalizedOption;
           
           return (
-            <button
+            <motion.button
               key={option}
               onClick={() => updateSetting(key, normalizedOption)}
+              variants={{
+                hidden: {
+                  opacity: 0,
+                  scale: 0.8,
+                  y: 10,
+                },
+                visible: {
+                  opacity: 1,
+                  scale: 1,
+                  y: 0,
+                  transition: {
+                    type: "spring",
+                    damping: 20,
+                    stiffness: 300,
+                  },
+                },
+              }}
+              whileHover={{ scale: 1.05, y: -1 }}
+              whileTap={{ scale: 0.95 }}
               className={`${
                 key === "pressure" || key === "windSpeed"
                   ? "w-[32%] text-xs px-2 py-1"
@@ -87,18 +139,32 @@ export default function WeatherSettings() {
               }}
             >
               {option}
-            </button>
+            </motion.button>
           );
         })}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 
   // Function to render a toggle switch
-  const renderToggle = (label, key) => (
-    <div className="flex items-center justify-between mt-4">
+  const renderToggle = (label, key, toggleIndex) => (
+    <motion.div
+      className="flex items-center justify-between mt-4"
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{
+        type: "spring",
+        damping: 20,
+        stiffness: 300,
+        delay: toggleIndex * 0.08,
+      }}
+    >
       <span className="text-sm" style={{ color: 'var(--fg)' }}>{label}</span>
-      <label className="inline-flex items-center cursor-pointer">
+      <motion.label
+        className="inline-flex items-center cursor-pointer"
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+      >
         <input
           type="checkbox"
           checked={settings[key]}
@@ -106,15 +172,28 @@ export default function WeatherSettings() {
           className="sr-only"
         />
         {/* Toggle switch */}
-        <div className="w-10 h-5 rounded-full relative transition-all" style={{ backgroundColor: settings[key] ? 'var(--blue)' : 'var(--gray)' }}>
-          <div
-            className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform ${
-              settings[key] ? "translate-x-5" : ""
-            }`}
-          ></div>
-        </div>
-      </label>
-    </div>
+        <motion.div
+          className="w-10 h-5 rounded-full relative"
+          style={{ backgroundColor: settings[key] ? 'var(--blue)' : 'var(--gray)' }}
+          animate={{
+            backgroundColor: settings[key] ? 'var(--blue)' : 'var(--gray)',
+          }}
+          transition={{ duration: 0.2 }}
+        >
+          <motion.div
+            className="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full"
+            animate={{
+              x: settings[key] ? 20 : 0,
+            }}
+            transition={{
+              type: "spring",
+              damping: 20,
+              stiffness: 300,
+            }}
+          ></motion.div>
+        </motion.div>
+      </motion.label>
+    </motion.div>
   );
 
   return (
@@ -123,68 +202,199 @@ export default function WeatherSettings() {
       {renderOptionGroup("Temperature", "temperature", [
         "Celsius",
         "Fahrenheit",
-      ])}
-      {renderOptionGroup("Wind Speed", "windSpeed", ["km/h", "m/s", "Knots"])}
+      ], 0)}
+      {renderOptionGroup("Wind Speed", "windSpeed", ["km/h", "m/s", "Knots"], 1)}
       {renderOptionGroup("Pressure", "pressure", [
         "hPa",
         "Inches",
         "kPa",
         "mm",
-      ])}
+      ], 2)}
       {renderOptionGroup("Precipitation", "precipitation", [
         "Millimeters",
         "Inches",
-      ])}
-      {renderOptionGroup("Distance", "distance", ["Kilometers", "Miles"])}
+      ], 3)}
+      {renderOptionGroup("Distance", "distance", ["Kilometers", "Miles"], 4)}
 
       {/* Notifications toggle */}
-      <div className="mt-6 pt-4" style={{ borderTop: '1px solid var(--bg-2)' }}>
-        <h4 className="font-semibold mb-2" style={{ color: 'var(--gray)' }}>Notifications</h4>
-        {renderToggle("Be aware of the weather", "notifications")}
-      </div>
+      <motion.div
+        className="mt-6 pt-4"
+        style={{ borderTop: '1px solid var(--bg-2)' }}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{
+          type: "spring",
+          damping: 20,
+          stiffness: 300,
+          delay: 0.5,
+        }}
+      >
+        <motion.h4
+          className="font-semibold mb-2"
+          style={{ color: 'var(--gray)' }}
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.55 }}
+        >
+          Notifications
+        </motion.h4>
+        {renderToggle("Be aware of the weather", "notifications", 0)}
+      </motion.div>
 
       {/* Theme Selection */}
-      <div className="mt-6 pt-4" style={{ borderTop: '1px solid var(--bg-2)' }}>
-        <h4 className="font-semibold mb-2" style={{ color: 'var(--gray)' }}>Appearance</h4>
-        {renderOptionGroup("Theme Mode", "themeMode", ["Light", "Dark", "System"])}
-        {renderOptionGroup("Theme Style", "themeStyle", ["Gruvbox", "Catppuccin", "Monokai", "Flexbox", "Everforest"])}
-      </div>
+      <motion.div
+        className="mt-6 pt-4"
+        style={{ borderTop: '1px solid var(--bg-2)' }}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{
+          type: "spring",
+          damping: 20,
+          stiffness: 300,
+          delay: 0.6,
+        }}
+      >
+        <motion.h4
+          className="font-semibold mb-2"
+          style={{ color: 'var(--gray)' }}
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.65 }}
+        >
+          Appearance
+        </motion.h4>
+        {renderOptionGroup("Theme Mode", "themeMode", ["Light", "Dark", "System"], 5)}
+        {renderOptionGroup("Theme Style", "themeStyle", ["Gruvbox", "Catppuccin", "Monokai", "Flexbox", "Everforest", "Ily❤️"], 6)}
+      </motion.div>
 
       {/* General settings toggles */}
-      <div className="mt-6 pt-4" style={{ borderTop: '1px solid var(--bg-2)' }}>
-        <h4 className="font-semibold mb-2" style={{ color: 'var(--gray)' }}>General</h4>
-        {renderToggle("12-Hour Time", "timeFormat")}
-        {renderToggle("Location", "location")}
-      </div>
+      <motion.div
+        className="mt-6 pt-4"
+        style={{ borderTop: '1px solid var(--bg-2)' }}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{
+          type: "spring",
+          damping: 20,
+          stiffness: 300,
+          delay: 0.7,
+        }}
+      >
+        <motion.h4
+          className="font-semibold mb-2"
+          style={{ color: 'var(--gray)' }}
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.75 }}
+        >
+          General
+        </motion.h4>
+        {renderToggle("12-Hour Time", "timeFormat", 1)}
+        {renderToggle("Location", "location", 2)}
+      </motion.div>
 
       {/* AI Features */}
-      <div className="mt-6 pt-4" style={{ borderTop: '1px solid var(--bg-2)' }}>
-        <h4 className="font-semibold mb-2" style={{ color: 'var(--gray)' }}>
+      <motion.div
+        className="mt-6 pt-4"
+        style={{ borderTop: '1px solid var(--bg-2)' }}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{
+          type: "spring",
+          damping: 20,
+          stiffness: 300,
+          delay: 0.8,
+        }}
+      >
+        <motion.h4
+          className="font-semibold mb-2"
+          style={{ color: 'var(--gray)' }}
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.85 }}
+        >
           AI Features
           {settings.aiEnabled && settings.aiApiKey && (
-            <span className="ml-2 text-xs" style={{ color: 'var(--green)' }}>● Active</span>
+            <motion.span
+              className="ml-2 text-sm"
+              style={{ color: 'var(--green)' }}
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{
+                type: "spring",
+                damping: 15,
+                stiffness: 200,
+                delay: 0.9,
+              }}
+            >
+              ● Active
+            </motion.span>
           )}
-        </h4>
-        {renderToggle("Enable AI Features", "aiEnabled")}
+        </motion.h4>
+        {renderToggle("Enable AI Features", "aiEnabled", 3)}
         
         {settings.aiEnabled && (
-          <>
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{
+              type: "spring",
+              damping: 20,
+              stiffness: 300,
+              delay: 0.9,
+            }}
+          >
             {/* AI Provider Selection */}
-            <div className="mt-4">
-              <h5 className="font-semibold text-xs mb-2" style={{ color: 'var(--gray)' }}>AI Provider</h5>
+            <motion.div
+              className="mt-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.95 }}
+            >
+              <h5 className="font-semibold mb-2" style={{ color: 'var(--gray)' }}>AI Provider</h5>
               <div className="flex flex-col">
-                <div
+                <motion.div
                   className="flex gap-1 mt-2 mb-4 p-1 rounded-[10px] justify-around flex-wrap"
                   style={{ backgroundColor: 'var(--bg-2)' }}
+                  initial="hidden"
+                  animate="visible"
+                  variants={{
+                    visible: {
+                      transition: {
+                        staggerChildren: 0.08,
+                        delayChildren: 1.0,
+                      },
+                    },
+                  }}
                 >
                   {["OpenAI", "Anthropic", "Google"].map((option) => {
                     const normalizedOption = option === "OpenAI" ? "openai" : option === "Anthropic" ? "anthropic" : "google";
                     const isSelected = settings.aiProvider?.toLowerCase() === normalizedOption;
                     
                     return (
-                      <button
+                      <motion.button
                         key={option}
                         onClick={() => updateSetting("aiProvider", normalizedOption)}
+                        variants={{
+                          hidden: {
+                            opacity: 0,
+                            scale: 0.8,
+                            y: 10,
+                          },
+                          visible: {
+                            opacity: 1,
+                            scale: 1,
+                            y: 0,
+                            transition: {
+                              type: "spring",
+                              damping: 20,
+                              stiffness: 300,
+                            },
+                          },
+                        }}
+                        whileHover={{ scale: 1.05, y: -1 }}
+                        whileTap={{ scale: 0.95 }}
                         className="w-[32%] text-xs px-2 py-1.5 text-center rounded-[7px] transition-all shadow-md"
                         style={{
                           backgroundColor: isSelected ? 'var(--bg-0)' : 'transparent',
@@ -192,22 +402,32 @@ export default function WeatherSettings() {
                         }}
                       >
                         {option}
-                      </button>
+                      </motion.button>
                     );
                   })}
-                </div>
+                </motion.div>
               </div>
-            </div>
+            </motion.div>
 
             {/* API Key Input */}
-            <div className="mt-4">
-              <label className="block text-xs font-semibold mb-2" style={{ color: 'var(--gray)' }}>
+            <motion.div
+              className="mt-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.05 }}
+            >
+              <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--gray)' }}>
                 API Key
                 {settings.aiEnabled && !settings.aiApiKey && (
                   <span className="ml-1" style={{ color: 'var(--red)' }}>*</span>
                 )}
               </label>
-              <div className="relative">
+              <motion.div
+                className="relative"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 1.1 }}
+              >
                 <input
                   type={showApiKey ? "text" : "password"}
                   value={settings.aiApiKey || ""}
@@ -220,27 +440,41 @@ export default function WeatherSettings() {
                     border: settings.aiEnabled && !settings.aiApiKey ? '1px solid var(--red)' : '1px solid transparent'
                   }}
                 />
-                <button
+                <motion.button
                   type="button"
                   onClick={() => setShowApiKey(!showApiKey)}
                   className="absolute right-2 top-1/2 -translate-y-1/2 p-1"
                   style={{ color: 'var(--gray)' }}
+                  whileHover={{ scale: 1.2 }}
+                  whileTap={{ scale: 0.9 }}
                 >
                   {showApiKey ? <IoEyeOff size={18} /> : <IoEye size={18} />}
-                </button>
-              </div>
+                </motion.button>
+              </motion.div>
               {settings.aiEnabled && !settings.aiApiKey && (
-                <p className="text-xs mt-1" style={{ color: 'var(--red)' }}>
+                <motion.p
+                  className="text-xs mt-1"
+                  style={{ color: 'var(--red)' }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 1.15 }}
+                >
                   API key is required to use AI features
-                </p>
+                </motion.p>
               )}
-              <p className="text-xs mt-1" style={{ color: 'var(--gray)' }}>
+              <motion.p
+                className="text-xs mt-1"
+                style={{ color: 'var(--gray)' }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1.2 }}
+              >
                 Your API key is stored locally and never shared
-              </p>
-            </div>
-          </>
+              </motion.p>
+            </motion.div>
+          </motion.div>
         )}
-      </div>
+      </motion.div>
     </Card>
   );
 }

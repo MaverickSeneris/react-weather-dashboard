@@ -1,4 +1,5 @@
 import React from "react";
+import { motion } from "framer-motion";
 import { useLocation, useNavigate } from "react-router";
 import CurrentCityContainer from "../components/CurrentCityContainer";
 import iconMap from "../utils/weatherIconMapper";
@@ -126,46 +127,73 @@ function CityWeatherDetail() {
       />
 
       {/* Detailed weather info cards */}
-      {cityInfo.map((info, index) => (
-        <div key={index} className="grid grid-cols-2 mt-2 w-[100%] gap-x-4">
-          <Card>
-            <CardTitle title={"UV INDEX"} />
-            <ValueContainer value={info.uvIndex} />
-          </Card>
-          <Card>
-            <CardTitle title={"WIND"} />
-            <ValueContainer value={info.wind} unit={settings.windSpeed} />
-          </Card>
-          <Card>
-            <CardTitle title={"HUMIDITY"} />
-            <ValueContainer value={info.humidity} unit={"%"} />
-          </Card>
-          <Card>
-            <CardTitle title={"VISIBILITY"} />
-            <ValueContainer
-              value={info.visibility}
-              unit={settings.distance === "Miles" ? " miles" : " km"}
-            />
-          </Card>
-          <Card>
-            <CardTitle title={"FEELS LIKE"} />
-            <ValueContainer value={info.feelsLike} unit={"°"} />
-          </Card>
-          <Card>
-            <CardTitle title={"CHANCE OF RAIN"} />
-            <ValueContainer value={info.chanceOfRain} unit={"%"} />
-          </Card>
-          <Card>
-            <CardTitle title={"PRESSURE"} />
-            <ValueContainer value={info.pressure} unit={settings.pressure} />
-          </Card>
-          <Card>
-            <CardTitle title={displayLabel} />
-            <ValueContainer value={formatTime(displayTime, settings.timeFormat)} />
-            {/* convert UNIX or Date to formatted time */}
-          </Card>
-        </div>
-      ))}
+      {cityInfo.map((info, infoIndex) => {
+        const cards = [
+          { title: "UV INDEX", value: info.uvIndex },
+          { title: "WIND", value: info.wind, unit: settings.windSpeed },
+          { title: "HUMIDITY", value: info.humidity, unit: "%" },
+          { title: "VISIBILITY", value: info.visibility, unit: settings.distance === "Miles" ? " miles" : " km" },
+          { title: "FEELS LIKE", value: info.feelsLike, unit: "°" },
+          { title: "CHANCE OF RAIN", value: info.chanceOfRain, unit: "%" },
+          { title: "PRESSURE", value: info.pressure, unit: settings.pressure },
+          { title: displayLabel, value: formatTime(displayTime, settings.timeFormat) },
+        ];
+
+        return (
+          <motion.div
+            key={infoIndex}
+            className="grid grid-cols-2 mt-2 w-[100%] gap-x-4"
+            initial="hidden"
+            animate="visible"
+            variants={{
+              visible: {
+                transition: {
+                  staggerChildren: 0.08,
+                  delayChildren: 0.1,
+                },
+              },
+            }}
+          >
+            {cards.map((card, cardIndex) => {
+              const isEven = cardIndex % 2 === 0;
+              return (
+                <motion.div
+                  key={cardIndex}
+                  variants={{
+                    hidden: {
+                      opacity: 0,
+                      x: isEven ? -50 : 50,
+                      y: 20,
+                      scale: 0.9,
+                    },
+                    visible: {
+                      opacity: 1,
+                      x: 0,
+                      y: 0,
+                      scale: 1,
+                      transition: {
+                        type: "spring",
+                        damping: 20,
+                        stiffness: 300,
+                      },
+                    },
+                  }}
+                  whileHover={{
+                    scale: 1.03,
+                    y: -2,
+                    transition: { duration: 0.2 },
+                  }}
+                >
+                  <Card>
+                    <CardTitle title={card.title} />
+                    <ValueContainer value={card.value} unit={card.unit} />
+                  </Card>
+                </motion.div>
+              );
+            })}
+          </motion.div>
+        );
+      })}
     </div>
   );
 }
