@@ -4,6 +4,7 @@ import Card from "./ui/Card";
 import { getTravelWeatherData } from "../utils/weatherAlertChecker";
 import { useWeatherSettings } from "../utils/hooks/useWeatherSettings";
 import { IoClose } from "react-icons/io5";
+import { convertTemperature, convertWindSpeed } from "../utils/unitConverter";
 
 function WeatherDetailsModal({ isOpen, onClose, weatherData, cityName, inline = false }) {
   const { settings } = useWeatherSettings();
@@ -12,16 +13,21 @@ function WeatherDetailsModal({ isOpen, onClose, weatherData, cityName, inline = 
   if (!travelData) return null;
 
   const convertTemp = (temp) => {
-    return settings.temperature === "Fahrenheit"
-      ? Math.round((temp * 9) / 5 + 32)
-      : Math.round(temp);
+    return Math.round(convertTemperature(temp, settings.temperature));
   };
 
-  const convertWind = (speed) => {
-    if (settings.windSpeed === "mph") return (speed * 2.237).toFixed(1);
-    if (settings.windSpeed === "m/s") return speed.toFixed(1);
-    if (settings.windSpeed === "Knots") return (speed * 1.944).toFixed(1);
-    return (speed * 3.6).toFixed(1); // km/h
+  const convertWind = (speedMps) => {
+    return convertWindSpeed(speedMps, settings.windSpeed);
+  };
+
+  const formatWindSpeedUnit = (unit) => {
+    if (!unit) return "km/h";
+    const lower = unit.toLowerCase();
+    if (lower === "km/h" || lower === "kmh") return "km/h";
+    if (lower === "m/s" || lower === "ms") return "m/s";
+    if (lower === "knots") return "Knots";
+    if (lower === "mph") return "mph";
+    return unit; // Return as-is if not recognized
   };
 
   const getAlertColor = (type) => {
@@ -100,7 +106,7 @@ function WeatherDetailsModal({ isOpen, onClose, weatherData, cityName, inline = 
                   <div className="p-3 rounded-lg" style={{ backgroundColor: 'var(--bg-2)' }}>
                     <p className="text-xs mb-1" style={{ color: 'var(--gray)' }}>Wind Speed</p>
                     <p className="text-xl font-bold" style={{ color: 'var(--fg)' }}>
-                      {convertWind(travelData.current.windSpeed)} {settings.windSpeed || "km/h"}
+                      {convertWind(travelData.current.windSpeed)} {formatWindSpeedUnit(settings.windSpeed)}
                     </p>
                   </div>
                   <div className="p-3 rounded-lg" style={{ backgroundColor: 'var(--bg-2)' }}>
@@ -305,7 +311,7 @@ function WeatherDetailsModal({ isOpen, onClose, weatherData, cityName, inline = 
                   <div className="p-3 rounded-lg" style={{ backgroundColor: 'var(--bg-2)' }}>
                     <p className="text-xs mb-1" style={{ color: 'var(--gray)' }}>Wind Speed</p>
                     <p className="text-xl font-bold" style={{ color: 'var(--fg)' }}>
-                      {convertWind(travelData.current.windSpeed)} {settings.windSpeed || "km/h"}
+                      {convertWind(travelData.current.windSpeed)} {formatWindSpeedUnit(settings.windSpeed)}
                     </p>
                   </div>
                   <div className="p-3 rounded-lg" style={{ backgroundColor: 'var(--bg-2)' }}>

@@ -41,14 +41,6 @@ export default function WeatherSettings() {
     }
     
     toggleSetting(key); // Toggle the setting
-    if (key === "dark") {
-      // Add a class for fade-out effect
-      document.body.classList.add("fade-out");
-      // Wait for the fade-out transition before reloading the page
-      setTimeout(() => {
-        window.location.reload();
-      }, 500); // Adjust timeout to match fade duration
-    }
   };
 
   // Function to render a group of option buttons
@@ -101,6 +93,8 @@ export default function WeatherSettings() {
             normalizedOption = "rose pine";
           } else if (option === "Tokyo Night") {
             normalizedOption = "tokyo night";
+          } else if (option === "Solarized") {
+            normalizedOption = "solarized";
           }
           const normalizedSetting = typeof settings[key] === 'string' ? settings[key].toLowerCase() : settings[key];
           const isSelected = normalizedSetting === normalizedOption;
@@ -187,6 +181,7 @@ export default function WeatherSettings() {
     if (themeName === "Ily❤️") return "ily❤️";
     if (themeName === "Rose Pine") return "rose pine";
     if (themeName === "Tokyo Night") return "tokyo night";
+    if (themeName === "Solarized") return "solarized";
     return themeName.toLowerCase();
   };
 
@@ -195,6 +190,7 @@ export default function WeatherSettings() {
     if (normalized === "ily❤️") return "Ily❤️";
     if (normalized === "rose pine") return "Rose Pine";
     if (normalized === "tokyo night") return "Tokyo Night";
+    if (normalized === "solarized") return "Solarized";
     return normalized.charAt(0).toUpperCase() + normalized.slice(1);
   };
 

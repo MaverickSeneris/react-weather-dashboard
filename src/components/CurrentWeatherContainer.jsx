@@ -8,22 +8,27 @@ import windIcon from "../assets/weather-icons/wind.svg";
 import uviIcon from "../assets/weather-icons/uv-index.svg";
 import { Link } from "react-router";
 import { useWeatherSettings } from "../utils/hooks/useWeatherSettings";
+import { convertTemperature, convertWindSpeed } from "../utils/unitConverter";
 
 function CurrentWeatherContainer({ currentWeatherInfo, cityName }) {
   const { settings } = useWeatherSettings();
 
   const convertTemp = (temp) => {
-    return settings.temperature === "Fahrenheit"
-      ? Math.round((temp * 9) / 5 + 32)
-      : Math.round(temp);
+    return Math.round(convertTemperature(temp, settings.temperature));
   };
 
   const convertWind = (speedMps) => {
-    // API provides wind speed in m/s
-    if (settings.windSpeed === "km/h") return Math.round(speedMps * 3.6);
-    if (settings.windSpeed === "mph") return Math.round(speedMps * 2.237);
-    if (settings.windSpeed === "Knots") return Math.round(speedMps * 1.944);
-    return Math.round(speedMps); // m/s fallback
+    return convertWindSpeed(speedMps, settings.windSpeed);
+  };
+
+  const formatWindSpeedUnit = (unit) => {
+    if (!unit) return "km/h";
+    const lower = unit.toLowerCase();
+    if (lower === "km/h" || lower === "kmh") return "km/h";
+    if (lower === "m/s" || lower === "ms") return "m/s";
+    if (lower === "knots") return "Knots";
+    if (lower === "mph") return "mph";
+    return unit; // Return as-is if not recognized
   };
 
   return (
@@ -50,7 +55,7 @@ function CurrentWeatherContainer({ currentWeatherInfo, cityName }) {
       <div className="grid grid-cols-2 mt-4">
         {[
           { icon: temperatureIcon, label: "Real Feel", value: `${convertTemp(currentWeatherInfo.feelsLike)}°`, delay: 0 },
-          { icon: windIcon, label: "Wind", value: `${convertWind(currentWeatherInfo.windSpeed)} ${settings.windSpeed}`, delay: 0.1, ml: true },
+          { icon: windIcon, label: "Wind", value: `${convertWind(currentWeatherInfo.windSpeed)} ${formatWindSpeedUnit(settings.windSpeed)}`, delay: 0.1, ml: true },
           { icon: chanceOfRainIcon, label: "Chance of Rain", value: `${currentWeatherInfo.chanceOfRain}%`, delay: 0.2 },
           { icon: uviIcon, label: "UV index", value: currentWeatherInfo.uvIndex, delay: 0.3, ml: true }
         ].map((item, index) => (

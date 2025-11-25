@@ -7,6 +7,7 @@ import { Link } from "react-router";
 import { IoAddSharp, IoChevronDown } from "react-icons/io5";
 import { useWeatherSettings } from "../../utils/hooks/useWeatherSettings";
 import { checkSevereWeather } from "../../utils/weatherAlertChecker";
+import { convertTemperature, convertWindSpeed, convertDistance } from "../../utils/unitConverter";
 
 const CityCard = ({ weatherData }) => {
   const [draggedId, setDraggedId] = useState(null);
@@ -18,16 +19,32 @@ const CityCard = ({ weatherData }) => {
 
   const { settings } = useWeatherSettings(); // ✅ use settings
 
-  const convertTemp = (temp) =>
-    settings.temperature === "Fahrenheit"
-      ? Math.round((temp * 9) / 5 + 32)
-      : Math.round(temp);
+  const convertTemp = (temp) => {
+    return Math.round(convertTemperature(temp, settings.temperature));
+  };
 
-  const convertWind = (speedKph) => {
-    if (settings.windSpeed === "mph") return Math.round(speedKph / 1.609);
-    if (settings.windSpeed === "m/s") return Math.round(speedKph / 3.6);
-    if (settings.windSpeed === "Knots") return Math.round(speedKph / 1.852);
-    return Math.round(speedKph); // km/h default
+  const convertWind = (speedMps) => {
+    return convertWindSpeed(speedMps, settings.windSpeed);
+  };
+
+  const convertVis = (visibilityMeters) => {
+    const visibilityKm = visibilityMeters / 1000;
+    const converted = convertDistance(visibilityKm, settings.distance);
+    return converted.toFixed(1);
+  };
+
+  const getDistanceUnit = () => {
+    return settings.distance?.toLowerCase() === "miles" ? "mi" : "km";
+  };
+
+  const formatWindSpeedUnit = (unit) => {
+    if (!unit) return "km/h";
+    const lower = unit.toLowerCase();
+    if (lower === "km/h" || lower === "kmh") return "km/h";
+    if (lower === "m/s" || lower === "ms") return "m/s";
+    if (lower === "knots") return "Knots";
+    if (lower === "mph") return "mph";
+    return unit; // Return as-is if not recognized
   };
 
   function handleSaveCity(cityId) {
@@ -352,8 +369,8 @@ const CityCard = ({ weatherData }) => {
                             <span style={{ color: 'var(--gray)' }}>Wind: </span>
                             <span style={{ color: 'var(--fg)' }}>
                               {city.windSpeed !== undefined && !isNaN(city.windSpeed) 
-                                ? `${city.windSpeed.toFixed(1)} m/s` 
-                                : '0 m/s'}
+                                ? `${convertWind(city.windSpeed)} ${formatWindSpeedUnit(settings.windSpeed)}` 
+                                : `0 ${formatWindSpeedUnit(settings.windSpeed)}`}
                             </span>
                           </div>
                           {city.humidity !== undefined && !isNaN(city.humidity) && (
@@ -365,7 +382,7 @@ const CityCard = ({ weatherData }) => {
                           {city.visibility !== undefined && !isNaN(city.visibility) && city.visibility > 0 && (
                             <div>
                               <span style={{ color: 'var(--gray)' }}>Visibility: </span>
-                              <span style={{ color: 'var(--fg)' }}>{(city.visibility / 1000).toFixed(1)} km</span>
+                              <span style={{ color: 'var(--fg)' }}>{convertVis(city.visibility)} {getDistanceUnit()}</span>
                     </div>
                           )}
                   </div>

@@ -77,6 +77,8 @@ function CurrentCity() {
         description: d.weather[0]?.description || "",
         tempHigh: Math.round(d.temp.max),
         tempLow: Math.round(d.temp.min),
+        sunrise: d.sunrise,
+        sunset: d.sunset,
       }));
 
       const weatherInfo = {

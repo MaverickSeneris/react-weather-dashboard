@@ -42,9 +42,11 @@ function Settings() {
       }}
     >
     <PageContainer>
-      <Header title={"Settings"} />
-      <div className="mt-8">
-        <WeatherSettings />
+      <div className="w-full lg:max-w-7xl lg:mx-auto lg:px-8 lg:mt-8">
+        <Header title={"Settings"} />
+        <div className="mt-8">
+          <WeatherSettings />
+        </div>
       </div>
     </PageContainer>
     </motion.div>

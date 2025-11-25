@@ -4,14 +4,13 @@ import Card from "./ui/Card";
 import CardTitle from "./ui/CardTitle";
 import iconMap from "../utils/weatherIconMapper";
 import { useWeatherSettings } from "../utils/hooks/useWeatherSettings";
+import { convertTemperature } from "../utils/unitConverter";
 
 function DailyContainer({ dailyWeatherInfo }) {
   const { settings } = useWeatherSettings();
 
   const convertTemp = (temp) => {
-    return settings.temperature === "Fahrenheit"
-      ? Math.round((temp * 9) / 5 + 32)
-      : Math.round(temp);
+    return Math.round(convertTemperature(temp, settings.temperature));
   };
 
   return (

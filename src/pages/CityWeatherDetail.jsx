@@ -19,44 +19,65 @@ function CityWeatherDetail() {
   // Use weather settings
   const { settings } = useWeatherSettings();
 
-  // Get current time
-  const now = new Date();
+  // Handle both nested (currentWeatherInfo.current) and flat structures
+  const current = currentWeatherInfo?.current || currentWeatherInfo;
 
-  // Get raw UNIX sunrise and sunset time
-  const sunrise = currentWeatherInfo.sunrise;
-  const sunset = currentWeatherInfo.sunset;
+  // Get current time in Unix timestamp (seconds)
+  const now = Math.floor(Date.now() / 1000);
 
-  // Determine if it's currently daytime (this logic assumes sunrise/sunset are already Date objects)
-  const isDayTime = now >= sunrise && now < sunset;
+  // Get today's sunrise and sunset from current weather (Unix timestamps in seconds)
+  const todaySunrise = current?.sunrise || 0;
+  const todaySunset = current?.sunset || 0;
 
-  // Choose which label/time to display: if it's day, show sunset time; if it's night, show sunrise time
-  const displayLabel = isDayTime ? "SUNRISE" : "SUNSET";
-  const displayTime = isDayTime ? sunrise : sunset;
+  // Get tomorrow's sunrise and sunset from daily forecast (if available)
+  const dailyForecast = currentWeatherInfo?.daily || [];
+  const tomorrowData = dailyForecast.length > 1 ? dailyForecast[1] : null;
+  const tomorrowSunrise = tomorrowData?.sunrise || todaySunrise;
+  const tomorrowSunset = tomorrowData?.sunset || todaySunset;
+
+  // Determine what to display based on current time:
+  // 1. If before today's sunrise → show today's sunrise
+  // 2. If after today's sunrise but before today's sunset → show today's sunset
+  // 3. If after today's sunset → show tomorrow's sunrise
+  let displayLabel;
+  let displayTime;
+
+  if (now < todaySunrise) {
+    // Before sunrise: show today's sunrise
+    displayLabel = "SUNRISE";
+    displayTime = todaySunrise;
+  } else if (now >= todaySunrise && now < todaySunset) {
+    // After sunrise, before sunset: show today's sunset
+    displayLabel = "SUNSET";
+    displayTime = todaySunset;
+  } else {
+    // After sunset: show tomorrow's sunrise
+    displayLabel = "SUNRISE";
+    displayTime = tomorrowSunrise;
+  }
 
   // This array helps organize and iterate over the weather data
   const cityInfo = [
     {
       temperature: convertTemperature(
-        currentWeatherInfo.temperature,
+        current?.temperature || 0,
         settings.temperature
       ), // Apply temperature setting
-      uvIndex: currentWeatherInfo.uvIndex,
-      wind: convertWindSpeed(currentWeatherInfo.windSpeed, settings.windSpeed), // Apply wind speed setting
+      uvIndex: current?.uvIndex || 0,
+      wind: convertWindSpeed(current?.windSpeed || 0, settings.windSpeed), // Apply wind speed setting
       feelsLike: convertTemperature(
-        currentWeatherInfo.feelsLike,
+        current?.feelsLike || 0,
         settings.temperature
       ), // Apply temperature setting for feels like
-      pressure: convertPressure(currentWeatherInfo.pressure, settings.pressure), // Apply pressure setting
-      humidity: currentWeatherInfo.humidity,
-      // visibility: currentWeatherInfo.visibility,
-      visibility: convertDistance(
-        currentWeatherInfo.visibility / 1000,
-        settings.distance
-      ),
-
-      sunrise: sunrise,
-      sunset: sunset,
-      chanceOfRain: currentWeatherInfo.chanceOfRain,
+      pressure: convertPressure(current?.pressure || 0, settings.pressure), // Apply pressure setting
+      humidity: current?.humidity || 0,
+      visibility: (() => {
+        const visibilityKm = (current?.visibility || 0) / 1000;
+        const converted = convertDistance(visibilityKm, settings.distance);
+        // Round to 1 decimal place for better display
+        return Math.round(converted * 10) / 10;
+      })(),
+      chanceOfRain: current?.chanceOfRain || 0,
     },
   ];
 
@@ -93,8 +114,9 @@ function CityWeatherDetail() {
       displayUnit = ` ${unit}`;
     } else if (unit === settings.windSpeed) {
       displayUnit = ` ${unit}`;
-    } else if (unit === " miles" && typeof value === "number") {
-      displayValue = value.toFixed(1); // Round miles value to 1 decimal place
+    } else if ((unit === " miles" || unit === " km") && typeof value === "number") {
+      // Round visibility to 1 decimal place for both miles and km
+      displayValue = value.toFixed(1);
     }
 
     return (
@@ -121,9 +143,9 @@ function CityWeatherDetail() {
       {/* Top current weather display */}
       <CurrentCityContainer
         cityName={cityName}
-        popValue={currentWeatherInfo.chanceOfRain}
-        weatherIcon={iconMap[currentWeatherInfo.weatherIcon]} // map API icon to local icon
-        tempValue={Math.floor(currentWeatherInfo.temperature)} // round temp
+        popValue={current?.chanceOfRain || 0}
+        weatherIcon={iconMap[current?.weatherIcon || ""]} // map API icon to local icon
+        tempValue={Math.floor(current?.temperature || 0)} // round temp
       />
 
       {/* Detailed weather info cards */}
@@ -132,7 +154,7 @@ function CityWeatherDetail() {
           { title: "UV INDEX", value: info.uvIndex },
           { title: "WIND", value: info.wind, unit: settings.windSpeed },
           { title: "HUMIDITY", value: info.humidity, unit: "%" },
-          { title: "VISIBILITY", value: info.visibility, unit: settings.distance === "Miles" ? " miles" : " km" },
+          { title: "VISIBILITY", value: info.visibility, unit: settings.distance?.toLowerCase() === "miles" ? " miles" : " km" },
           { title: "FEELS LIKE", value: info.feelsLike, unit: "°" },
           { title: "CHANCE OF RAIN", value: info.chanceOfRain, unit: "%" },
           { title: "PRESSURE", value: info.pressure, unit: settings.pressure },

@@ -1,18 +1,16 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { useWeatherSettings } from "../utils/hooks/useWeatherSettings";
+import { convertTemperature } from "../utils/unitConverter";
 
 function CurrentCityContainer({ cityName, popValue, weatherIcon, tempValue }) {
   const { settings } = useWeatherSettings();
 
-  const convertTemperature = (value) => {
-    if (settings.temperature === "Fahrenheit") {
-      return Math.round((value * 9) / 5 + 32);
-    }
-    return Math.round(value); // Celsius by default
+  const convertTemperatureValue = (value) => {
+    return Math.round(convertTemperature(value, settings.temperature));
   };
 
-  const displayedTemp = convertTemperature(tempValue);
+  const displayedTemp = convertTemperatureValue(tempValue);
 
   return (
     <div className="flex flex-col justify-center items-center">
@@ -60,7 +58,7 @@ function CurrentCityContainer({ cityName, popValue, weatherIcon, tempValue }) {
         transition={{ type: "spring", damping: 15, stiffness: 200, delay: 0.4 }}
         className="text-5xl font-bold mb-8"
       >
-        {displayedTemp}&deg;{settings.temperature === "Fahrenheit" ? "F" : "C"}
+        {displayedTemp}&deg;{settings.temperature?.toLowerCase() === "fahrenheit" ? "F" : "C"}
       </motion.h2>
     </div>
   );

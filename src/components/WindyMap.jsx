@@ -76,32 +76,79 @@ const WindyMapEmbed = () => {
     localStorage.setItem("spotForecastPreference", JSON.stringify(newValue)); // Save preference to localStorage
   };
 
-  const windUnitParam =
-    settings.windSpeed === "km/h"
-      ? "km/h"
-      : settings.windSpeed === "m/s"
-      ? "m/s"
-      : settings.windSpeed === "Knots"
-      ? "kt"
-      : "default";
+  // Convert unit settings to Windy API format
+  // Windy embed API expects: "km/h" (URL encoded), "m/s" (URL encoded), "kt", "mph", or "bft"
+  // The parameter values should match the display format, not abbreviations
+  const getWindUnitParam = () => {
+    const windSpeed = settings.windSpeed;
+    const windSpeedLower = windSpeed?.toLowerCase();
+    
+    console.log("[WindyMap] Raw wind speed setting:", windSpeed);
+    console.log("[WindyMap] Normalized:", windSpeedLower);
+    
+    // Windy expects the actual unit string, not abbreviations
+    if (!windSpeed || windSpeedLower === "km/h" || windSpeedLower === "kmh") {
+      console.log("[WindyMap] Using km/h");
+      return "km/h"; // Windy expects "km/h" not "kph"
+    }
+    if (windSpeedLower === "m/s" || windSpeedLower === "ms" || windSpeedLower === "mps") {
+      console.log("[WindyMap] Using m/s");
+      return "m/s"; // Windy expects "m/s" not "ms"
+    }
+    if (windSpeedLower === "knots" || windSpeedLower === "kt" || windSpeedLower === "kts") {
+      console.log("[WindyMap] Using kt");
+      return "kt";
+    }
+    if (windSpeedLower === "mph") {
+      console.log("[WindyMap] Using mph");
+      return "mph";
+    }
+    
+    console.log("[WindyMap] Unknown unit, defaulting to km/h");
+    return "km/h"; // Default to km/h
+  };
 
-  const tempUnitParam =
-    settings.temperature === "Fahrenheit" ? "°F" : "default";
+  const getTempUnitParam = () => {
+    // Windy expects "°F" for Fahrenheit and "°C" for Celsius (with degree symbol)
+    return settings.temperature?.toLowerCase() === "fahrenheit" ? "°F" : "°C";
+  };
 
-  const rainUnitParam =
-    settings.precipitation === "Millimeters"
-      ? "mm"
-      : settings.precipitation === "Inches"
-      ? "in"
-      : "default";
+  const getRainUnitParam = () => {
+    const precipLower = settings.precipitation?.toLowerCase();
+    if (precipLower === "millimeters") return "mm";
+    if (precipLower === "inches") return "in";
+    return "default";
+  };
 
+  const windUnitParam = getWindUnitParam();
+  const tempUnitParam = getTempUnitParam();
+  const rainUnitParam = getRainUnitParam();
+
+  // Create a unique key based on unit settings to force iframe re-render when settings change
+  const settingsKey = `${windUnitParam}-${tempUnitParam}-${rainUnitParam}`;
+  
+  // Build iframe URL with unit parameters
+  // Windy requires URL encoding for parameters with special characters like "/"
+  const encodedWindUnit = encodeURIComponent(windUnitParam);
+  const encodedTempUnit = encodeURIComponent(tempUnitParam);
+  const encodedRainUnit = encodeURIComponent(rainUnitParam);
+  
   const iframeSrc = `https://embed.windy.com/embed2.html?lat=${
     coordinates.lat
   }&lon=${coordinates.lon}&detailLat=${coordinates.lat}&detailLon=${
     coordinates.lon
   }&zoom=9&level=surface&overlay=${overlay}&menu=true&message=true&marker=true&pressure=true&type=map&location=coordinates${
     showSpotForecast ? "&detail=true" : ""
-  }&metricWind=${windUnitParam}&metricTemp=${tempUnitParam}&metricRain=${rainUnitParam}&radarRange=-1`;
+  }&metricWind=${encodedWindUnit}&metricTemp=${encodedTempUnit}&metricRain=${encodedRainUnit}&radarRange=-1`;
+  
+  // Debug logging
+  console.log("[WindyMap] Final iframe URL params:", {
+    windUnit: windUnitParam,
+    encodedWindUnit: encodedWindUnit,
+    tempUnit: tempUnitParam,
+    rainUnit: rainUnitParam,
+    fullUrl: iframeSrc
+  });
 
   return (
     <div className="flex flex-col gap-4">
@@ -222,6 +269,7 @@ const WindyMapEmbed = () => {
           </div>
         ) : (
           <iframe
+            key={settingsKey}
             className="w-full h-full rounded-[15px]"
             src={iframeSrc}
             frameBorder="0"

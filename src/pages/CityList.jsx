@@ -13,6 +13,7 @@ import getDayLabel from "../utils/dayLabel";
 import { useWeatherSettings } from "../utils/hooks/useWeatherSettings";
 import { useSwipeToRefresh } from "../utils/hooks/useSwipeToRefresh";
 import { checkSevereWeather } from "../utils/weatherAlertChecker";
+import { convertTemperature, convertWindSpeed, convertDistance } from "../utils/unitConverter";
 
 const key = import.meta.env.VITE_OPENWEATHER_API_KEY;
 const url = import.meta.env.VITE_OPENWEATHER_ONECALL_API_URL;
@@ -26,9 +27,31 @@ function CityList() {
   const [undoTimeout, setUndoTimeout] = useState(null);
 
   const convertTemp = (temp) => {
-    return settings.temperature === "Fahrenheit"
-      ? Math.round((temp * 9) / 5 + 32)
-      : Math.round(temp);
+    return Math.round(convertTemperature(temp, settings.temperature));
+  };
+
+  const convertWind = (speedMps) => {
+    return convertWindSpeed(speedMps, settings.windSpeed);
+  };
+
+  const convertVis = (visibilityMeters) => {
+    const visibilityKm = visibilityMeters / 1000;
+    const converted = convertDistance(visibilityKm, settings.distance);
+    return converted.toFixed(1);
+  };
+
+  const getDistanceUnit = () => {
+    return settings.distance?.toLowerCase() === "miles" ? "mi" : "km";
+  };
+
+  const formatWindSpeedUnit = (unit) => {
+    if (!unit) return "km/h";
+    const lower = unit.toLowerCase();
+    if (lower === "km/h" || lower === "kmh") return "km/h";
+    if (lower === "m/s" || lower === "ms") return "m/s";
+    if (lower === "knots") return "Knots";
+    if (lower === "mph") return "mph";
+    return unit; // Return as-is if not recognized
   };
   // Track the city being dragged/swiped
   const [draggedId, setDraggedId] = useState(null);
@@ -596,7 +619,7 @@ function CityList() {
                           </div>
                           <div>
                             <span style={{ color: 'var(--gray)' }}>Wind: </span>
-                            <span style={{ color: 'var(--fg)' }}>{city.windSpeed?.toFixed(1) || 0} m/s</span>
+                            <span style={{ color: 'var(--fg)' }}>{convertWind(city.windSpeed || 0)} {formatWindSpeedUnit(settings.windSpeed)}</span>
                           </div>
                           {city.humidity && (
                             <div>
@@ -607,7 +630,7 @@ function CityList() {
                           {city.visibility && (
                             <div>
                               <span style={{ color: 'var(--gray)' }}>Visibility: </span>
-                              <span style={{ color: 'var(--fg)' }}>{(city.visibility / 1000).toFixed(1)} km</span>
+                              <span style={{ color: 'var(--fg)' }}>{convertVis(city.visibility)} {getDistanceUnit()}</span>
                             </div>
                           )}
                         </div>
