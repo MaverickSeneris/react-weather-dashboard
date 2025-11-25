@@ -36,15 +36,22 @@ A sleek and minimal weather dashboard built with React and Vite. Search for any 
    npm install
    ```
 
-3. **Add your API key:**
+3. **Add your API keys:**
 
-   Create a `.env` file in the root folder:
+   Create a `.env` file in the root folder (or copy from `.env.example`):
 
    ```
-   VITE_WEATHER_API_KEY=your_api_key_here
+   # OpenWeatherMap API Configuration
+   VITE_OPENWEATHER_API_KEY=your_openweather_api_key_here
+   VITE_OPENWEATHER_ONECALL_API_URL=https://api.openweathermap.org/data/3.0/onecall?
+
+   # OpenCage Geocoding API Configuration
+   VITE_OPENCAGE_API_KEY=your_opencage_api_key_here
    ```
 
-   Replace `your_api_key_here` with your actual key from [OpenWeatherMap](https://openweathermap.org/api).
+   Replace the placeholder values with your actual API keys:
+   - OpenWeatherMap API key from [OpenWeatherMap](https://openweathermap.org/api)
+   - OpenCage API key from [OpenCage](https://opencagedata.com/api)
 
 4. **Run the app:**
 

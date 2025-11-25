@@ -97,7 +97,7 @@ function CityWeatherDetail() {
     }
 
     return (
-      <span className="font-bold text-[1.4rem] dark:text-gray-300">
+      <span className="font-bold text-[1.4rem]" style={{ color: 'var(--fg)' }}>
         {displayValue}
         {displayUnit}
       </span>
@@ -109,7 +109,10 @@ function CityWeatherDetail() {
       {/* Back button */}
       <button
         onClick={() => navigate(-1)}
-        className="self-start font-medium dark:text-white hover:text-blue-400 mb-4"
+        className="self-start font-medium mb-4"
+        style={{ color: 'var(--fg)' }}
+        onMouseEnter={(e) => e.currentTarget.style.color = 'var(--blue)'}
+        onMouseLeave={(e) => e.currentTarget.style.color = 'var(--fg)'}
       >
         <BiChevronLeft className="w-8 h-8 mr-1" />
       </button>
@@ -158,7 +161,7 @@ function CityWeatherDetail() {
           </Card>
           <Card>
             <CardTitle title={displayLabel} />
-            <ValueContainer value={formatTime(displayTime)} />
+            <ValueContainer value={formatTime(displayTime, settings.timeFormat)} />
             {/* convert UNIX or Date to formatted time */}
           </Card>
         </div>

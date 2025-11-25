@@ -171,11 +171,12 @@ function CityList() {
                         currentWeatherInfo: city,
                         cityName: city.name,
                       }}
-                      className="flex flex-col justify-between h-8 dark:text-white"
+                      className="flex flex-col justify-between h-8"
+                      style={{ color: 'var(--fg)' }}
                     >
                       <h2 className="font-bold text-2xl">{city.name}</h2>
-                      <span className="text-sm font-bold text-gray-400">
-                        {formatTime(city.time)}
+                      <span className="text-sm font-bold" style={{ color: 'var(--gray)' }}>
+                        {formatTime(city.time, settings.timeFormat)}
                       </span>
                     </Link>
                     <div>
@@ -191,7 +192,13 @@ function CityList() {
               {draggedId === city.cityId && swiped && (
                 <button
                   onClick={() => handleDelete(city.cityId)}
-                  className="ml-4 flex-shrink-0 p-5 bg-[#d53d3d] hover:bg-red-400 active:bg-red-400 focus:bg-red-400 text-white rounded-[15px] h-[100px] w-[20%]"
+                  className="ml-4 flex-shrink-0 p-5 rounded-[15px] h-[100px] w-[20%]"
+                  style={{ 
+                    backgroundColor: 'var(--red)', 
+                    color: 'var(--bg-0)'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
+                  onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
                 >
                   <IoCloseSharp size={"35px"} />
                 </button>

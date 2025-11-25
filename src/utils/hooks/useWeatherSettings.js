@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { applyTheme, getSystemMode } from "../themes";
 
 const defaultSettings = {
   temperature: "Celsius",
@@ -9,7 +10,11 @@ const defaultSettings = {
   notifications: true,
   timeFormat: true,
   location: true,
-  dark: false,
+  themeMode: "system", // "light", "dark", or "system"
+  themeStyle: "gruvbox", // "gruvbox", "catppuccin", "monokai", "flexbox", "everforest"
+  aiEnabled: false, // Toggle for AI features
+  aiProvider: "openai", // "openai", "anthropic", "google"
+  aiApiKey: "", // User's AI API key
 };
 
 export function useWeatherSettings() {
@@ -18,19 +23,31 @@ export function useWeatherSettings() {
 
     if (saved) {
       const parsed = JSON.parse(saved);
+      // Migrate old settings format
+      if (parsed.dark !== undefined && !parsed.themeMode) {
+        parsed.themeMode = parsed.dark ? "dark" : "light";
+        delete parsed.dark;
+      }
+      if (!parsed.themeStyle) {
+        parsed.themeStyle = "gruvbox";
+      }
+      // Migrate AI settings
+      if (parsed.aiEnabled === undefined) {
+        parsed.aiEnabled = false;
+      }
+      if (!parsed.aiProvider) {
+        parsed.aiProvider = "openai";
+      }
+      if (parsed.aiApiKey === undefined) {
+        parsed.aiApiKey = "";
+      }
       console.log("[INIT] Weather settings loaded from localStorage:", parsed);
       return parsed;
     }
 
-    const prefersDark = window.matchMedia(
-      "(prefers-color-scheme: dark)"
-    ).matches;
-    const initial = { ...defaultSettings, dark: prefersDark };
+    const initial = { ...defaultSettings };
     localStorage.setItem("weatherSettings", JSON.stringify(initial));
-    console.log(
-      "[INIT] No saved settings. Using system dark mode:",
-      prefersDark
-    );
+    console.log("[INIT] No saved settings. Using defaults");
     return initial;
   });
 
@@ -38,6 +55,17 @@ export function useWeatherSettings() {
     localStorage.setItem("weatherSettings", JSON.stringify(settings));
     console.log("[UPDATE] Weather settings saved:", settings);
   }, [settings]);
+
+  // Handle notifications permission and requests
+  useEffect(() => {
+    if (settings.notifications && "Notification" in window) {
+      if (Notification.permission === "default") {
+        Notification.requestPermission().then((permission) => {
+          console.log("[NOTIFICATIONS] Permission:", permission);
+        });
+      }
+    }
+  }, [settings.notifications]);
 
   const updateSetting = (key, value) => {
     console.log(`[SET] ${key} \u2192 ${value}`);
@@ -49,13 +77,30 @@ export function useWeatherSettings() {
     setSettings((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
+  // Apply theme based on settings
   useEffect(() => {
-    if (settings.dark) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
+    let mode = settings.themeMode;
+    
+    if (mode === "system") {
+      mode = getSystemMode();
     }
-  }, [settings.dark]);
+    
+    applyTheme(settings.themeStyle || "gruvbox", mode);
+  }, [settings.themeMode, settings.themeStyle]);
+
+  // Listen for system theme changes
+  useEffect(() => {
+    if (settings.themeMode === "system") {
+      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+      const handleChange = () => {
+        const mode = getSystemMode();
+        applyTheme(settings.themeStyle || "gruvbox", mode);
+      };
+      
+      mediaQuery.addEventListener("change", handleChange);
+      return () => mediaQuery.removeEventListener("change", handleChange);
+    }
+  }, [settings.themeMode, settings.themeStyle]);
 
   return { settings, updateSetting, toggleSetting };
 }

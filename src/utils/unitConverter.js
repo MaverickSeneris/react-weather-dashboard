@@ -8,13 +8,16 @@ export const convertTemperature = (value, toUnit) => {
   return value;
 };
 
-export const convertWindSpeed = (value, toUnit) => {
+// Convert wind speed from m/s (API standard) to desired unit
+export const convertWindSpeed = (valueMs, toUnit) => {
+  // API provides wind speed in m/s, convert to desired unit
   const conversions = {
-    'km/h': Math.round(value),
-    'm/s': Math.round(value / 3.6),
-    'Knots': Math.round(value / 1.852),
+    'km/h': Math.round(valueMs * 3.6),
+    'm/s': Math.round(valueMs),
+    'Knots': Math.round(valueMs * 1.944),
+    'mph': Math.round(valueMs * 2.237),
   };
-  return conversions[toUnit];
+  return conversions[toUnit] || Math.round(valueMs * 3.6); // Default to km/h
 };
 
 // export const convertPressure = (value, toUnit) => {

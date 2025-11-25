@@ -21,43 +21,48 @@ const WindyMapEmbed = () => {
   );
 
   useEffect(() => {
-    navigator.geolocation.getCurrentPosition(
-      async ({ coords: { latitude, longitude } }) => {
-        setCoordinates({ lat: latitude, lon: longitude });
-        const geoKey = import.meta.env.VITE_OPENCAGE_API_KEY;
+    if (settings.location) {
+      navigator.geolocation.getCurrentPosition(
+        async ({ coords: { latitude, longitude } }) => {
+          setCoordinates({ lat: latitude, lon: longitude });
+          const geoKey = import.meta.env.VITE_OPENCAGE_API_KEY;
 
-        try {
-          const res = await fetch(
-            `https://api.opencagedata.com/geocode/v1/json?q=${latitude}+${longitude}&key=${geoKey}`
-          );
-          const data = await res.json();
-          const components = data.results[0]?.components;
-          const town =
-            components.village ||
-            components.city ||
-            components.town ||
-            components.municipality ||
-            components.county ||
-            "Unknown location";
-          setLocationName(town);
-        } catch (err) {
-          console.error("OpenCage error:", err);
-          setLocationName("Unknown location");
-        } finally {
+          try {
+            const res = await fetch(
+              `https://api.opencagedata.com/geocode/v1/json?q=${latitude}+${longitude}&key=${geoKey}`
+            );
+            const data = await res.json();
+            const components = data.results[0]?.components;
+            const town =
+              components.village ||
+              components.city ||
+              components.town ||
+              components.municipality ||
+              components.county ||
+              "Unknown location";
+            setLocationName(town);
+          } catch (err) {
+            console.error("OpenCage error:", err);
+            setLocationName("Unknown location");
+          } finally {
+            setLoading(false);
+          }
+        },
+        (err) => {
+          console.error("Geolocation error:", err.message);
+          setError("Failed to get your location. Showing default location.");
           setLoading(false);
         }
-      },
-      (err) => {
-        console.error("Geolocation error:", err.message);
-        setError("Failed to get your location. Showing default location.");
-        setLoading(false);
-      }
-    );
+      );
+    } else {
+      setLoading(false);
+      setLocationName("Default location");
+    }
 
     const handleResize = () => setWindowHeight(window.innerHeight);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  }, [settings.location]);
 
   const handleOverlayChange = (option) => {
     setOverlay(option);
@@ -108,22 +113,24 @@ const WindyMapEmbed = () => {
             <button
               key={option}
               onClick={() => handleOverlayChange(option)}
-              className={`px-4 py-1 rounded-full text-sm font-bold ${
-                overlay === option
-                  ? "bg-green-400 text-white font-bold border-green-500 border-2"
-                  : "bg-slate-300 dark:bg-gray-800 dark:text-gray-300 font-bold dark:border-gray-500"
-              }`}
+              className="px-4 py-1 rounded-full text-sm font-bold border-2"
+              style={{
+                backgroundColor: overlay === option ? 'var(--green)' : 'var(--bg-1)',
+                color: overlay === option ? 'var(--bg-0)' : 'var(--fg)',
+                borderColor: overlay === option ? 'var(--green)' : 'var(--bg-2)'
+              }}
             >
               {option}
             </button>
           ))}
           <button
             onClick={toggleSpotForecast}
-            className={`px-4 py-1 rounded-full text-sm font-bold  ${
-              showSpotForecast
-                ? "bg-amber-200 dark:bg-yellow-400 border-2 dark:border-amber-500 border-amber-400"
-                : "dark:bg-gray-800 bg-slate-300 dark:text-gray-300 font-bold dark:border-gray-500"
-            } text-black`}
+            className="px-4 py-1 rounded-full text-sm font-bold border-2"
+            style={{
+              backgroundColor: showSpotForecast ? 'var(--yellow)' : 'var(--bg-1)',
+              color: showSpotForecast ? 'var(--bg-0)' : 'var(--fg)',
+              borderColor: showSpotForecast ? 'var(--yellow)' : 'var(--bg-2)'
+            }}
           >
             Forecast
           </button>
@@ -138,7 +145,7 @@ const WindyMapEmbed = () => {
       >
         {error && <p className="text-red-500">{error}</p>}
         {loading ? (
-          <div className="absolute inset-0 bg-slate-100 dark:bg-gray-800 bg-opacity-60 flex items-center justify-center animate-pulse">
+          <div className="absolute inset-0 bg-opacity-60 flex items-center justify-center animate-pulse" style={{ backgroundColor: 'var(--bg-1)' }}>
             {/* <p className="text-gray-500 dark:text-gray-300">
               Loading map, please wait...
             </p> */}

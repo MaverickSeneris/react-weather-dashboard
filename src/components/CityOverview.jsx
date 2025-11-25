@@ -17,7 +17,10 @@ function CityOverview({ children }) {
     <div className="flex flex-col items-center w-[100%] px-4 mt-4 pb-2">
       <button
         onClick={() => navigate(-1)}
-        className="self-start font-medium dark:text-white hover:text-blue-400 mb-4"
+        className="self-start font-medium mb-4"
+        style={{ color: 'var(--fg)' }}
+        onMouseEnter={(e) => e.currentTarget.style.color = 'var(--blue)'}
+        onMouseLeave={(e) => e.currentTarget.style.color = 'var(--fg)'}
       >
         <BiChevronLeft className="w-8 h-8 mr-1" />
       </button>

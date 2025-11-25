@@ -29,7 +29,8 @@ function HourlyContainer({ hourlyWeatherInfo }) {
             {time.map((t, index) => (
               <span
                 key={index}
-                className="w-max font-bold pb-2 text-slate-400 dark:text-gray-400 text-center"
+                className="w-max font-bold pb-2 text-center"
+                style={{ color: 'var(--gray)' }}
               >
                 {t}
               </span>
@@ -54,7 +55,7 @@ function HourlyContainer({ hourlyWeatherInfo }) {
           </div>
         </div>
       ) : (
-        <p className="text-center text-gray-400 dark:text-gray-500 py-4">
+        <p className="text-center py-4" style={{ color: 'var(--gray)' }}>
           Loading forecast...
         </p>
       )}

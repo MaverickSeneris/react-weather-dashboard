@@ -17,7 +17,7 @@ function CurrentCityContainer({ cityName, popValue, weatherIcon, tempValue }) {
     <div className="flex flex-col justify-center items-center">
       <h1 className="font-extrabold text-4xl my-2">{cityName}</h1>
 
-      <p className="text-lg font-semibold text-gray-400 word-space">
+      <p className="text-lg font-semibold word-space" style={{ color: 'var(--gray)' }}>
         Chance of rain: {popValue}%
       </p>
 

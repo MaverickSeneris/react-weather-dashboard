@@ -19,7 +19,7 @@ function DailyContainer({ dailyWeatherInfo }) {
         <CardTitle title={"7-DAY FORECAST"} />
         {dailyWeatherInfo.map((day, index) => (
           <div key={index} className="flex items-center justify-around text-sm">
-            <span className="w-12 font-semibold text-lg text-slate-400 dark:text-gray-400">
+            <span className="w-12 font-semibold text-lg" style={{ color: 'var(--gray)' }}>
               {day.day}
             </span>
             <div className="flex items-center">
@@ -28,7 +28,7 @@ function DailyContainer({ dailyWeatherInfo }) {
                 alt={day.description}
                 className="w-10"
               />
-              <span className="pl-2 capitalize font-bold text-[0.8rem] dark:text-gray-300 w-32">
+              <span className="pl-2 capitalize font-bold text-[0.8rem] w-32" style={{ color: 'var(--fg)' }}>
                 {day.description}
               </span>
             </div>
@@ -36,7 +36,7 @@ function DailyContainer({ dailyWeatherInfo }) {
               <span className="font-bold text-lg">
                 {convertTemp(day.tempHigh)}&deg;
               </span>
-              <span className="text-gray-400 text-lg">
+              <span className="text-lg" style={{ color: 'var(--gray)' }}>
                 /{convertTemp(day.tempLow)}&deg;
               </span>
             </div>

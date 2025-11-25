@@ -19,16 +19,15 @@ function Dashboard() {
       <main className="flex-1 overflow-y-auto w-screen">
         <Outlet />
       </main>
-      <nav className="sticky bottom-0 bg-slate-100 dark:bg-gray-800 text-white p-4">
+      <nav className="sticky bottom-0 p-4" style={{ backgroundColor: 'var(--bg-1)' }}>
         <div className="flex justify-around">
           {navItems.map(({ to, icon: Icon }) => (
             <Link to={to} key={to}>
               <Icon
-                className={`text-2xl ${
-                  pathname === to
-                    ? "text-slate-600 dark:text-gray-300"
-                    : "text-slate-400 dark:text-gray-500"
-                }`}
+                className="text-2xl"
+                style={{
+                  color: pathname === to ? 'var(--fg)' : 'var(--gray)'
+                }}
               />
             </Link>
           ))}

@@ -16,8 +16,8 @@ export default defineConfig({
         description: "Smart weather app",
         start_url: "/", // Ensures proper routing when launched from home screen
         display: "standalone",
-        theme_color: "#0b0b1d",
-        background_color: "#0b0b1d",
+        theme_color: "#fbf1c7", // Default light theme - will be overridden by dynamic theme
+        background_color: "#fbf1c7", // Default light theme - will be overridden by dynamic theme
         icons: [
           {
             src: "pwa-192x192.png",

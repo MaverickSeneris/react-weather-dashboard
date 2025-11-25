@@ -8,21 +8,31 @@ import WeatherMap from "./pages/WeatherMap";
 import CityOverview from "./components/CityOverview";
 import CityWeatherDetail from "./pages/CityWeatherDetail";
 import { useWeatherSettings } from "./utils/hooks/useWeatherSettings";
+import { getSystemMode } from "./utils/themes";
 
 function App() {
   const { settings } = useWeatherSettings();
 
   useEffect(() => {
-    // uncomment code below and uncomment toggle dark theme button on WeatherSetting.jsx
-    // const themeColor = settings.dark ? "#0b0b1d" : "#ffffff"; // dark: Tailwind gray-800
+    // Set theme color based on current theme mode and style
+    let mode = settings.themeMode;
+    if (mode === "system") {
+      mode = getSystemMode();
+    }
+    
+    // Get current theme colors
+    const themeName = settings.themeStyle?.toLowerCase() || "gruvbox";
+    const bgColor = document.documentElement.style.getPropertyValue("--bg-0") || 
+                   (mode === "dark" ? "#282828" : "#fbf1c7");
+    
     let meta = document.querySelector('meta[name="theme-color"]');
     if (!meta) {
       meta = document.createElement("meta");
       meta.name = "theme-color";
       document.head.appendChild(meta);
     }
-    // meta.setAttribute("content", themeColor);
-  }, [settings.dark]);
+    meta.setAttribute("content", bgColor);
+  }, [settings.themeMode, settings.themeStyle]);
 
   return (
     <BrowserRouter>

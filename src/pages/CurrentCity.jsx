@@ -10,6 +10,10 @@ import DailyContainer from "../components/DailyContainer";
 import CurrentWeatherContainer from "../components/CurrentWeatherContainer";
 import generateUUID from "../utils/uuidGenerator";
 import LoadingSkeleton from "../components/ui/loadingComponents/CurrentCityLoadingSkeleton";
+import { useWeatherSettings } from "../utils/hooks/useWeatherSettings";
+import { checkWeatherAlerts } from "../utils/notifications";
+import WeatherRecommendations from "../components/WeatherRecommendations";
+import WeatherAlerts from "../components/WeatherAlerts";
 
 function CurrentCity() {
   const [currentWeatherInfo, setCurrentWeatherInfo] = useState(
@@ -20,9 +24,10 @@ function CurrentCity() {
   );
   const [unit, setUnit] = useState("metric");
   const [loading, setLoading] = useState(false);
+  const { settings } = useWeatherSettings();
 
   useEffect(() => {
-    if (!currentWeatherInfo) {
+    if (!currentWeatherInfo && settings.location) {
       navigator.geolocation.getCurrentPosition(
         ({ coords: { latitude, longitude } }) => {
           fetchAllWeatherInfo(latitude, longitude);
@@ -32,7 +37,7 @@ function CurrentCity() {
         }
       );
     }
-  }, [unit]);
+  }, [unit, settings.location]);
 
   const fetchAllWeatherInfo = async (lat, lon) => {
     setLoading(true);
@@ -57,7 +62,7 @@ function CurrentCity() {
         .filter((_, i) => i >= 2 && (i - 2) % 3 === 0)
         .slice(0, 3)
         .map((d) => ({
-          time: formatTime(d.dt),
+          time: formatTime(d.dt, settings.timeFormat),
           temperature: d.temp,
           icon: d.weather?.[0]?.icon,
         }));
@@ -107,6 +112,9 @@ function CurrentCity() {
       const fetchTime = new Date().toLocaleString();
       setLastFetchTime(fetchTime);
       localStorage.setItem("lastFetchTime", fetchTime);
+
+      // Check for weather alerts and send notifications if enabled
+      checkWeatherAlerts(weatherInfo);
     } catch (err) {
       console.error("\u274c Error in fetchAllWeatherInfo():", err);
     } finally {
@@ -115,14 +123,16 @@ function CurrentCity() {
   };
 
   const handleRefresh = () => {
-    navigator.geolocation.getCurrentPosition(
-      ({ coords: { latitude, longitude } }) => {
-        fetchAllWeatherInfo(latitude, longitude);
-      },
-      (error) => {
-        console.error("❌ Geolocation error:", error.message);
-      }
-    );
+    if (settings.location) {
+      navigator.geolocation.getCurrentPosition(
+        ({ coords: { latitude, longitude } }) => {
+          fetchAllWeatherInfo(latitude, longitude);
+        },
+        (error) => {
+          console.error("❌ Geolocation error:", error.message);
+        }
+      );
+    }
   };
 
   if (!currentWeatherInfo || loading) return <LoadingSkeleton />;
@@ -131,7 +141,10 @@ function CurrentCity() {
     <div className="flex flex-col items-center w-screen px-4 mt-10 pb-2">
       <button
         onClick={handleRefresh}
-        className="self-start p-2 thyuvgfext-slate-300 dark:text-white rounded-full hover:bg-blue-600"
+        className="self-start p-2 rounded-full"
+        style={{ color: 'var(--fg)' }}
+        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--blue)'}
+        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
       >
         <FiRefreshCw size={20} />
       </button>
@@ -143,17 +156,24 @@ function CurrentCity() {
         tempValue={currentWeatherInfo.current.temperature}
       />
       {lastFetchTime && (
-        <p className="text-[0.7rem] text-slate-300 dark:text-gray-500">
+        <p className="text-[0.7rem]" style={{ color: 'var(--gray)' }}>
           Last updated: {lastFetchTime}
         </p>
       )}
 
       <HourlyContainer hourlyWeatherInfo={currentWeatherInfo.hourly} />
       <DailyContainer dailyWeatherInfo={currentWeatherInfo.daily} />
+      
+      {/* Weather Alerts - only shows if there are alarming conditions */}
+      <WeatherAlerts weatherData={currentWeatherInfo} />
+      
       <CurrentWeatherContainer
         currentWeatherInfo={currentWeatherInfo.current}
         cityName={currentWeatherInfo.location.village}
       />
+      
+      {/* Weather Recommendations */}
+      <WeatherRecommendations weatherData={currentWeatherInfo} />
     </div>
   );
 }

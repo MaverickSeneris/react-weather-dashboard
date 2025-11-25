@@ -6,8 +6,26 @@
   font-weight: 400;
 
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #0b0b1d;
+  
+  /* Theme variables will be set dynamically by JavaScript */
+  /* Default fallback colors (Gruvbox Light) */
+  --bg-0: #fbf1c7;
+  --bg-0-h: #f9f5d7;
+  --bg-1: #ebdbb2;
+  --bg-2: #d5c4a1;
+  --fg: #3c3836;
+  --fg-1: #504945;
+  --gray: #7c6f64;
+  --red: #cc241d;
+  --green: #98971a;
+  --yellow: #d79921;
+  --blue: #458588;
+  --purple: #b16286;
+  --aqua: #689d6a;
+  --orange: #d65d0e;
+
+  color: var(--fg);
+  background-color: var(--bg-0);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -15,31 +33,50 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Remove any hardcoded dark mode colors - they'll be set dynamically */
+
 body {
   margin: 0;
   display: flex;
   justify-content: center;
   min-width: 320px;
   min-height: 100vh;
+  background-color: var(--bg-0);
+  color: var(--fg);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #1d293d;
-    background-color: rgb(255, 255, 255);
-  }
+/* Dark mode - colors are set dynamically by theme system */
+.dark {
+  color: var(--fg) !important;
+  background-color: var(--bg-0) !important;
+}
+
+.dark body {
+  background-color: var(--bg-0) !important;
+  color: var(--fg) !important;
+}
+
+/* Light mode class for consistency */
+.light {
+  color: var(--fg);
+  background-color: var(--bg-0);
+}
+
+.light body {
+  background-color: var(--bg-0);
+  color: var(--fg);
 }
 
 .word-space {
   word-spacing: 0.15rem;
 }
 
-
 .bg-white.dark\:bg-black {
   background-color: white;
 }
 
 .dark .your-class {
-  background-color: #111;
+  background-color: #1d2021;
 }
 

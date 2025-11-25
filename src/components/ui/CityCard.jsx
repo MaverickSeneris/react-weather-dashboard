@@ -18,10 +18,12 @@ const CityCard = ({ weatherData }) => {
       ? Math.round((temp * 9) / 5 + 32)
       : Math.round(temp);
 
-  const convertWind = (speedKph) =>
-    settings.windSpeed === "mph"
-      ? Math.round(speedKph / 1.609)
-      : Math.round(speedKph);
+  const convertWind = (speedKph) => {
+    if (settings.windSpeed === "mph") return Math.round(speedKph / 1.609);
+    if (settings.windSpeed === "m/s") return Math.round(speedKph / 3.6);
+    if (settings.windSpeed === "Knots") return Math.round(speedKph / 1.852);
+    return Math.round(speedKph); // km/h default
+  };
 
   function handleSaveCity(cityId) {
     const city = weatherData.find((c) => c.cityId === cityId);
@@ -78,7 +80,7 @@ const CityCard = ({ weatherData }) => {
           >
             <Card>
               {saveMessages[city.cityId] ? (
-                <div className="flex items-center justify-center w-full dark:text-white font-bold h-[55px]">
+                <div className="flex items-center justify-center w-full font-bold h-[55px]" style={{ color: 'var(--fg)' }}>
                   {saveMessages[city.cityId]}
                 </div>
               ) : (
@@ -95,7 +97,7 @@ const CityCard = ({ weatherData }) => {
                     />
                     <div className="flex flex-col items-start">
                       <div className="flex items-center gap-2">
-                        <span className="font-bold text-[1rem] dark:text-gray-300">
+                        <span className="font-bold text-[1rem]" style={{ color: 'var(--fg)' }}>
                           {city.name}
                         </span>
                         <span className="text-xs font-regular">
@@ -103,8 +105,8 @@ const CityCard = ({ weatherData }) => {
                         </span>
                       </div>
                       <p className="text-xs">{city.state}</p>
-                      <div className="text-sm font-semibold text-gray-400">
-                        {timeFormatter(city.time)}
+                      <div className="text-sm font-semibold" style={{ color: 'var(--gray)' }}>
+                        {timeFormatter(city.time, settings.timeFormat)}
                       </div>
                     </div>
                   </div>
@@ -126,7 +128,13 @@ const CityCard = ({ weatherData }) => {
           {draggedId === city.cityId && swiped && (
             <button
               onClick={() => handleSaveCity(city.cityId)}
-              className="ml-4 flex-shrink-0 p-5 bg-green-500 hover:bg-green-400 active:bg-green-400 focus:bg-green-400 text-white rounded-[15px] h-[100px] w-[20%]"
+              className="ml-4 flex-shrink-0 p-5 rounded-[15px] h-[100px] w-[20%]"
+              style={{ 
+                backgroundColor: 'var(--green)', 
+                color: 'var(--bg-0)'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--yellow)'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--green)'}
             >
               <IoAddSharp size={"35px"} />
             </button>
