@@ -46,9 +46,9 @@ function RegularCityCard({
   touchStartX
 }) {
   return (
-    <div className="relative flex items-center w-full">
+    <div className="relative flex items-center w-full select-none touch-none">
       <div
-        className="w-full"
+        className="w-full select-none touch-none"
         onTouchStart={(e) => {
           setDraggedId(city.cityId);
           setTouchStartX(e.touches[0].clientX);
@@ -74,7 +74,7 @@ function RegularCityCard({
         style={{ touchAction: 'pan-y' }}
       >
         <motion.div
-          className="flex-grow"
+          className="flex-grow select-none touch-none"
           animate={{ x: -clampedSwipe }}
           transition={{ type: "spring", damping: 25, stiffness: 300 }}
           style={{ willChange: 'transform' }}
@@ -337,13 +337,13 @@ function SortableCityCard({
     <div
       ref={setNodeRef}
       style={style}
-      className="relative flex items-center w-full" // Removed transition for snappier drag
+      className="relative flex items-center w-full select-none touch-none" // Removed transition for snappier drag
       {...attributes}
       {...customListeners}
     >
       {/* Inner container for swipe-to-delete - wider drag area */}
       <div
-        className="w-full min-h-[80px]" // Increased minimum height for easier drag trigger
+        className="w-full min-h-[80px] select-none touch-none" // Increased minimum height for easier drag trigger
         onTouchStart={(e) => {
           touchStartTimeRef.current = Date.now();
           hasMovedRef.current = false;
@@ -437,7 +437,7 @@ function SortableCityCard({
       >
         {/* Card */}
         <motion.div
-          className="flex-grow"
+          className="flex-grow select-none touch-none"
           animate={{
             x: -clampedSwipe,
           }}
