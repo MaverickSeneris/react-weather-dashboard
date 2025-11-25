@@ -59,7 +59,7 @@ function WeatherRecommendations({ weatherData }) {
   return (
     <Card>
       <div className="flex items-center justify-between mb-2">
-        <CardTitle title={"RECOMMENDATIONS"} />
+      <CardTitle title={"RECOMMENDATIONS"} />
         {settings.aiEnabled && settings.aiApiKey && (
           <span className="text-sm px-2 py-1 rounded font-semibold" style={{ backgroundColor: 'var(--bg-2)', color: 'var(--green)' }}>
             AI

@@ -78,8 +78,8 @@ function WeatherAlerts({ weatherData }) {
     <Card>
       <div className="flex items-center justify-between mb-3">
         <h3 className="font-bold text-lg" style={{ color: 'var(--fg)' }}>
-          ⚠️ Weather Alerts
-        </h3>
+        ⚠️ Weather Alerts
+      </h3>
         {settings.aiEnabled && settings.aiApiKey && (
           <span className="text-sm px-2 py-1 rounded font-semibold" style={{ backgroundColor: 'var(--bg-2)', color: 'var(--green)' }}>
             AI
@@ -96,9 +96,9 @@ function WeatherAlerts({ weatherData }) {
       )}
       <div className="space-y-3">
         <AnimatePresence>
-          {alerts.map((alert, index) => (
+        {alerts.map((alert, index) => (
             <motion.div
-              key={index}
+            key={index}
               initial={{ opacity: 0, y: 10, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, x: -20, scale: 0.9 }}
@@ -108,10 +108,10 @@ function WeatherAlerts({ weatherData }) {
                 stiffness: 300,
                 delay: index * 0.1 
               }}
-              className="p-3 rounded-lg border-2"
-              style={getAlertStyle(alert.type)}
-            >
-              <div className="flex items-start gap-2">
+            className="p-3 rounded-lg border-2"
+            style={getAlertStyle(alert.type)}
+          >
+            <div className="flex items-start gap-2">
                 <motion.span
                   animate={{ rotate: [0, 10, -10, 0] }}
                   transition={{ duration: 0.5, delay: index * 0.1 + 0.2 }}
@@ -119,13 +119,13 @@ function WeatherAlerts({ weatherData }) {
                 >
                   {alert.icon}
                 </motion.span>
-                <div className="flex-1">
-                  <h4 className="font-bold text-sm mb-1">{alert.title}</h4>
-                  <p className="text-xs opacity-90">{alert.message}</p>
-                </div>
+              <div className="flex-1">
+                <h4 className="font-bold text-sm mb-1">{alert.title}</h4>
+                <p className="text-xs opacity-90">{alert.message}</p>
               </div>
+            </div>
             </motion.div>
-          ))}
+        ))}
         </AnimatePresence>
       </div>
     </Card>

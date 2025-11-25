@@ -1,15 +1,18 @@
 import React, { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence, useInView } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import SearchBar from "../components/SearchBar";
 import Header from "../components/ui/Header";
 import PageContainer from "../components/ui/PageContainer";
 import Card from "../components/ui/Card";
 import formatTime from "../utils/timeFormatter";
-import { IoCloseSharp, IoArrowUndo } from "react-icons/io5";
+import { IoCloseSharp, IoArrowUndo, IoChevronDown } from "react-icons/io5";
+import { FiRefreshCw } from "react-icons/fi";
 import { Link } from "react-router";
 import axios from "axios";
 import getDayLabel from "../utils/dayLabel";
 import { useWeatherSettings } from "../utils/hooks/useWeatherSettings";
+import { useSwipeToRefresh } from "../utils/hooks/useSwipeToRefresh";
+import { checkSevereWeather } from "../utils/weatherAlertChecker";
 
 const key = import.meta.env.VITE_OPENWEATHER_API_KEY;
 const url = import.meta.env.VITE_OPENWEATHER_ONECALL_API_URL;
@@ -29,17 +32,63 @@ function CityList() {
   };
   // Track the city being dragged/swiped
   const [draggedId, setDraggedId] = useState(null);
-  const [swiped, setSwiped] = useState(false);
+  const [swipeDistance, setSwipeDistance] = useState(0);
+  const [touchStartX, setTouchStartX] = useState(0);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  // Expanded cards state
+  const [expandedCards, setExpandedCards] = useState(new Set());
+  const [lastUpdateTime, setLastUpdateTime] = useState(null);
 
+  // Load initial data from localStorage on mount and listen for updates
   useEffect(() => {
+    const loadCities = () => {
+      try {
+        const stored = JSON.parse(localStorage.getItem("savedCities")) || [];
+        setFavoriteCities(stored);
+      } catch (error) {
+        console.error("Error loading cities from localStorage:", error);
+        setFavoriteCities([]);
+      }
+    };
+
+    loadCities();
+
+    // Listen for storage events (when city is added from search)
+    const handleStorageChange = () => {
+      loadCities();
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Also listen for custom event (for same-tab updates)
+    window.addEventListener('cityAdded', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('cityAdded', handleStorageChange);
+    };
+  }, []);
+
+  // Fetch weather data function
     const fetchLiveWeatherData = async () => {
+    setIsRefreshing(true);
       const stored = JSON.parse(localStorage.getItem("savedCities")) || [];
+
+    if (stored.length === 0) {
+      setIsRefreshing(false);
+      return;
+    }
 
       const updatedCities = await Promise.all(
         stored.map(async (city) => {
           const { lat, lon, name, cityId } = city;
 
           try {
+          if (!lat || !lon || isNaN(lat) || isNaN(lon)) {
+            console.error(`Invalid coordinates for ${name}:`, { lat, lon });
+            return city;
+          }
+
             const res = await axios.get(url, {
               params: {
                 lat,
@@ -51,38 +100,51 @@ function CityList() {
 
             const data = res.data;
 
-            const hourlyData = data.hourly
+          if (!data || !data.current) {
+            throw new Error("Invalid weather data received");
+          }
+
+          const hourlyData = (data.hourly || [])
               .filter((_, i) => i >= 2 && (i - 2) % 3 === 0)
               .slice(0, 3)
               .map((d) => ({
                 time: formatTime(d.dt),
-                temperature: d.temp,
+              temperature: d.temp || 0,
                 icon: d.weather?.[0]?.icon,
               }));
 
-            const dailyData = data.daily.slice(0, 7).map((d, i) => ({
+          const dailyData = (data.daily || []).slice(0, 7).map((d, i) => ({
               day: getDayLabel(d.dt, i),
-              icon: d.weather[0]?.icon || "",
-              description: d.weather[0]?.description || "",
-              tempHigh: Math.round(d.temp.max),
-              tempLow: Math.round(d.temp.min),
+            icon: d.weather?.[0]?.icon || "",
+            description: d.weather?.[0]?.description || "",
+            tempHigh: Math.round(d.temp?.max || 0),
+            tempLow: Math.round(d.temp?.min || 0),
             }));
+
+          // Get timezone offset from API (in seconds from UTC), or calculate from longitude
+          // OpenWeather API provides timezone_offset, otherwise approximate from longitude
+          const timezoneOffset = (data.timezone_offset !== undefined && !isNaN(data.timezone_offset))
+            ? data.timezone_offset 
+            : (!isNaN(lon)) 
+              ? Math.round((lon / 15) * 3600)
+              : 0;
 
             const updatedCity = {
               ...city,
-              temperature: Math.floor(data.current.temp),
-              condition: data.current.weather[0].main.toLowerCase(),
-              weatherIcon: data.current.weather[0].icon,
-              time: data.current.dt,
-              uvIndex: Math.ceil(data.current.uvi),
-              windSpeed: data.current.wind_speed,
-              humidity: data.current.humidity,
-              visibility: data.current.visibility,
-              feelsLike: Math.floor(data.current.feels_like),
-              pressure: data.current.pressure,
-              sunset: data.current.sunset,
-              sunrise: data.current.sunrise,
-              chanceOfRain: Math.round(data.daily[0].pop * 100),
+            temperature: Math.floor(data.current.temp || 0),
+            condition: data.current.weather?.[0]?.main?.toLowerCase() || "unknown",
+            weatherIcon: data.current.weather?.[0]?.icon || "01d",
+            time: data.current.dt || Math.floor(Date.now() / 1000),
+            timezoneOffset: timezoneOffset, // Store timezone offset for local time calculation
+            uvIndex: Math.ceil(data.current.uvi || 0),
+            windSpeed: data.current.wind_speed || 0,
+            humidity: data.current.humidity || 0,
+            visibility: data.current.visibility || null,
+            feelsLike: Math.floor(data.current.feels_like || 0),
+            pressure: data.current.pressure || 0,
+            sunset: data.current.sunset || 0,
+            sunrise: data.current.sunrise || 0,
+            chanceOfRain: Math.round((data.daily?.[0]?.pop || 0) * 100),
               hourlyWeatherInfo: {
                 time: hourlyData.map((i) => i.time),
                 temperature: hourlyData.map((i) => i.temperature),
@@ -95,18 +157,44 @@ function CityList() {
             console.log(`Fetched weather data for ${name}:`, updatedCity);
             return updatedCity;
           } catch (err) {
-            console.error(`Error fetching weather for ${name}:`, err.message);
-            return city;
+          console.error(`Error fetching weather for ${name}:`, err.message || err);
+          // Return city with default values to prevent NaN
+          return {
+            ...city,
+            temperature: city.temperature || 0,
+            time: city.time || Math.floor(Date.now() / 1000),
+            timezoneOffset: city.timezoneOffset || (city.lon ? Math.round((city.lon / 15) * 3600) : 0),
+            uvIndex: city.uvIndex || 0,
+            windSpeed: city.windSpeed || 0,
+            humidity: city.humidity || 0,
+            feelsLike: city.feelsLike || 0,
+            chanceOfRain: city.chanceOfRain || 0,
+          };
           }
         })
       );
 
       setFavoriteCities(updatedCities);
+    localStorage.setItem("savedCities", JSON.stringify(updatedCities));
       console.log("Updated favoriteCities state:", updatedCities);
-    };
+    
+    // Set last update time
+    const updateTime = new Date().toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: settings.timeFormat === "12 Hour",
+    });
+    setLastUpdateTime(updateTime);
+    localStorage.setItem("lastCityListUpdateTime", updateTime);
+    
+    setIsRefreshing(false);
+  };
 
-    fetchLiveWeatherData();
-  }, [searchMode]);
+  // Swipe to refresh hook
+  const { pullDistance, containerRef } = useSwipeToRefresh(
+    fetchLiveWeatherData,
+    { enabled: !searchMode }
+  );
 
   function toggleSearchMode() {
     setSearchMode((prevMode) => !prevMode);
@@ -123,7 +211,8 @@ function CityList() {
     setFavoriteCities(updated);
     localStorage.setItem("savedCities", JSON.stringify(updated));
     setDraggedId(null);
-    setSwiped(false);
+    setSwipeDistance(0);
+    setTouchStartX(0);
 
     // Clear any existing timeout
     if (undoTimeout) {
@@ -150,7 +239,7 @@ function CityList() {
     if (undoTimeout) {
       clearTimeout(undoTimeout);
       setUndoTimeout(null);
-    }
+  }
   }
 
   // Cleanup timeout on unmount
@@ -163,162 +252,395 @@ function CityList() {
   }, [undoTimeout]);
 
   return (
-    <PageContainer>
+    <PageContainer ref={containerRef}>
+      {/* Pull to refresh indicator */}
+      {!searchMode && pullDistance > 0 && (
+        <motion.div
+          className="fixed top-0 left-0 right-0 z-50 flex items-center justify-center py-2"
+          style={{
+            backgroundColor: 'var(--bg-0)',
+            transform: `translateY(${Math.min(pullDistance, 80)}px)`,
+          }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: pullDistance > 20 ? 1 : 0 }}
+        >
+          <motion.div
+            animate={{ rotate: isRefreshing ? 360 : 0 }}
+            transition={{ duration: 1, repeat: isRefreshing ? Infinity : 0, ease: "linear" }}
+            style={{ color: 'var(--fg)' }}
+          >
+            <FiRefreshCw size={24} />
+          </motion.div>
+        </motion.div>
+      )}
+
       {/* Header */}
-      {!searchMode && <Header title={"My Cities"} />}
+      {!searchMode && (
+        <div className="flex items-center justify-between">
+          <Header title={"My Cities"} />
+          <motion.button
+            onClick={fetchLiveWeatherData}
+            disabled={isRefreshing}
+            whileHover={{ scale: 1.1, rotate: 180 }}
+            whileTap={{ scale: 0.9 }}
+            transition={{ type: "spring", stiffness: 400, damping: 17 }}
+            className="p-2 rounded-full"
+            style={{ 
+              color: 'var(--fg)',
+              opacity: isRefreshing ? 0.5 : 1,
+              cursor: isRefreshing ? 'not-allowed' : 'pointer'
+            }}
+            onMouseEnter={(e) => !isRefreshing && (e.currentTarget.style.backgroundColor = 'var(--bg-2)')}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+          >
+            <motion.div
+              animate={{ rotate: isRefreshing ? 360 : 0 }}
+              transition={{ duration: 1, repeat: isRefreshing ? Infinity : 0, ease: "linear" }}
+            >
+              <FiRefreshCw size={20} />
+            </motion.div>
+          </motion.button>
+        </div>
+      )}
 
       {/* Search */}
       {searchMode ? (
         <SearchBar toggleSearchMode={toggleSearchMode} />
       ) : (
-        <motion.div
+        <>
+          <motion.div
           onClick={toggleSearchMode}
-          className="rounded-[10px] p-2 mt-4 cursor-pointer transition-all"
-          style={{ 
-            backgroundColor: 'var(--bg-2)', 
-            color: 'var(--gray)'
-          }}
-          initial={{ opacity: 0, scale: 0.9, y: 10 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{
-            type: "spring",
-            damping: 20,
-            stiffness: 300,
-            delay: 0.1,
-          }}
-          whileHover={{
-            scale: 1.05,
-            backgroundColor: 'var(--bg-1)',
-            transition: { duration: 0.2 },
-          }}
-          whileTap={{ scale: 0.95 }}
+            className="rounded-[10px] p-2 mt-4 cursor-pointer transition-all"
+            style={{ 
+              backgroundColor: 'var(--bg-2)', 
+              color: 'var(--gray)'
+            }}
+            initial={{ opacity: 0, scale: 0.9, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{
+              type: "spring",
+              damping: 20,
+              stiffness: 300,
+              delay: 0.1,
+            }}
+            whileHover={{
+              scale: 1.05,
+              backgroundColor: 'var(--bg-1)',
+              transition: { duration: 0.2 },
+            }}
+            whileTap={{ scale: 0.95 }}
         >
           Search City
-        </motion.div>
+          </motion.div>
+          {lastUpdateTime && (
+            <p className="flex justify-center text-xs mt-1" style={{ color: 'var(--gray)' }}>
+              Last updated: {lastUpdateTime}
+            </p>
+          )}
+        </>
       )}
 
       {/* Favorite City Cards */}
       {!searchMode && (
-        <div className="mt-6">
-          {favoriteCities.map((city, index) => {
-            const CardWrapper = ({ children }) => {
-              const ref = useRef(null);
-              const isInView = useInView(ref, { once: true, margin: "-100px" });
-              const isEven = index % 2 === 0;
-              
-              return (
-                <motion.div
-                  ref={ref}
-                  initial={{ 
-                    opacity: 0, 
-                    x: isEven ? -100 : 100,
-                    scale: 0.85
-                  }}
-                  animate={isInView ? { 
-                    opacity: 1, 
-                    x: 0,
-                    scale: 1
-                  } : { 
-                    opacity: 0, 
-                    x: isEven ? -100 : 100,
-                    scale: 0.85
-                  }}
-                  exit={{ opacity: 0, x: isEven ? -100 : 100 }}
-                  transition={{ 
-                    type: "spring", 
-                    damping: 15, 
-                    stiffness: 200,
-                    delay: 0.15,
-                    duration: 0.6
-                  }}
-                  className="relative flex items-center h-[100%]"
-                >
-                  {children}
-                </motion.div>
-              );
+        <div className="mt-6 space-y-1">
+          {favoriteCities.map((city) => {
+            const isDragging = draggedId === city.cityId;
+            const currentSwipeDistance = isDragging ? swipeDistance : 0;
+            const deleteButtonWidth = 80; // Width of delete button
+            const swipeThreshold = 50; // Minimum swipe to show delete button
+            const maxSwipe = deleteButtonWidth + 20; // Max swipe distance
+            
+            // Calculate if delete button should be visible
+            const showDelete = currentSwipeDistance > swipeThreshold;
+            // Clamp swipe distance
+            const clampedSwipe = Math.min(Math.max(currentSwipeDistance, 0), maxSwipe);
+
+            // Check for severe weather - adapt city data structure
+            const cityWeatherData = {
+              current: {
+                temperature: city.temperature || 0,
+                feelsLike: city.feelsLike || 0,
+                uvIndex: city.uvIndex || 0,
+                chanceOfRain: city.chanceOfRain || 0,
+                windSpeed: city.windSpeed || 0,
+                description: city.condition || "unknown",
+                visibility: city.visibility || null,
+                humidity: city.humidity || 0,
+              },
             };
+            const severeWeather = checkSevereWeather(cityWeatherData);
+            const borderColor = severeWeather.hasSevere
+              ? severeWeather.alertType === "danger"
+                ? "var(--red)"
+                : "var(--yellow)"
+              : "transparent";
 
             return (
-              <CardWrapper key={city.cityId}>
-                <div
-                  className="relative flex items-center h-[100%] w-full"
-                  onTouchStart={() => {
-                    setDraggedId(city.cityId);
-                  }}
-                  onTouchMove={(e) => {
-                    const touchX = e.touches[0].clientX;
-                    if (touchX < 150) {
-                      setSwiped(true); // activate squeezed look
-                    }
-                  }}
-                  onTouchEnd={() => {
-                    // optional: reset swipe if you want automatic return
-                    // setDraggedId(null);
-                    // setSwiped(false);
-                  }}
-                >
+            <div
+              key={city.cityId}
+                className="relative flex items-center w-full"
+                onTouchStart={(e) => {
+                setDraggedId(city.cityId);
+                  setTouchStartX(e.touches[0].clientX);
+              }}
+              onTouchMove={(e) => {
+                  if (!isDragging) return;
+                const touchX = e.touches[0].clientX;
+                  const deltaX = touchStartX - touchX; // Negative when swiping left
+                  
+                  if (deltaX > 0) {
+                    // Swiping left
+                    setSwipeDistance(deltaX);
+                  } else {
+                    // Swiping right - reset
+                    setSwipeDistance(0);
+                }
+              }}
+              onTouchEnd={() => {
+                  // If swipe wasn't far enough, snap back
+                  if (currentSwipeDistance < swipeThreshold) {
+                    setSwipeDistance(0);
+                  } else {
+                    // Keep it open
+                    setSwipeDistance(maxSwipe);
+                  }
+                }}
+                style={{ touchAction: 'pan-y' }}
+            >
               {/* Card */}
-              <div
-                className={`transition-all duration-400  ${
-                  draggedId === city.cityId && swiped
-                    ? "flex-grow-[0.95]" // squeezed when swiped
-                    : "flex-grow"
-                }`}
+                <motion.div
+                  className="flex-grow"
+                  animate={{
+                    x: -clampedSwipe,
+                  }}
+                  transition={{
+                    type: "spring",
+                    damping: 25,
+                    stiffness: 300,
+                  }}
+                  style={{ willChange: 'transform' }}
               >
-                <Card>
+                  <Card
+                    compact={true}
+                    style={{
+                      borderLeft: severeWeather.hasSevere ? `4px solid ${borderColor}` : undefined,
+                    }}
+                  >
                   <div className="flex justify-between">
                     <Link
                       to={`/test/${city.cityId || "unknown"}`}
-                      key={city.cityId}
                       state={{
                         currentWeatherInfo: city,
                         cityName: city.name,
                       }}
-                      className="flex flex-col justify-between h-8"
+                        className="flex flex-col justify-between"
                       style={{ color: 'var(--fg)' }}
                     >
-                      <h2 className="font-bold text-2xl">{city.name}</h2>
-                      <span className="text-sm font-bold" style={{ color: 'var(--gray)' }}>
-                        {formatTime(city.time, settings.timeFormat)}
+                        <h2 className="font-bold text-xl">{city.name}</h2>
+                        <span className="text-xs font-bold" style={{ color: 'var(--gray)' }}>
+                          {(() => {
+                            try {
+                              // Calculate local time for this city without API calls
+                              if (!city.time || isNaN(city.time)) return '';
+                              
+                              // Get timezone offset (in seconds from UTC)
+                              const timezoneOffset = (city.timezoneOffset !== undefined && !isNaN(city.timezoneOffset))
+                                ? city.timezoneOffset 
+                                : (city.lon && !isNaN(city.lon)) 
+                                  ? Math.round((city.lon / 15) * 3600)
+                                  : 0;
+                              
+                              // Create Date from UTC timestamp
+                              const utcDate = new Date(city.time * 1000);
+                              
+                              if (isNaN(utcDate.getTime())) return '';
+                              
+                              // Get UTC hours and minutes
+                              let hours = utcDate.getUTCHours();
+                              let minutes = utcDate.getUTCMinutes();
+                              
+                              // Add timezone offset (convert seconds to hours)
+                              const offsetHours = Math.floor(timezoneOffset / 3600);
+                              const offsetMinutes = Math.floor((timezoneOffset % 3600) / 60);
+                              
+                              hours = hours + offsetHours;
+                              minutes = minutes + offsetMinutes;
+                              
+                              // Handle overflow
+                              if (minutes >= 60) {
+                                hours += 1;
+                                minutes -= 60;
+                              } else if (minutes < 0) {
+                                hours -= 1;
+                                minutes += 60;
+                              }
+                              
+                              // Handle hour overflow
+                              if (hours >= 24) {
+                                hours -= 24;
+                              } else if (hours < 0) {
+                                hours += 24;
+                              }
+                              
+                              // Format time
+                              const is12Hour = settings.timeFormat === "12 Hour";
+                              
+                              if (is12Hour) {
+                                const period = hours >= 12 ? 'PM' : 'AM';
+                                const displayHours = hours % 12 || 12;
+                                return `${displayHours}:${minutes.toString().padStart(2, '0')} ${period}`;
+                              } else {
+                                return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+                              }
+                            } catch (error) {
+                              console.error("Error calculating local time:", error);
+                              return '';
+                            }
+                          })()}
                       </span>
                     </Link>
                     <div>
-                      <span className="text-5xl font-regular">
-                        {convertTemp(city.temperature)}&deg;
+                        <span className="text-4xl font-regular">
+                          {city.temperature !== undefined && !isNaN(city.temperature) 
+                            ? `${convertTemp(city.temperature)}°` 
+                            : 'N/A'}
                       </span>
+                      </div>
+                    </div>
+                    <div className="flex justify-center mt-1">
+                      <motion.button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          const isExpanded = expandedCards.has(city.cityId);
+                          if (isExpanded) {
+                            setExpandedCards(prev => {
+                              const newSet = new Set(prev);
+                              newSet.delete(city.cityId);
+                              return newSet;
+                            });
+                          } else {
+                            setExpandedCards(prev => new Set(prev).add(city.cityId));
+                          }
+                        }}
+                        className="p-0"
+                        style={{ 
+                          color: severeWeather.hasSevere ? borderColor : 'var(--gray)',
+                        }}
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                        animate={{
+                          rotate: expandedCards.has(city.cityId) ? 180 : 0
+                        }}
+                      >
+                        <IoChevronDown size={18} />
+                      </motion.button>
+                    </div>
+                    {expandedCards.has(city.cityId) && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ type: "spring", damping: 20, stiffness: 300 }}
+                        className="mt-2 pt-2 border-t"
+                        style={{ borderColor: 'var(--bg-2)' }}
+                      >
+                        {/* Weather Alerts */}
+                        {severeWeather.hasSevere && severeWeather.alerts && severeWeather.alerts.length > 0 && (
+                          <div className="mb-3 space-y-1.5">
+                            {severeWeather.alerts.map((alert, index) => (
+                              <motion.div
+                                key={index}
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: index * 0.05 }}
+                                className="p-2 rounded text-xs border"
+                                style={{
+                                  borderColor: alert.type === "danger" ? "var(--red)" : "var(--yellow)",
+                                  backgroundColor: alert.type === "danger" ? "var(--red)15" : "var(--yellow)15",
+                                }}
+                              >
+                                <div className="flex items-start gap-1.5">
+                                  <span className="text-sm">{alert.icon}</span>
+                                  <div className="flex-1">
+                                    <span 
+                                      className="font-semibold"
+                                      style={{ 
+                                        color: alert.type === "danger" ? "var(--red)" : "var(--yellow)" 
+                                      }}
+                                    >
+                                      {alert.title}:{" "}
+                                    </span>
+                                    <span style={{ color: 'var(--fg)' }}>{alert.message}</span>
                     </div>
                   </div>
-                </Card>
+                              </motion.div>
+                            ))}
               </div>
+                        )}
+                        
+                        {/* Weather Data */}
+                        <div className="grid grid-cols-2 gap-2 text-xs">
+                          <div>
+                            <span style={{ color: 'var(--gray)' }}>Feels like: </span>
+                            <span style={{ color: 'var(--fg)' }}>{convertTemp(city.feelsLike)}°</span>
+                          </div>
+                          <div>
+                            <span style={{ color: 'var(--gray)' }}>Rain: </span>
+                            <span style={{ color: 'var(--fg)' }}>{city.chanceOfRain}%</span>
+                          </div>
+                          <div>
+                            <span style={{ color: 'var(--gray)' }}>UV Index: </span>
+                            <span style={{ color: 'var(--fg)' }}>{city.uvIndex}</span>
+                          </div>
+                          <div>
+                            <span style={{ color: 'var(--gray)' }}>Wind: </span>
+                            <span style={{ color: 'var(--fg)' }}>{city.windSpeed?.toFixed(1) || 0} m/s</span>
+                          </div>
+                          {city.humidity && (
+                            <div>
+                              <span style={{ color: 'var(--gray)' }}>Humidity: </span>
+                              <span style={{ color: 'var(--fg)' }}>{city.humidity}%</span>
+                            </div>
+                          )}
+                          {city.visibility && (
+                            <div>
+                              <span style={{ color: 'var(--gray)' }}>Visibility: </span>
+                              <span style={{ color: 'var(--fg)' }}>{(city.visibility / 1000).toFixed(1)} km</span>
+                            </div>
+                          )}
+                        </div>
+                      </motion.div>
+                    )}
+                  </Card>
+                </motion.div>
 
-              {/* Delete Button - only if swiped this card */}
-              <AnimatePresence>
-                {draggedId === city.cityId && swiped && (
-                  <motion.button
-                    initial={{ opacity: 0, x: -20, scale: 0.8 }}
-                    animate={{ opacity: 1, x: 0, scale: 1 }}
-                    exit={{ opacity: 0, x: -20, scale: 0.8 }}
-                    transition={{ type: "spring", damping: 20, stiffness: 300 }}
-                    onClick={() => handleDelete(city.cityId)}
-                    whileHover={{ scale: 1.1, opacity: 0.9 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="ml-4 flex-shrink-0 p-5 rounded-[15px] h-[100px] w-[20%] flex items-center justify-center"
-                    style={{ 
-                      backgroundColor: 'var(--red)', 
-                      color: 'var(--bg-0)'
-                    }}
-                  >
-                    <motion.div
-                      animate={{ rotate: [0, 90, 0] }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <IoCloseSharp size={35} />
-                    </motion.div>
-                  </motion.button>
-                )}
-              </AnimatePresence>
-                </div>
-              </CardWrapper>
+                {/* Delete Button */}
+                <motion.button
+                  onClick={() => {
+                    handleDelete(city.cityId);
+                    setSwipeDistance(0);
+                  }}
+                  className="absolute right-0 flex-shrink-0 p-5 rounded-[15px] h-[100px] w-20 flex items-center justify-center"
+                  style={{ 
+                    backgroundColor: 'var(--red)', 
+                    color: 'var(--bg-0)'
+                  }}
+                  animate={{
+                    opacity: showDelete ? 1 : 0,
+                    scale: showDelete ? 1 : 0.8,
+                  }}
+                  transition={{
+                    type: "spring",
+                    damping: 20,
+                    stiffness: 300,
+                  }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <IoCloseSharp size={35} />
+                </motion.button>
+            </div>
             );
           })}
         </div>

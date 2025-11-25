@@ -116,7 +116,7 @@ const WindyMapEmbed = () => {
           delay: 0.1,
         }}
       >
-        <Header title={locationName} />
+      <Header title={locationName} />
       </motion.div>
       {/* Overlay Buttons */}
       {!loading ? (

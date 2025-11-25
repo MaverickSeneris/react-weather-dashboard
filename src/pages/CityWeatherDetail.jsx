@@ -184,10 +184,10 @@ function CityWeatherDetail() {
                     transition: { duration: 0.2 },
                   }}
                 >
-                  <Card>
+          <Card>
                     <CardTitle title={card.title} />
                     <ValueContainer value={card.value} unit={card.unit} />
-                  </Card>
+          </Card>
                 </motion.div>
               );
             })}

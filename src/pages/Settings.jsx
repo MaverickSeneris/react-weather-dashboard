@@ -41,12 +41,12 @@ function Settings() {
         duration: 0.35,
       }}
     >
-      <PageContainer>
-        <Header title={"Settings"} />
-        <div className="mt-8">
-          <WeatherSettings />
-        </div>
-      </PageContainer>
+    <PageContainer>
+      <Header title={"Settings"} />
+      <div className="mt-8">
+        <WeatherSettings />
+      </div>
+    </PageContainer>
     </motion.div>
   );
 }

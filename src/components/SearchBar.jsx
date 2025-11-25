@@ -80,51 +80,61 @@ function SearchBar({ toggleSearchMode, handleAddCity }) {
 
           const data = await res.json();
 
+          if (!data || !data.current) {
+            throw new Error("Invalid weather data received");
+          }
+
           console.log(
             `✅ Success [SearchBar.jsx > fetchWeather()] — Weather for ${city.name} fetched at line 52:`,
             data
           );
 
-          const hourlyData = data.hourly
+          // Get timezone offset from API or calculate from longitude
+          const timezoneOffset = data.timezone_offset !== undefined 
+            ? data.timezone_offset 
+            : Math.round((city.lon / 15) * 3600);
+
+          const hourlyData = (data.hourly || [])
             .filter((_, i) => i >= 2 && (i - 2) % 3 === 0)
             .slice(0, 3)
             .map((d) => ({
               time: formatTime(d.dt),
-              temperature: d.temp,
+              temperature: d.temp || 0,
               icon: d.weather?.[0]?.icon,
             }));
 
-          const dailyData = data.daily.slice(0, 7).map((d, i) => ({
+          const dailyData = (data.daily || []).slice(0, 7).map((d, i) => ({
             day: getDayLabel(d.dt, i),
-            icon: d.weather[0]?.icon || "",
-            description: d.weather[0]?.description || "",
-            tempHigh: Math.round(d.temp.max),
-            tempLow: Math.round(d.temp.min),
+            icon: d.weather?.[0]?.icon || "",
+            description: d.weather?.[0]?.description || "",
+            tempHigh: Math.round(d.temp?.max || 0),
+            tempLow: Math.round(d.temp?.min || 0),
           }));
 
           return {
             cityId: generateUUID(),
             // City data:
-            name: city.name,
-            state: city.state,
-            country: city.country,
-            lat: city.lat,
-            lon: city.lon,
+            name: city.name || "Unknown",
+            state: city.state || "",
+            country: city.country || "",
+            lat: city.lat || 0,
+            lon: city.lon || 0,
 
             // Current Weather Data
-            temperature: Math.floor(data.current.temp),
-            condition: data.current.weather[0].main.toLowerCase(),
-            weatherIcon: data.current.weather[0].icon,
-            time: data.current.dt,
-            uvIndex: Math.ceil(data.current.uvi),
-            windSpeed: data.current.wind_speed,
-            humidity: data.current.humidity,
-            visibility: data.current.visibility,
-            feelsLike: Math.floor(data.current.feels_like),
-            pressure: data.current.pressure,
-            sunset: data.current.sunset,
-            sunrise: data.current.sunrise,
-            chanceOfRain: Math.round(data.daily[0].pop * 100),
+            temperature: Math.floor(data.current.temp || 0),
+            condition: data.current.weather?.[0]?.main?.toLowerCase() || "unknown",
+            weatherIcon: data.current.weather?.[0]?.icon || "01d",
+            time: data.current.dt || Math.floor(Date.now() / 1000),
+            timezoneOffset: timezoneOffset,
+            uvIndex: Math.ceil(data.current.uvi || 0),
+            windSpeed: data.current.wind_speed || 0,
+            humidity: data.current.humidity || 0,
+            visibility: data.current.visibility || null,
+            feelsLike: Math.floor(data.current.feels_like || 0),
+            pressure: data.current.pressure || 0,
+            sunset: data.current.sunset || 0,
+            sunrise: data.current.sunrise || 0,
+            chanceOfRain: Math.round((data.daily?.[0]?.pop || 0) * 100),
 
             hourlyWeatherInfo: {
               time: hourlyData.map((i) => i.time),
@@ -132,7 +142,6 @@ function SearchBar({ toggleSearchMode, handleAddCity }) {
               icon: hourlyData.map((i) => i.icon),
             },
 
-            //TODO MON, 04/28/25: RENDER DAILY(7-day forcast) WEATHER INFORMATION
             dailyWeatherInfo: dailyData,
           };
         } catch (innerErr) {

@@ -34,16 +34,16 @@ function CurrentWeatherContainer({ currentWeatherInfo, cityName }) {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
-          <Link
-            to={`/city/${currentWeatherInfo.cityId || "unknown"}`}
-            state={{ currentWeatherInfo, cityName }}
-            className="flex justify-center items-center mb-2 px-2 py-1 rounded-full transition"
-            style={{ backgroundColor: 'var(--blue)', color: 'var(--bg-0)' }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--aqua)'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--blue)'}
-          >
-            <p className="font-bold text-xs">See more</p>
-          </Link>
+        <Link
+          to={`/city/${currentWeatherInfo.cityId || "unknown"}`}
+          state={{ currentWeatherInfo, cityName }}
+          className="flex justify-center items-center mb-2 px-2 py-1 rounded-full transition"
+          style={{ backgroundColor: 'var(--blue)', color: 'var(--bg-0)' }}
+          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--aqua)'}
+          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--blue)'}
+        >
+          <p className="font-bold text-xs">See more</p>
+        </Link>
         </motion.div>
       </div>
 
@@ -82,9 +82,9 @@ function CurrentWeatherContainer({ currentWeatherInfo, cityName }) {
                   transition: { duration: 0.4 }
                 }}
               />
-              <p className="font-semibold" style={{ color: 'var(--gray)' }}>
+            <p className="font-semibold" style={{ color: 'var(--gray)' }}>
                 {item.label}
-              </p>
+            </p>
             </motion.div>
             <motion.span
               initial={{ opacity: 0, scale: 0.8 }}

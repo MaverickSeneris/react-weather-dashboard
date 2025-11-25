@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import React, { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import Card from "../components/ui/Card";
 import { useWeatherSettings } from "../utils/hooks/useWeatherSettings";
-import { IoEye, IoEyeOff } from "react-icons/io5";
+import { IoEye, IoEyeOff, IoChevronDown } from "react-icons/io5";
 
 export default function WeatherSettings() {
   // Destructure settings and update functions from the custom hook
@@ -97,6 +97,10 @@ export default function WeatherSettings() {
           // Handle special theme name mapping
           if (option === "Ily❤️") {
             normalizedOption = "ily❤️";
+          } else if (option === "Rose Pine") {
+            normalizedOption = "rose pine";
+          } else if (option === "Tokyo Night") {
+            normalizedOption = "tokyo night";
           }
           const normalizedSetting = typeof settings[key] === 'string' ? settings[key].toLowerCase() : settings[key];
           const isSelected = normalizedSetting === normalizedOption;
@@ -145,6 +149,154 @@ export default function WeatherSettings() {
       </motion.div>
     </motion.div>
   );
+
+  // Theme selector dropdown state
+  const [isThemeDropdownOpen, setIsThemeDropdownOpen] = useState(false);
+  const themeDropdownRef = useRef(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (themeDropdownRef.current && !themeDropdownRef.current.contains(event.target)) {
+        setIsThemeDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  // Theme options
+  const themeOptions = [
+    "Gruvbox",
+    "Catppuccin",
+    "Monokai",
+    "Flexbox",
+    "Everforest",
+    "Ily❤️",
+    "Rose Pine",
+    "Nord",
+    "Tokyo Night",
+    "Solarized",
+  ];
+
+  // Function to normalize theme name
+  const normalizeThemeName = (themeName) => {
+    if (themeName === "Ily❤️") return "ily❤️";
+    if (themeName === "Rose Pine") return "rose pine";
+    if (themeName === "Tokyo Night") return "tokyo night";
+    return themeName.toLowerCase();
+  };
+
+  // Function to get display name from normalized name
+  const getDisplayName = (normalized) => {
+    if (normalized === "ily❤️") return "Ily❤️";
+    if (normalized === "rose pine") return "Rose Pine";
+    if (normalized === "tokyo night") return "Tokyo Night";
+    return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+  };
+
+  // Function to render theme selector dropdown
+  const renderThemeSelector = (groupIndex) => {
+    const currentTheme = settings.themeStyle || "catppuccin";
+    const normalizedCurrent = typeof currentTheme === 'string' ? currentTheme.toLowerCase() : currentTheme;
+    const displayName = getDisplayName(normalizedCurrent);
+
+    return (
+      <motion.div
+        className="flex flex-col"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{
+          type: "spring",
+          damping: 20,
+          stiffness: 300,
+          delay: groupIndex * 0.1,
+        }}
+        ref={themeDropdownRef}
+      >
+        <motion.h4
+          className="font-semibold mt-1 mb-2"
+          style={{ color: 'var(--gray)' }}
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: groupIndex * 0.1 + 0.05 }}
+        >
+          Theme Style
+        </motion.h4>
+        <div className="relative">
+          <motion.button
+            onClick={() => setIsThemeDropdownOpen(!isThemeDropdownOpen)}
+            className="w-full flex items-center justify-between p-3 rounded-[10px] text-left"
+            style={{ 
+              backgroundColor: 'var(--bg-2)',
+              color: 'var(--fg)',
+            }}
+            whileHover={{ backgroundColor: 'var(--bg-1)' }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ type: "spring", stiffness: 400, damping: 17 }}
+          >
+            <span className="text-sm font-medium">{displayName}</span>
+            <motion.div
+              animate={{ rotate: isThemeDropdownOpen ? 180 : 0 }}
+              transition={{ type: "spring", stiffness: 400, damping: 17 }}
+            >
+              <IoChevronDown size={18} style={{ color: 'var(--gray)' }} />
+            </motion.div>
+          </motion.button>
+
+          <AnimatePresence>
+            {isThemeDropdownOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                className="absolute z-50 w-full mt-2 rounded-[10px] overflow-hidden shadow-lg"
+                style={{ 
+                  backgroundColor: 'var(--bg-2)',
+                  border: '1px solid var(--bg-1)',
+                }}
+              >
+                <div className="max-h-64 overflow-y-auto">
+                  {themeOptions.map((theme, index) => {
+                    const normalized = normalizeThemeName(theme);
+                    const isSelected = normalizedCurrent === normalized;
+                    
+                    return (
+                      <motion.button
+                        key={theme}
+                        onClick={() => {
+                          updateSetting("themeStyle", normalized);
+                          setIsThemeDropdownOpen(false);
+                        }}
+                        className="w-full text-left px-4 py-2.5 text-sm transition-colors"
+                        style={{
+                          backgroundColor: isSelected ? 'var(--bg-0)' : 'transparent',
+                          color: isSelected ? 'var(--fg)' : 'var(--gray)',
+                        }}
+                        whileHover={{
+                          backgroundColor: isSelected ? 'var(--bg-0)' : 'var(--bg-1)',
+                          color: 'var(--fg)',
+                        }}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.03 }}
+                      >
+                        {theme}
+                      </motion.button>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </motion.div>
+    );
+  };
 
   // Function to render a toggle switch
   const renderToggle = (label, key, toggleIndex) => (
@@ -264,7 +416,7 @@ export default function WeatherSettings() {
           Appearance
         </motion.h4>
         {renderOptionGroup("Theme Mode", "themeMode", ["Light", "Dark", "System"], 5)}
-        {renderOptionGroup("Theme Style", "themeStyle", ["Gruvbox", "Catppuccin", "Monokai", "Flexbox", "Everforest", "Ily❤️"], 6)}
+        {renderThemeSelector(6)}
       </motion.div>
 
       {/* General settings toggles */}
