@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
+import { SortableContext, verticalListSortingStrategy, arrayMove, useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import SearchBar from "../components/SearchBar";
 import Header from "../components/ui/Header";
 import PageContainer from "../components/ui/PageContainer";
@@ -17,6 +20,653 @@ import { convertTemperature, convertWindSpeed, convertDistance } from "../utils/
 
 const key = import.meta.env.VITE_OPENWEATHER_API_KEY;
 const url = import.meta.env.VITE_OPENWEATHER_ONECALL_API_URL;
+
+// Regular City Card Component (non-sortable, for swipe-to-delete only)
+function RegularCityCard({
+  city,
+  isDragging,
+  currentSwipeDistance,
+  clampedSwipe,
+  showDelete,
+  swipeThreshold,
+  maxSwipe,
+  severeWeather,
+  borderColor,
+  expandedCards,
+  setExpandedCards,
+  setDraggedId,
+  setTouchStartX,
+  setSwipeDistance,
+  handleDelete,
+  convertTemp,
+  convertWind,
+  convertVis,
+  getDistanceUnit,
+  formatWindSpeedUnit,
+  settings,
+  touchStartX
+}) {
+  return (
+    <div className="relative flex items-center w-full">
+      <div
+        className="w-full"
+        onTouchStart={(e) => {
+          setDraggedId(city.cityId);
+          setTouchStartX(e.touches[0].clientX);
+        }}
+        onTouchMove={(e) => {
+          if (!isDragging) return;
+          const touchX = e.touches[0].clientX;
+          const deltaX = touchStartX - touchX;
+          
+          if (deltaX > 0) {
+            setSwipeDistance(deltaX);
+          } else {
+            setSwipeDistance(0);
+          }
+        }}
+        onTouchEnd={() => {
+          if (currentSwipeDistance < swipeThreshold) {
+            setSwipeDistance(0);
+          } else {
+            setSwipeDistance(maxSwipe);
+          }
+        }}
+        style={{ touchAction: 'pan-y' }}
+      >
+        <motion.div
+          className="flex-grow"
+          animate={{ x: -clampedSwipe }}
+          transition={{ type: "spring", damping: 25, stiffness: 300 }}
+          style={{ willChange: 'transform' }}
+        >
+          <Card compact={true} style={{ borderLeft: severeWeather.hasSevere ? `4px solid ${borderColor}` : undefined }}>
+            <div className="flex justify-between">
+              <Link
+                to={`/test/${city.cityId || "unknown"}`}
+                state={{ currentWeatherInfo: city, cityName: city.name }}
+                className="flex flex-col justify-between"
+                style={{ color: 'var(--fg)' }}
+              >
+                <h2 className="font-bold text-xl">{city.name}</h2>
+                <span className="text-xs font-bold" style={{ color: 'var(--gray)' }}>
+                  {(() => {
+                    try {
+                      if (!city.time || isNaN(city.time)) return '';
+                      const timezoneOffset = (city.timezoneOffset !== undefined && !isNaN(city.timezoneOffset))
+                        ? city.timezoneOffset 
+                        : (city.lon && !isNaN(city.lon)) 
+                          ? Math.round((city.lon / 15) * 3600)
+                          : 0;
+                      const utcDate = new Date(city.time * 1000);
+                      if (isNaN(utcDate.getTime())) return '';
+                      let hours = utcDate.getUTCHours();
+                      let minutes = utcDate.getUTCMinutes();
+                      const offsetHours = Math.floor(timezoneOffset / 3600);
+                      const offsetMinutes = Math.floor((timezoneOffset % 3600) / 60);
+                      hours = hours + offsetHours;
+                      minutes = minutes + offsetMinutes;
+                      if (minutes >= 60) { hours += 1; minutes -= 60; }
+                      else if (minutes < 0) { hours -= 1; minutes += 60; }
+                      if (hours >= 24) { hours -= 24; }
+                      else if (hours < 0) { hours += 24; }
+                      const is12Hour = settings.timeFormat === "12 Hour";
+                      if (is12Hour) {
+                        const period = hours >= 12 ? 'PM' : 'AM';
+                        const displayHours = hours % 12 || 12;
+                        return `${displayHours}:${minutes.toString().padStart(2, '0')} ${period}`;
+                      } else {
+                        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+                      }
+                    } catch (error) {
+                      console.error("Error calculating local time:", error);
+                      return '';
+                    }
+                  })()}
+                </span>
+              </Link>
+              <div>
+                <span className="text-4xl font-regular">
+                  {city.temperature !== undefined && !isNaN(city.temperature) 
+                    ? `${convertTemp(city.temperature)}°` 
+                    : 'N/A'}
+                </span>
+              </div>
+            </div>
+            <div className="flex justify-center mt-1">
+              <motion.button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  const isExpanded = expandedCards.has(city.cityId);
+                  if (isExpanded) {
+                    setExpandedCards(prev => {
+                      const newSet = new Set(prev);
+                      newSet.delete(city.cityId);
+                      return newSet;
+                    });
+                  } else {
+                    setExpandedCards(prev => new Set(prev).add(city.cityId));
+                  }
+                }}
+                className="p-0"
+                style={{ color: severeWeather.hasSevere ? borderColor : 'var(--gray)' }}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                animate={{ rotate: expandedCards.has(city.cityId) ? 180 : 0 }}
+              >
+                <IoChevronDown size={18} />
+              </motion.button>
+            </div>
+            {expandedCards.has(city.cityId) && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ type: "spring", damping: 20, stiffness: 300 }}
+                className="mt-2 pt-2 border-t"
+                style={{ borderColor: 'var(--bg-2)' }}
+              >
+                {severeWeather.hasSevere && severeWeather.alerts && severeWeather.alerts.length > 0 && (
+                  <div className="mb-3 space-y-1.5">
+                    {severeWeather.alerts.map((alert, index) => (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        className="p-2 rounded text-xs border"
+                        style={{
+                          borderColor: alert.type === "danger" ? "var(--red)" : "var(--yellow)",
+                          backgroundColor: alert.type === "danger" ? "var(--red)15" : "var(--yellow)15",
+                        }}
+                      >
+                        <div className="flex items-start gap-1.5">
+                          <span className="text-sm">{alert.icon}</span>
+                          <div className="flex-1">
+                            <span 
+                              className="font-semibold"
+                              style={{ color: alert.type === "danger" ? "var(--red)" : "var(--yellow)" }}
+                            >
+                              {alert.title}:{" "}
+                            </span>
+                            <span style={{ color: 'var(--fg)' }}>{alert.message}</span>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div>
+                    <span style={{ color: 'var(--gray)' }}>Feels like: </span>
+                    <span style={{ color: 'var(--fg)' }}>{convertTemp(city.feelsLike)}°</span>
+                  </div>
+                  <div>
+                    <span style={{ color: 'var(--gray)' }}>Rain: </span>
+                    <span style={{ color: 'var(--fg)' }}>{city.chanceOfRain}%</span>
+                  </div>
+                  <div>
+                    <span style={{ color: 'var(--gray)' }}>UV Index: </span>
+                    <span style={{ color: 'var(--fg)' }}>{city.uvIndex}</span>
+                  </div>
+                  <div>
+                    <span style={{ color: 'var(--gray)' }}>Wind: </span>
+                    <span style={{ color: 'var(--fg)' }}>{convertWind(city.windSpeed || 0)} {formatWindSpeedUnit(settings.windSpeed)}</span>
+                  </div>
+                  {city.humidity && (
+                    <div>
+                      <span style={{ color: 'var(--gray)' }}>Humidity: </span>
+                      <span style={{ color: 'var(--fg)' }}>{city.humidity}%</span>
+                    </div>
+                  )}
+                  {city.visibility && (
+                    <div>
+                      <span style={{ color: 'var(--gray)' }}>Visibility: </span>
+                      <span style={{ color: 'var(--fg)' }}>{convertVis(city.visibility)} {getDistanceUnit()}</span>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </Card>
+        </motion.div>
+        <motion.button
+          onClick={() => {
+            handleDelete(city.cityId);
+            setSwipeDistance(0);
+          }}
+          className="absolute right-0 top-0 bottom-0 flex-shrink-0 p-5 rounded-[15px] w-20 flex items-center justify-center"
+          style={{ backgroundColor: 'var(--red)', color: 'var(--bg-0)' }}
+          animate={{ opacity: showDelete ? 1 : 0, scale: showDelete ? 1 : 0.8 }}
+          transition={{ type: "spring", damping: 20, stiffness: 300 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <IoCloseSharp size={35} />
+        </motion.button>
+      </div>
+    </div>
+  );
+}
+
+// Sortable City Card Component
+function SortableCityCard({ 
+  city, 
+  isDragging, 
+  currentSwipeDistance, 
+  clampedSwipe, 
+  showDelete, 
+  swipeThreshold, 
+  maxSwipe,
+  severeWeather,
+  borderColor,
+  expandedCards,
+  setExpandedCards,
+  setDraggedId,
+  setTouchStartX,
+  setSwipeDistance,
+  handleDelete,
+  convertTemp,
+  convertWind,
+  convertVis,
+  getDistanceUnit,
+  formatWindSpeedUnit,
+  settings,
+  touchStartX,
+  touchStartRef,
+  dragModeCardId,
+  setDragModeCardId
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging: isSortableDragging,
+  } = useSortable({ id: city.cityId });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isSortableDragging ? 0.5 : 1,
+    cursor: isSortableDragging ? 'grabbing' : 'grab',
+  };
+
+  const longPressTimerRef = useRef(null);
+  const touchStartTimeRef = useRef(0);
+  const hasMovedRef = useRef(false);
+  const dragStartRef = useRef({ x: 0, y: 0, isVertical: null });
+
+  // Only enable drag listeners if this card is in drag mode
+  const shouldEnableDrag = dragModeCardId === city.cityId;
+
+  // Custom listeners that only work when drag mode is enabled
+  const customListeners = shouldEnableDrag ? {
+    ...listeners,
+    onPointerDown: (e) => {
+      dragStartRef.current = {
+        x: e.clientX,
+        y: e.clientY,
+        isVertical: null
+      };
+      if (listeners?.onPointerDown) {
+        listeners.onPointerDown(e);
+      }
+    },
+    onPointerMove: (e) => {
+      if (dragStartRef.current.isVertical === null) {
+        const deltaX = Math.abs(e.clientX - dragStartRef.current.x);
+        const deltaY = Math.abs(e.clientY - dragStartRef.current.y);
+        
+        if (deltaY > deltaX && deltaY > 8) {
+          dragStartRef.current.isVertical = true;
+        } else if (deltaX > deltaY && deltaX > 8) {
+          dragStartRef.current.isVertical = false;
+          return;
+        }
+      }
+      
+      if (dragStartRef.current.isVertical && listeners?.onPointerMove) {
+        listeners.onPointerMove(e);
+      }
+    }
+  } : {};
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="relative flex items-center w-full transition-all duration-300 ease-in-out"
+      {...attributes}
+      {...customListeners}
+    >
+      {/* Inner container for swipe-to-delete */}
+      <div
+        className="w-full"
+        onTouchStart={(e) => {
+          touchStartTimeRef.current = Date.now();
+          hasMovedRef.current = false;
+          
+          touchStartRef.current = {
+            x: e.touches[0].clientX,
+            y: e.touches[0].clientY,
+            cityId: city.cityId
+          };
+          dragStartRef.current = {
+            x: e.touches[0].clientX,
+            y: e.touches[0].clientY,
+            isVertical: null
+          };
+          
+          // Start long press timer
+          longPressTimerRef.current = setTimeout(() => {
+            if (!hasMovedRef.current) {
+              setDragModeCardId(city.cityId);
+            }
+          }, 1200); // 1.2 seconds
+        }}
+        onTouchMove={(e) => {
+          if (isSortableDragging && shouldEnableDrag) return;
+          
+          const currentX = e.touches[0].clientX;
+          const currentY = e.touches[0].clientY;
+          const deltaX = Math.abs(currentX - touchStartRef.current.x);
+          const deltaY = Math.abs(currentY - touchStartRef.current.y);
+          
+          // Check if user has moved significantly
+          if (deltaX > 10 || deltaY > 10) {
+            hasMovedRef.current = true;
+            // Cancel long press if user is swiping horizontally
+            if (deltaX > deltaY && deltaX > 10) {
+              if (longPressTimerRef.current) {
+                clearTimeout(longPressTimerRef.current);
+                longPressTimerRef.current = null;
+              }
+            }
+          }
+          
+          // Only allow swipe-to-delete if not in drag mode
+          if (!shouldEnableDrag) {
+            if (dragStartRef.current.isVertical === null) {
+              if (deltaY > deltaX && deltaY > 8) {
+                dragStartRef.current.isVertical = true;
+                return;
+              } else if (deltaX > deltaY && deltaX > 8) {
+                dragStartRef.current.isVertical = false;
+              }
+            }
+            
+            if (dragStartRef.current.isVertical === false) {
+              if (!isDragging) {
+                setDraggedId(city.cityId);
+                setTouchStartX(touchStartRef.current.x);
+              }
+              const swipeDelta = touchStartRef.current.x - currentX;
+              if (swipeDelta > 0) {
+                setSwipeDistance(swipeDelta);
+              } else {
+                setSwipeDistance(0);
+              }
+            }
+          }
+        }}
+        onTouchEnd={() => {
+          // Clear long press timer
+          if (longPressTimerRef.current) {
+            clearTimeout(longPressTimerRef.current);
+            longPressTimerRef.current = null;
+          }
+          
+          // If in drag mode, reset it after a short delay to allow drag to complete
+          if (shouldEnableDrag) {
+            setTimeout(() => {
+              setDragModeCardId(null);
+            }, 100);
+            dragStartRef.current = { x: 0, y: 0, isVertical: null };
+            return;
+          }
+          
+          if (currentSwipeDistance < swipeThreshold) {
+            setSwipeDistance(0);
+          } else {
+            setSwipeDistance(maxSwipe);
+          }
+          touchStartRef.current = { x: 0, y: 0, cityId: null };
+          dragStartRef.current = { x: 0, y: 0, isVertical: null };
+        }}
+        style={{ touchAction: (isSortableDragging && shouldEnableDrag) ? 'none' : 'pan-y' }}
+      >
+        {/* Card */}
+        <motion.div
+          className="flex-grow"
+          animate={{
+            x: -clampedSwipe,
+          }}
+          transition={{
+            type: "spring",
+            damping: 25,
+            stiffness: 300,
+          }}
+          style={{ willChange: 'transform' }}
+        >
+          <Card
+            compact={true}
+            style={{
+              borderLeft: severeWeather.hasSevere ? `4px solid ${borderColor}` : undefined,
+            }}
+          >
+            <div className="flex justify-between">
+              <Link
+                to={`/test/${city.cityId || "unknown"}`}
+                state={{
+                  currentWeatherInfo: city,
+                  cityName: city.name,
+                }}
+                className="flex flex-col justify-between"
+                style={{ color: 'var(--fg)' }}
+              >
+                <h2 className="font-bold text-xl">{city.name}</h2>
+                <span className="text-xs font-bold" style={{ color: 'var(--gray)' }}>
+                  {(() => {
+                    try {
+                      if (!city.time || isNaN(city.time)) return '';
+                      
+                      const timezoneOffset = (city.timezoneOffset !== undefined && !isNaN(city.timezoneOffset))
+                        ? city.timezoneOffset 
+                        : (city.lon && !isNaN(city.lon)) 
+                          ? Math.round((city.lon / 15) * 3600)
+                          : 0;
+                      
+                      const utcDate = new Date(city.time * 1000);
+                      
+                      if (isNaN(utcDate.getTime())) return '';
+                      
+                      let hours = utcDate.getUTCHours();
+                      let minutes = utcDate.getUTCMinutes();
+                      
+                      const offsetHours = Math.floor(timezoneOffset / 3600);
+                      const offsetMinutes = Math.floor((timezoneOffset % 3600) / 60);
+                      
+                      hours = hours + offsetHours;
+                      minutes = minutes + offsetMinutes;
+                      
+                      if (minutes >= 60) {
+                        hours += 1;
+                        minutes -= 60;
+                      } else if (minutes < 0) {
+                        hours -= 1;
+                        minutes += 60;
+                      }
+                      
+                      if (hours >= 24) {
+                        hours -= 24;
+                      } else if (hours < 0) {
+                        hours += 24;
+                      }
+                      
+                      const is12Hour = settings.timeFormat === "12 Hour";
+                      
+                      if (is12Hour) {
+                        const period = hours >= 12 ? 'PM' : 'AM';
+                        const displayHours = hours % 12 || 12;
+                        return `${displayHours}:${minutes.toString().padStart(2, '0')} ${period}`;
+                      } else {
+                        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+                      }
+                    } catch (error) {
+                      console.error("Error calculating local time:", error);
+                      return '';
+                    }
+                  })()}
+                </span>
+              </Link>
+              <div>
+                <span className="text-4xl font-regular">
+                  {city.temperature !== undefined && !isNaN(city.temperature) 
+                    ? `${convertTemp(city.temperature)}°` 
+                    : 'N/A'}
+                </span>
+              </div>
+            </div>
+            <div className="flex justify-center mt-1">
+              <motion.button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  const isExpanded = expandedCards.has(city.cityId);
+                  if (isExpanded) {
+                    setExpandedCards(prev => {
+                      const newSet = new Set(prev);
+                      newSet.delete(city.cityId);
+                      return newSet;
+                    });
+                  } else {
+                    setExpandedCards(prev => new Set(prev).add(city.cityId));
+                  }
+                }}
+                className="p-0"
+                style={{ 
+                  color: severeWeather.hasSevere ? borderColor : 'var(--gray)',
+                }}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                animate={{
+                  rotate: expandedCards.has(city.cityId) ? 180 : 0
+                }}
+              >
+                <IoChevronDown size={18} />
+              </motion.button>
+            </div>
+            {expandedCards.has(city.cityId) && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ type: "spring", damping: 20, stiffness: 300 }}
+                className="mt-2 pt-2 border-t"
+                style={{ borderColor: 'var(--bg-2)' }}
+              >
+                {/* Weather Alerts */}
+                {severeWeather.hasSevere && severeWeather.alerts && severeWeather.alerts.length > 0 && (
+                  <div className="mb-3 space-y-1.5">
+                    {severeWeather.alerts.map((alert, index) => (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        className="p-2 rounded text-xs border"
+                        style={{
+                          borderColor: alert.type === "danger" ? "var(--red)" : "var(--yellow)",
+                          backgroundColor: alert.type === "danger" ? "var(--red)15" : "var(--yellow)15",
+                        }}
+                      >
+                        <div className="flex items-start gap-1.5">
+                          <span className="text-sm">{alert.icon}</span>
+                          <div className="flex-1">
+                            <span 
+                              className="font-semibold"
+                              style={{ 
+                                color: alert.type === "danger" ? "var(--red)" : "var(--yellow)" 
+                              }}
+                            >
+                              {alert.title}:{" "}
+                            </span>
+                            <span style={{ color: 'var(--fg)' }}>{alert.message}</span>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
+                
+                {/* Weather Data */}
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div>
+                    <span style={{ color: 'var(--gray)' }}>Feels like: </span>
+                    <span style={{ color: 'var(--fg)' }}>{convertTemp(city.feelsLike)}°</span>
+                  </div>
+                  <div>
+                    <span style={{ color: 'var(--gray)' }}>Rain: </span>
+                    <span style={{ color: 'var(--fg)' }}>{city.chanceOfRain}%</span>
+                  </div>
+                  <div>
+                    <span style={{ color: 'var(--gray)' }}>UV Index: </span>
+                    <span style={{ color: 'var(--fg)' }}>{city.uvIndex}</span>
+                  </div>
+                  <div>
+                    <span style={{ color: 'var(--gray)' }}>Wind: </span>
+                    <span style={{ color: 'var(--fg)' }}>{convertWind(city.windSpeed || 0)} {formatWindSpeedUnit(settings.windSpeed)}</span>
+                  </div>
+                  {city.humidity && (
+                    <div>
+                      <span style={{ color: 'var(--gray)' }}>Humidity: </span>
+                      <span style={{ color: 'var(--fg)' }}>{city.humidity}%</span>
+                    </div>
+                  )}
+                  {city.visibility && (
+                    <div>
+                      <span style={{ color: 'var(--gray)' }}>Visibility: </span>
+                      <span style={{ color: 'var(--fg)' }}>{convertVis(city.visibility)} {getDistanceUnit()}</span>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </Card>
+        </motion.div>
+
+        {/* Delete Button */}
+        <motion.button
+          onClick={() => {
+            handleDelete(city.cityId);
+            setSwipeDistance(0);
+          }}
+          className="absolute right-0 top-0 bottom-0 flex-shrink-0 p-5 rounded-[15px] w-20 flex items-center justify-center"
+          style={{ 
+            backgroundColor: 'var(--red)', 
+            color: 'var(--bg-0)'
+          }}
+          animate={{
+            opacity: showDelete ? 1 : 0,
+            scale: showDelete ? 1 : 0.8,
+          }}
+          transition={{
+            type: "spring",
+            damping: 20,
+            stiffness: 300,
+          }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <IoCloseSharp size={35} />
+        </motion.button>
+      </div>
+    </div>
+  );
+}
 
 function CityList() {
   const [searchMode, setSearchMode] = useState(false);
@@ -61,6 +711,8 @@ function CityList() {
   // Expanded cards state
   const [expandedCards, setExpandedCards] = useState(new Set());
   const [lastUpdateTime, setLastUpdateTime] = useState(null);
+  // Track which card is in drag mode (activated by long press)
+  const [dragModeCardId, setDragModeCardId] = useState(null);
 
   // Load initial data from localStorage on mount and listen for updates
   useEffect(() => {
@@ -265,6 +917,36 @@ function CityList() {
   }
   }
 
+  // Drag and drop handlers
+  // Track initial touch position to determine direction
+  const touchStartRef = useRef({ x: 0, y: 0, cityId: null });
+
+  // Custom sensor that only activates for vertical drag
+  const verticalDragSensor = useSensor(PointerSensor, {
+    activationConstraint: {
+      distance: 8,
+      delay: 0,
+      tolerance: 5,
+    },
+  });
+
+  const sensors = useSensors(verticalDragSensor);
+
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
+
+    if (active.id !== over?.id) {
+      setFavoriteCities((items) => {
+        const oldIndex = items.findIndex((item) => item.cityId === active.id);
+        const newIndex = items.findIndex((item) => item.cityId === over.id);
+
+        const newItems = arrayMove(items, oldIndex, newIndex);
+        localStorage.setItem("savedCities", JSON.stringify(newItems));
+        return newItems;
+      });
+    }
+  };
+
   // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
@@ -365,308 +1047,79 @@ function CityList() {
 
       {/* Favorite City Cards */}
       {!searchMode && (
-        <div className="mt-6 space-y-1">
-          {favoriteCities.map((city) => {
-            const isDragging = draggedId === city.cityId;
-            const currentSwipeDistance = isDragging ? swipeDistance : 0;
-            const deleteButtonWidth = 80; // Width of delete button
-            const swipeThreshold = 50; // Minimum swipe to show delete button
-            const maxSwipe = deleteButtonWidth + 20; // Max swipe distance
-            
-            // Calculate if delete button should be visible
-            const showDelete = currentSwipeDistance > swipeThreshold;
-            // Clamp swipe distance
-            const clampedSwipe = Math.min(Math.max(currentSwipeDistance, 0), maxSwipe);
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={favoriteCities.map(city => city.cityId)}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className="mt-6 space-y-1">
+              {favoriteCities.map((city) => {
+                const isDragging = draggedId === city.cityId;
+                const currentSwipeDistance = isDragging ? swipeDistance : 0;
+                const deleteButtonWidth = 80;
+                const swipeThreshold = 50;
+                const maxSwipe = deleteButtonWidth + 20;
+                
+                const showDelete = currentSwipeDistance > swipeThreshold;
+                const clampedSwipe = Math.min(Math.max(currentSwipeDistance, 0), maxSwipe);
 
-            // Check for severe weather - adapt city data structure
-            const cityWeatherData = {
-              current: {
-                temperature: city.temperature || 0,
-                feelsLike: city.feelsLike || 0,
-                uvIndex: city.uvIndex || 0,
-                chanceOfRain: city.chanceOfRain || 0,
-                windSpeed: city.windSpeed || 0,
-                description: city.condition || "unknown",
-                visibility: city.visibility || null,
-                humidity: city.humidity || 0,
-              },
-            };
-            const severeWeather = checkSevereWeather(cityWeatherData);
-            const borderColor = severeWeather.hasSevere
-              ? severeWeather.alertType === "danger"
-                ? "var(--red)"
-                : "var(--yellow)"
-              : "transparent";
+                const cityWeatherData = {
+                  current: {
+                    temperature: city.temperature || 0,
+                    feelsLike: city.feelsLike || 0,
+                    uvIndex: city.uvIndex || 0,
+                    chanceOfRain: city.chanceOfRain || 0,
+                    windSpeed: city.windSpeed || 0,
+                    description: city.condition || "unknown",
+                    visibility: city.visibility || null,
+                    humidity: city.humidity || 0,
+                  },
+                };
+                const severeWeather = checkSevereWeather(cityWeatherData);
+                const borderColor = severeWeather.hasSevere
+                  ? severeWeather.alertType === "danger"
+                    ? "var(--red)"
+                    : "var(--yellow)"
+                  : "transparent";
 
-            return (
-            <div
-              key={city.cityId}
-                className="relative flex items-center w-full"
-                onTouchStart={(e) => {
-                setDraggedId(city.cityId);
-                  setTouchStartX(e.touches[0].clientX);
-              }}
-              onTouchMove={(e) => {
-                  if (!isDragging) return;
-                const touchX = e.touches[0].clientX;
-                  const deltaX = touchStartX - touchX; // Negative when swiping left
-                  
-                  if (deltaX > 0) {
-                    // Swiping left
-                    setSwipeDistance(deltaX);
-                  } else {
-                    // Swiping right - reset
-                    setSwipeDistance(0);
-                }
-              }}
-              onTouchEnd={() => {
-                  // If swipe wasn't far enough, snap back
-                  if (currentSwipeDistance < swipeThreshold) {
-                    setSwipeDistance(0);
-                  } else {
-                    // Keep it open
-                    setSwipeDistance(maxSwipe);
-                  }
-                }}
-                style={{ touchAction: 'pan-y' }}
-            >
-              {/* Card */}
-                <motion.div
-                  className="flex-grow"
-                  animate={{
-                    x: -clampedSwipe,
-                  }}
-                  transition={{
-                    type: "spring",
-                    damping: 25,
-                    stiffness: 300,
-                  }}
-                  style={{ willChange: 'transform' }}
-              >
-                  <Card
-                    compact={true}
-                    style={{
-                      borderLeft: severeWeather.hasSevere ? `4px solid ${borderColor}` : undefined,
-                    }}
-                  >
-                  <div className="flex justify-between">
-                    <Link
-                      to={`/test/${city.cityId || "unknown"}`}
-                      state={{
-                        currentWeatherInfo: city,
-                        cityName: city.name,
-                      }}
-                        className="flex flex-col justify-between"
-                      style={{ color: 'var(--fg)' }}
-                    >
-                        <h2 className="font-bold text-xl">{city.name}</h2>
-                        <span className="text-xs font-bold" style={{ color: 'var(--gray)' }}>
-                          {(() => {
-                            try {
-                              // Calculate local time for this city without API calls
-                              if (!city.time || isNaN(city.time)) return '';
-                              
-                              // Get timezone offset (in seconds from UTC)
-                              const timezoneOffset = (city.timezoneOffset !== undefined && !isNaN(city.timezoneOffset))
-                                ? city.timezoneOffset 
-                                : (city.lon && !isNaN(city.lon)) 
-                                  ? Math.round((city.lon / 15) * 3600)
-                                  : 0;
-                              
-                              // Create Date from UTC timestamp
-                              const utcDate = new Date(city.time * 1000);
-                              
-                              if (isNaN(utcDate.getTime())) return '';
-                              
-                              // Get UTC hours and minutes
-                              let hours = utcDate.getUTCHours();
-                              let minutes = utcDate.getUTCMinutes();
-                              
-                              // Add timezone offset (convert seconds to hours)
-                              const offsetHours = Math.floor(timezoneOffset / 3600);
-                              const offsetMinutes = Math.floor((timezoneOffset % 3600) / 60);
-                              
-                              hours = hours + offsetHours;
-                              minutes = minutes + offsetMinutes;
-                              
-                              // Handle overflow
-                              if (minutes >= 60) {
-                                hours += 1;
-                                minutes -= 60;
-                              } else if (minutes < 0) {
-                                hours -= 1;
-                                minutes += 60;
-                              }
-                              
-                              // Handle hour overflow
-                              if (hours >= 24) {
-                                hours -= 24;
-                              } else if (hours < 0) {
-                                hours += 24;
-                              }
-                              
-                              // Format time
-                              const is12Hour = settings.timeFormat === "12 Hour";
-                              
-                              if (is12Hour) {
-                                const period = hours >= 12 ? 'PM' : 'AM';
-                                const displayHours = hours % 12 || 12;
-                                return `${displayHours}:${minutes.toString().padStart(2, '0')} ${period}`;
-                              } else {
-                                return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-                              }
-                            } catch (error) {
-                              console.error("Error calculating local time:", error);
-                              return '';
-                            }
-                          })()}
-                      </span>
-                    </Link>
-                    <div>
-                        <span className="text-4xl font-regular">
-                          {city.temperature !== undefined && !isNaN(city.temperature) 
-                            ? `${convertTemp(city.temperature)}°` 
-                            : 'N/A'}
-                      </span>
-                      </div>
-                    </div>
-                    <div className="flex justify-center mt-1">
-                      <motion.button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          const isExpanded = expandedCards.has(city.cityId);
-                          if (isExpanded) {
-                            setExpandedCards(prev => {
-                              const newSet = new Set(prev);
-                              newSet.delete(city.cityId);
-                              return newSet;
-                            });
-                          } else {
-                            setExpandedCards(prev => new Set(prev).add(city.cityId));
-                          }
-                        }}
-                        className="p-0"
-                        style={{ 
-                          color: severeWeather.hasSevere ? borderColor : 'var(--gray)',
-                        }}
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                        transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                        animate={{
-                          rotate: expandedCards.has(city.cityId) ? 180 : 0
-                        }}
-                      >
-                        <IoChevronDown size={18} />
-                      </motion.button>
-                    </div>
-                    {expandedCards.has(city.cityId) && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        transition={{ type: "spring", damping: 20, stiffness: 300 }}
-                        className="mt-2 pt-2 border-t"
-                        style={{ borderColor: 'var(--bg-2)' }}
-                      >
-                        {/* Weather Alerts */}
-                        {severeWeather.hasSevere && severeWeather.alerts && severeWeather.alerts.length > 0 && (
-                          <div className="mb-3 space-y-1.5">
-                            {severeWeather.alerts.map((alert, index) => (
-                              <motion.div
-                                key={index}
-                                initial={{ opacity: 0, x: -10 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: index * 0.05 }}
-                                className="p-2 rounded text-xs border"
-                                style={{
-                                  borderColor: alert.type === "danger" ? "var(--red)" : "var(--yellow)",
-                                  backgroundColor: alert.type === "danger" ? "var(--red)15" : "var(--yellow)15",
-                                }}
-                              >
-                                <div className="flex items-start gap-1.5">
-                                  <span className="text-sm">{alert.icon}</span>
-                                  <div className="flex-1">
-                                    <span 
-                                      className="font-semibold"
-                                      style={{ 
-                                        color: alert.type === "danger" ? "var(--red)" : "var(--yellow)" 
-                                      }}
-                                    >
-                                      {alert.title}:{" "}
-                                    </span>
-                                    <span style={{ color: 'var(--fg)' }}>{alert.message}</span>
-                    </div>
-                  </div>
-                              </motion.div>
-                            ))}
-              </div>
-                        )}
-                        
-                        {/* Weather Data */}
-                        <div className="grid grid-cols-2 gap-2 text-xs">
-                          <div>
-                            <span style={{ color: 'var(--gray)' }}>Feels like: </span>
-                            <span style={{ color: 'var(--fg)' }}>{convertTemp(city.feelsLike)}°</span>
-                          </div>
-                          <div>
-                            <span style={{ color: 'var(--gray)' }}>Rain: </span>
-                            <span style={{ color: 'var(--fg)' }}>{city.chanceOfRain}%</span>
-                          </div>
-                          <div>
-                            <span style={{ color: 'var(--gray)' }}>UV Index: </span>
-                            <span style={{ color: 'var(--fg)' }}>{city.uvIndex}</span>
-                          </div>
-                          <div>
-                            <span style={{ color: 'var(--gray)' }}>Wind: </span>
-                            <span style={{ color: 'var(--fg)' }}>{convertWind(city.windSpeed || 0)} {formatWindSpeedUnit(settings.windSpeed)}</span>
-                          </div>
-                          {city.humidity && (
-                            <div>
-                              <span style={{ color: 'var(--gray)' }}>Humidity: </span>
-                              <span style={{ color: 'var(--fg)' }}>{city.humidity}%</span>
-                            </div>
-                          )}
-                          {city.visibility && (
-                            <div>
-                              <span style={{ color: 'var(--gray)' }}>Visibility: </span>
-                              <span style={{ color: 'var(--fg)' }}>{convertVis(city.visibility)} {getDistanceUnit()}</span>
-                            </div>
-                          )}
-                        </div>
-                      </motion.div>
-                    )}
-                  </Card>
-                </motion.div>
-
-                {/* Delete Button */}
-                <motion.button
-                  onClick={() => {
-                    handleDelete(city.cityId);
-                    setSwipeDistance(0);
-                  }}
-                  className="absolute right-0 flex-shrink-0 p-5 rounded-[15px] h-[100px] w-20 flex items-center justify-center"
-                  style={{ 
-                    backgroundColor: 'var(--red)', 
-                    color: 'var(--bg-0)'
-                  }}
-                  animate={{
-                    opacity: showDelete ? 1 : 0,
-                    scale: showDelete ? 1 : 0.8,
-                  }}
-                  transition={{
-                    type: "spring",
-                    damping: 20,
-                    stiffness: 300,
-                  }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <IoCloseSharp size={35} />
-                </motion.button>
+                return (
+                  <SortableCityCard
+                    key={city.cityId}
+                    city={city}
+                    isDragging={isDragging}
+                    currentSwipeDistance={currentSwipeDistance}
+                    clampedSwipe={clampedSwipe}
+                    showDelete={showDelete}
+                    swipeThreshold={swipeThreshold}
+                    maxSwipe={maxSwipe}
+                    severeWeather={severeWeather}
+                    borderColor={borderColor}
+                    expandedCards={expandedCards}
+                    setExpandedCards={setExpandedCards}
+                    setDraggedId={setDraggedId}
+                    setTouchStartX={setTouchStartX}
+                    setSwipeDistance={setSwipeDistance}
+                    handleDelete={handleDelete}
+                    convertTemp={convertTemp}
+                    convertWind={convertWind}
+                    convertVis={convertVis}
+                    getDistanceUnit={getDistanceUnit}
+                    formatWindSpeedUnit={formatWindSpeedUnit}
+                    settings={settings}
+                    touchStartX={touchStartX}
+                    touchStartRef={touchStartRef}
+                    dragModeCardId={dragModeCardId}
+                    setDragModeCardId={setDragModeCardId}
+                  />
+                );
+              })}
             </div>
-            );
-          })}
-        </div>
+          </SortableContext>
+        </DndContext>
       )}
 
       {/* Undo Notification */}
