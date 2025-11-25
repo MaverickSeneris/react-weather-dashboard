@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import axios from "axios";
-import { FiRefreshCw } from "react-icons/fi";
 import iconMap from "../utils/weatherIconMapper";
 import formatTime from "../utils/timeFormatter";
 import getDayLabel from "../utils/dayLabel";
@@ -15,7 +14,8 @@ import { useWeatherSettings } from "../utils/hooks/useWeatherSettings";
 import { checkWeatherAlerts } from "../utils/notifications";
 import WeatherRecommendations from "../components/WeatherRecommendations";
 import WeatherAlerts from "../components/WeatherAlerts";
-import { useSwipeToRefresh } from "../utils/hooks/useSwipeToRefresh";
+import PageContainer from "../components/ui/PageContainer";
+import FloatingRefreshButton from "../components/ui/FloatingRefreshButton";
 
 function CurrentCity() {
   const [currentWeatherInfo, setCurrentWeatherInfo] = useState(
@@ -26,8 +26,8 @@ function CurrentCity() {
   );
   const [unit, setUnit] = useState("metric");
   const [loading, setLoading] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const { settings } = useWeatherSettings();
-  const containerRef = useRef(null);
 
   // Only fetch on initial load if no data exists
   useEffect(() => {
@@ -125,6 +125,7 @@ function CurrentCity() {
       console.error("\u274c Error in fetchAllWeatherInfo():", err);
     } finally {
       setLoading(false);
+      setIsRefreshing(false);
     }
   };
 
@@ -144,10 +145,6 @@ function CurrentCity() {
     }
   };
 
-  // Swipe to refresh hook
-  const { pullDistance, isRefreshing } = useSwipeToRefresh(handleRefresh, {
-    enabled: !!currentWeatherInfo && settings.location,
-  });
 
   if (!currentWeatherInfo || loading) return <LoadingSkeleton />;
 
@@ -189,73 +186,58 @@ function CurrentCity() {
   };
 
   return (
-    <div 
-      ref={containerRef}
-      className="flex flex-col items-center w-screen px-4 mt-10 pb-2"
-    >
-      {/* Pull to refresh indicator */}
-      {pullDistance > 0 && (
-        <motion.div
-          className="fixed top-0 left-0 right-0 z-50 flex items-center justify-center py-2"
-          style={{
-            backgroundColor: 'var(--bg-0)',
-            transform: `translateY(${Math.min(pullDistance, 80)}px)`,
-          }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: pullDistance > 20 ? 1 : 0 }}
-        >
-          <motion.div
-            animate={{ rotate: isRefreshing ? 360 : 0 }}
-            transition={{ duration: 1, repeat: isRefreshing ? Infinity : 0, ease: "linear" }}
-        style={{ color: 'var(--fg)' }}
-      >
-            <FiRefreshCw size={24} />
-          </motion.div>
-        </motion.div>
-      )}
-
-      <LazySection index={0}>
-      <CurrentCityContainer
-        cityName={currentWeatherInfo.location.village}
-        popValue={currentWeatherInfo.current.chanceOfRain}
-        weatherIcon={iconMap[currentWeatherInfo.current.weatherIcon]}
-        tempValue={currentWeatherInfo.current.temperature}
+    <PageContainer>
+      {/* Floating Refresh Button */}
+      <FloatingRefreshButton
+        onClick={handleRefresh}
+        isRefreshing={isRefreshing || loading}
+        disabled={false}
       />
-      </LazySection>
-      
-      {lastFetchTime && (
-        <LazySection index={1}>
-        <p className="text-[0.7rem]" style={{ color: 'var(--gray)' }}>
-          Last updated: {lastFetchTime}
-        </p>
+
+      <div className="flex flex-col items-center w-full">
+        <LazySection index={0}>
+          <CurrentCityContainer
+            cityName={currentWeatherInfo.location.village}
+            popValue={currentWeatherInfo.current.chanceOfRain}
+            weatherIcon={iconMap[currentWeatherInfo.current.weatherIcon]}
+            tempValue={currentWeatherInfo.current.temperature}
+          />
         </LazySection>
-      )}
+        
+        {lastFetchTime && (
+          <LazySection index={1}>
+            <p className="text-[0.7rem]" style={{ color: 'var(--gray)' }}>
+              Last updated: {lastFetchTime}
+            </p>
+          </LazySection>
+        )}
 
-      <LazySection index={2} className="w-full">
-      <HourlyContainer hourlyWeatherInfo={currentWeatherInfo.hourly} />
-      </LazySection>
-      
-      <LazySection index={3} className="w-full">
-      <DailyContainer dailyWeatherInfo={currentWeatherInfo.daily} />
-      </LazySection>
-      
-      {/* Weather Alerts - only shows if there are alarming conditions */}
-      <LazySection index={4} className="w-full">
-      <WeatherAlerts weatherData={currentWeatherInfo} />
-      </LazySection>
-      
-      <LazySection index={5} className="w-full">
-      <CurrentWeatherContainer
-        currentWeatherInfo={currentWeatherInfo.current}
-        cityName={currentWeatherInfo.location.village}
-      />
-      </LazySection>
-      
-      {/* Weather Recommendations */}
-      <LazySection index={6} className="w-full">
-      <WeatherRecommendations weatherData={currentWeatherInfo} />
-      </LazySection>
-    </div>
+        <LazySection index={2} className="w-full">
+          <HourlyContainer hourlyWeatherInfo={currentWeatherInfo.hourly} />
+        </LazySection>
+        
+        <LazySection index={3} className="w-full">
+          <DailyContainer dailyWeatherInfo={currentWeatherInfo.daily} />
+        </LazySection>
+        
+        {/* Weather Alerts - only shows if there are alarming conditions */}
+        <LazySection index={4} className="w-full">
+          <WeatherAlerts weatherData={currentWeatherInfo} />
+        </LazySection>
+        
+        <LazySection index={5} className="w-full">
+          <CurrentWeatherContainer
+            currentWeatherInfo={currentWeatherInfo.current}
+            cityName={currentWeatherInfo.location.village}
+          />
+        </LazySection>
+        
+        {/* Weather Recommendations */}
+        <LazySection index={6} className="w-full">
+          <WeatherRecommendations weatherData={currentWeatherInfo} />
+        </LazySection>
+      </div>
+    </PageContainer>
   );
 }
 

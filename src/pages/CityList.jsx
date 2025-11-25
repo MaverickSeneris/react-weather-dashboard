@@ -6,15 +6,14 @@ import { CSS } from "@dnd-kit/utilities";
 import SearchBar from "../components/SearchBar";
 import Header from "../components/ui/Header";
 import PageContainer from "../components/ui/PageContainer";
+import FloatingRefreshButton from "../components/ui/FloatingRefreshButton";
 import Card from "../components/ui/Card";
 import formatTime from "../utils/timeFormatter";
 import { IoCloseSharp, IoArrowUndo, IoChevronDown } from "react-icons/io5";
-import { FiRefreshCw } from "react-icons/fi";
 import { Link } from "react-router";
 import axios from "axios";
 import getDayLabel from "../utils/dayLabel";
 import { useWeatherSettings } from "../utils/hooks/useWeatherSettings";
-import { useSwipeToRefresh } from "../utils/hooks/useSwipeToRefresh";
 import { checkSevereWeather } from "../utils/weatherAlertChecker";
 import { convertTemperature, convertWindSpeed, convertDistance } from "../utils/unitConverter";
 
@@ -289,8 +288,8 @@ function SortableCityCard({
 
   const style = {
     transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isSortableDragging ? 0.5 : 1,
+    transition: isSortableDragging ? undefined : transition, // Disable transition during drag for snappier feel
+    opacity: isSortableDragging ? 0.6 : 1, // Slightly more visible when dragging
     cursor: isSortableDragging ? 'grabbing' : 'grab',
   };
 
@@ -320,9 +319,9 @@ function SortableCityCard({
         const deltaX = Math.abs(e.clientX - dragStartRef.current.x);
         const deltaY = Math.abs(e.clientY - dragStartRef.current.y);
         
-        if (deltaY > deltaX && deltaY > 8) {
+        if (deltaY > deltaX && deltaY > 5) { // Reduced threshold for snappier detection
           dragStartRef.current.isVertical = true;
-        } else if (deltaX > deltaY && deltaX > 8) {
+        } else if (deltaX > deltaY && deltaX > 5) {
           dragStartRef.current.isVertical = false;
           return;
         }
@@ -338,13 +337,13 @@ function SortableCityCard({
     <div
       ref={setNodeRef}
       style={style}
-      className="relative flex items-center w-full transition-all duration-300 ease-in-out"
+      className="relative flex items-center w-full" // Removed transition for snappier drag
       {...attributes}
       {...customListeners}
     >
-      {/* Inner container for swipe-to-delete */}
+      {/* Inner container for swipe-to-delete - wider drag area */}
       <div
-        className="w-full"
+        className="w-full min-h-[80px]" // Increased minimum height for easier drag trigger
         onTouchStart={(e) => {
           touchStartTimeRef.current = Date.now();
           hasMovedRef.current = false;
@@ -360,12 +359,12 @@ function SortableCityCard({
             isVertical: null
           };
           
-          // Start long press timer
+          // Start long press timer (reduced to 800ms for snappier response)
           longPressTimerRef.current = setTimeout(() => {
             if (!hasMovedRef.current) {
               setDragModeCardId(city.cityId);
             }
-          }, 1200); // 1.2 seconds
+          }, 800); // 0.8 seconds - faster activation
         }}
         onTouchMove={(e) => {
           if (isSortableDragging && shouldEnableDrag) return;
@@ -375,11 +374,11 @@ function SortableCityCard({
           const deltaX = Math.abs(currentX - touchStartRef.current.x);
           const deltaY = Math.abs(currentY - touchStartRef.current.y);
           
-          // Check if user has moved significantly
-          if (deltaX > 10 || deltaY > 10) {
+          // Check if user has moved significantly (reduced threshold for snappier response)
+          if (deltaX > 8 || deltaY > 8) {
             hasMovedRef.current = true;
             // Cancel long press if user is swiping horizontally
-            if (deltaX > deltaY && deltaX > 10) {
+            if (deltaX > deltaY && deltaX > 8) {
               if (longPressTimerRef.current) {
                 clearTimeout(longPressTimerRef.current);
                 longPressTimerRef.current = null;
@@ -390,10 +389,10 @@ function SortableCityCard({
           // Only allow swipe-to-delete if not in drag mode
           if (!shouldEnableDrag) {
             if (dragStartRef.current.isVertical === null) {
-              if (deltaY > deltaX && deltaY > 8) {
+              if (deltaY > deltaX && deltaY > 5) { // Reduced threshold for snappier detection
                 dragStartRef.current.isVertical = true;
                 return;
-              } else if (deltaX > deltaY && deltaX > 8) {
+              } else if (deltaX > deltaY && deltaX > 5) {
                 dragStartRef.current.isVertical = false;
               }
             }
@@ -419,11 +418,9 @@ function SortableCityCard({
             longPressTimerRef.current = null;
           }
           
-          // If in drag mode, reset it after a short delay to allow drag to complete
+          // If in drag mode, reset it immediately for snappier response
           if (shouldEnableDrag) {
-            setTimeout(() => {
-              setDragModeCardId(null);
-            }, 100);
+            setDragModeCardId(null);
             dragStartRef.current = { x: 0, y: 0, isVertical: null };
             return;
           }
@@ -865,11 +862,6 @@ function CityList() {
     setIsRefreshing(false);
   };
 
-  // Swipe to refresh hook
-  const { pullDistance, containerRef } = useSwipeToRefresh(
-    fetchLiveWeatherData,
-    { enabled: !searchMode }
-  );
 
   function toggleSearchMode() {
     setSearchMode((prevMode) => !prevMode);
@@ -924,9 +916,9 @@ function CityList() {
   // Custom sensor that only activates for vertical drag
   const verticalDragSensor = useSensor(PointerSensor, {
     activationConstraint: {
-      distance: 8,
+      distance: 3, // Reduced from 8 to 3 for easier activation
       delay: 0,
-      tolerance: 5,
+      tolerance: 3, // Reduced tolerance for snappier response
     },
   });
 
@@ -957,55 +949,19 @@ function CityList() {
   }, [undoTimeout]);
 
   return (
-    <PageContainer ref={containerRef}>
-      {/* Pull to refresh indicator */}
-      {!searchMode && pullDistance > 0 && (
-        <motion.div
-          className="fixed top-0 left-0 right-0 z-50 flex items-center justify-center py-2"
-          style={{
-            backgroundColor: 'var(--bg-0)',
-            transform: `translateY(${Math.min(pullDistance, 80)}px)`,
-          }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: pullDistance > 20 ? 1 : 0 }}
-        >
-          <motion.div
-            animate={{ rotate: isRefreshing ? 360 : 0 }}
-            transition={{ duration: 1, repeat: isRefreshing ? Infinity : 0, ease: "linear" }}
-            style={{ color: 'var(--fg)' }}
-          >
-            <FiRefreshCw size={24} />
-          </motion.div>
-        </motion.div>
+    <PageContainer>
+      {/* Floating Refresh Button */}
+      {!searchMode && (
+        <FloatingRefreshButton
+          onClick={fetchLiveWeatherData}
+          isRefreshing={isRefreshing}
+          disabled={false}
+        />
       )}
 
       {/* Header */}
       {!searchMode && (
-        <div className="flex items-center justify-between">
-          <Header title={"My Cities"} />
-          <motion.button
-            onClick={fetchLiveWeatherData}
-            disabled={isRefreshing}
-            whileHover={{ scale: 1.1, rotate: 180 }}
-            whileTap={{ scale: 0.9 }}
-            transition={{ type: "spring", stiffness: 400, damping: 17 }}
-            className="p-2 rounded-full"
-            style={{ 
-              color: 'var(--fg)',
-              opacity: isRefreshing ? 0.5 : 1,
-              cursor: isRefreshing ? 'not-allowed' : 'pointer'
-            }}
-            onMouseEnter={(e) => !isRefreshing && (e.currentTarget.style.backgroundColor = 'var(--bg-2)')}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-          >
-            <motion.div
-              animate={{ rotate: isRefreshing ? 360 : 0 }}
-              transition={{ duration: 1, repeat: isRefreshing ? Infinity : 0, ease: "linear" }}
-            >
-              <FiRefreshCw size={20} />
-            </motion.div>
-          </motion.button>
-        </div>
+        <Header title={"My Cities"} />
       )}
 
       {/* Search */}
